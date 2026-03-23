@@ -1,0 +1,74 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: 'DinPro', 'Arial Narrow', 'Arial', sans-serif;
+  overflow: hidden;
+}
+
+.screen {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── SLEEP ── */
+.sleep {
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sleep-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* ── ACTIVE ── */
+.active {
+  display: flex;
+  flex-direction: row;
+  background: #fff; /* white bg to match the diagram which has white background */
+}
+
+.text-panel {
+  width: 35%;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 2rem;
+  background: #fff;
+  color: #000;
+}
+
+.panel-title {
+  font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+  font-weight: 900;
+  line-height: 1.25;
+  margin-bottom: 1rem;
+  color: #000;
+}
+
+.panel-body {
+  font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+  line-height: 1.65;
+  color: #333;
+}
+
+.diagram-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: #fff;
+}
+
+.diagram-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"New-Item -ItemType Directory -Force -Path ''c:/Users/tomas.koller/Energetika/TepelniElektrarna/server'',''c:/Users/tomas.koller/Energetika/TepelniElektrarna/screen_oled2'',''c:/Users/tomas.koller/Energetika/TepelniElektrarna/screen_oled4'',''c:/Users/tomas.koller/Energetika/TepelniElektrarna/screen_6'',''c:/Users/tomas.koller/Energetika/TepelniElektrarna/screen_9'',''c:/Users/tomas.koller/Energetika/TepelniElektrarna/screen_2R'',''c:/Users/tomas.koller/Energetika/TepelniElektrarna/screen_4R'',''c:/Users/tomas.koller/Energetika/TepelniElektrarna/screen_7R'',''c:/Users/tomas.koller/Energetika/TepelniElektrarna/screen_8R'',''c:/Users/tomas.koller/Energetika/TepelniElektrarna/screen_10''\")",
+      "Bash(powershell -Command \"Remove-Item -Recurse -Force ''c:/Users/tomas.koller/Energetika/TepelniElektrarna/shared''\")",
+      "Bash(find C:/Users/tomas.koller/Energetika/TepelniElektrarna/grafika -type f -exec ls -lh {})",
+      "Bash(2)",
+      "Read(//c/Users/tomas.koller/Energetika/TepelniElektrarna/**)",
+      "Bash(powershell -ExecutionPolicy Bypass -File setup-assets.ps1)"
+    ]
+  }
+}
