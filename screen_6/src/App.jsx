@@ -50,6 +50,23 @@ export default function App() {
     return () => { ws.current?.close(); clearTimeout(wsTimer.current); };
   }, [connect]);
 
+  // ── KEYBOARD SIMULATOR ────────────────────────────────
+  useEffect(() => {
+    const onKey = (e) => {
+      switch (e.key) {
+        case ' ': case 'Enter': case 'p': case 'P':
+          e.preventDefault();
+          handleMessage({ type:'trigger', device:'BUTTON', id:'PHASE3_START', value:{ pressed: true } });
+          break;
+        case 'r': case 'R': case 'Escape':
+          handleMessage({ type:'trigger', device:'BUTTON', id:'RESET_ALL', value:{ pressed: true } });
+          break;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [handleMessage]);
+
   const lang = T[language];
 
   if (screen === 'sleep') {

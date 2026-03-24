@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { T, FUEL_LABELS } from './Texts';
 
 const WS_URL = 'ws://localhost:8765';
 
@@ -9,11 +10,6 @@ const DEG_PER_PT = {
 };
 
 const FUELS = ['coal', 'gas', 'biomass'];
-const FUEL_LABELS = {
-  cz: ['uhlí', 'zemní plyn', 'biomasa'],
-  en: ['coal', 'natural gas', 'biomass'],
-  de: ['Kohle', 'Erdgas', 'Biomasse'],
-};
 const FUEL_IMAGES = ['/g/uhlí.png', '/g/plyn.png', '/g/biomasa.png'];
 const FUEL_VIDEO_LETTERS = ['A', 'B', 'C'];
 const FUEL_VIDEO_SUBDIRS = ['Uhlí', 'Plyn', 'Biomasa'];
@@ -24,45 +20,6 @@ function videoPath(fuelIdx, state) {
   const space = fuelIdx === 1 ? ' ' : ''; // gas has space before letter
   return `/v/${dir}/OLED2_${state}_${space}${letter}.mp4`;
 }
-
-const T = {
-  cz: {
-    selectFuel: 'Zvolte druh PALIVA.',
-    startBtn: 'Zmáčkni tlačítko START.',
-    startSub: 'Na boku exponátu.',
-    gameIntro: 'Ve spalovací komoře kotle dochází k vytváření tepla. Tvým úkolem je dosáhnout optimální teploty a následně ji udržet.',
-    params: ['Přívod paliva', 'Přívod vzduchu', 'Odvod spalin'],
-    warnBlue: ['Zvyš přívod paliva!', 'Zvyš přívod vzduchu!', 'Zvyš odvod spalin!'],
-    warnRed:  ['Sniž přívod paliva!', 'Sniž přívod vzduchu!', 'Sniž odvod spalin!'],
-    overload: 'POZOR! HROZÍ PŘETÍŽENÍ!',
-    stopped:  'Reakce zastavena z důvodu rizika selhání!',
-    success:  'Dosaženo optimálních podmínek pro spalování.\nPřesuň se k další obrazovce.',
-  },
-  en: {
-    selectFuel: 'Select the type of fuel.',
-    startBtn: 'Press the START button.',
-    startSub: 'On the side of the exhibit.',
-    gameIntro: 'Heat is generated in the boiler combustion chamber. Your aim is to reach the optimum temperature and then maintain it.',
-    params: ['Fuel supply', 'Air supply', 'Flue gas exhaust'],
-    warnBlue: ['Increase the fuel supply!', 'Increase the air supply!', 'Increase the flue gas exhaust!'],
-    warnRed:  ['Reduce the fuel supply!', 'Reduce the air supply!', 'Reduce the flue gas exhaust!'],
-    overload: 'CAUTION! RISK OF OVERLOADING!',
-    stopped:  'Reaction stopped due to risk of failure!',
-    success:  'Optimum combustion conditions achieved.\nGo to the next screen.',
-  },
-  de: {
-    selectFuel: 'Wählen Sie die Art des Kraftstoffs.',
-    startBtn: 'Drücke die START-Taste.',
-    startSub: 'An der Seite des Exponats.',
-    gameIntro: 'In der Brennkammer des Kessels wird Wärme erzeugt. Deine Aufgabe ist es, die optimale Temperatur zu erreichen und anschließend stabil zu halten.',
-    params: ['Zufuhr Brennstoff', 'Zufuhr Luft', 'Abführung Abgase'],
-    warnBlue: ['Erhöhe die Brennstoffzufuhr!', 'Erhöhe die Luftzufuhr!', 'Erhöhe die Abgasabfuhr!'],
-    warnRed:  ['Verringere die Brennstoffzufuhr!', 'Verringere die Luftzufuhr!', 'Verringere die Abgasabfuhr!'],
-    overload: 'ACHTUNG! ÜBERLASTUNG DROHT!',
-    stopped:  'Der Prozess wurde wegen Störungsrisiko gestoppt.',
-    success:  'Optimale Verbrennungsbedingungen erreicht.\nWechsle zur nächsten Anzeige.',
-  },
-};
 
 function getZone(v) {
   if (v <= 60) return 'blue';
@@ -96,8 +53,6 @@ export default function App() {
   const [warnActive, setWarnActive] = useState([false, false, false]);
   const [overloadActive, setOverloadActive] = useState(false);
   const [stoppedMsg, setStoppedMsg] = useState(false);
-  // Screensaver bounce position
-  const [bouncePos, setBouncePos] = useState({ x: 40, y: 40 });
 
   const ws = useRef(null);
   const wsTimer = useRef(null);
@@ -111,24 +66,43 @@ export default function App() {
   const fuelIdxRef = useRef(fuelIdx);
   const gaugesRef = useRef(gauges);
   const videoRef = useRef(null);
+  const simAngles = useRef([180, 180, 180]);
+  const sleepImgRef = useRef(null);
 
   useEffect(() => { screenRef.current = screen; }, [screen]);
   useEffect(() => { fuelIdxRef.current = fuelIdx; }, [fuelIdx]);
   useEffect(() => { gaugesRef.current = gauges; }, [gauges]);
 
-  // Screensaver bounce animation
+  // Screensaver bounce animation — direct DOM, no React re-renders
   useEffect(() => {
     if (screen !== 'sleep') return;
-    let vx = (Math.random() > 0.5 ? 1 : -1) * 0.3;
-    let vy = (Math.random() > 0.5 ? 1 : -1) * 0.2;
-    let x = 40, y = 40;
-    const id = setInterval(() => {
+    let vx = (Math.random() > 0.5 ? 1 : -1) * 2.5;
+    let vy = (Math.random() > 0.5 ? 1 : -1) * 1.5;
+    let x = 0, y = 0, rafId;
+
+    const tick = () => {
+      const img = sleepImgRef.current;
+      if (!img) return;
       x += vx; y += vy;
-      if (x <= 0 || x >= 85) vx = -vx;
-      if (y <= 0 || y >= 85) vy = -vy;
-      setBouncePos({ x: Math.max(0, Math.min(85, x)), y: Math.max(0, Math.min(85, y)) });
+      const mX = window.innerWidth - img.offsetWidth;
+      const mY = window.innerHeight - img.offsetHeight;
+      if (x <= 0)  { x = 0;  vx =  Math.abs(vx); }
+      if (x >= mX) { x = mX; vx = -Math.abs(vx); }
+      if (y <= 0)  { y = 0;  vy =  Math.abs(vy); }
+      if (y >= mY) { y = mY; vy = -Math.abs(vy); }
+      img.style.transform = `translate(${x}px, ${y}px)`;
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const t = setTimeout(() => {
+      const img = sleepImgRef.current;
+      if (!img) return;
+      x = Math.random() * (window.innerWidth - img.offsetWidth);
+      y = Math.random() * (window.innerHeight - img.offsetHeight);
+      rafId = requestAnimationFrame(tick);
     }, 50);
-    return () => clearInterval(id);
+
+    return () => { clearTimeout(t); cancelAnimationFrame(rafId); };
   }, [screen]);
 
   const stopDecay = useCallback(() => clearInterval(decayTimer.current), []);
@@ -167,6 +141,7 @@ export default function App() {
         else if (now - greenStart.current >= 5000) {
           stopDecay();
           setScreen('success');
+          ws.current?.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'COMBUSTION_COMPLETE' } }));
           return;
         }
       } else {
@@ -227,11 +202,12 @@ export default function App() {
   const handleMessage = useCallback((msg) => {
     if (msg.type !== 'trigger') return;
 
-    if (msg.device === 'BUTTON' && msg.value?.pressed) {
+    // BUTTON — hardware uses integer id; language msgs from master use string id
+    if (msg.name === 'BUTTON' && msg.data?.pressed) {
       if (msg.id === 'LANG_CZ') setLanguage('cz');
       if (msg.id === 'LANG_EN') setLanguage('en');
       if (msg.id === 'LANG_DE') setLanguage('de');
-      if (msg.id === 'START' && screenRef.current === 'home') {
+      if (msg.id === 1 && screenRef.current === 'home') {  // button 1 = START
         setScreen('game');
         setShowIntro(true);
         setGauges([0, 90, 90]);
@@ -243,16 +219,16 @@ export default function App() {
         startDecay();
         setTimeout(() => setShowIntro(false), 8000);
       }
-      if ((msg.id === 'WAKE' || msg.id === 'START') && screenRef.current === 'sleep') {
+      if (msg.id === 1 && screenRef.current === 'sleep') {
         setScreen('home');
       }
     }
 
-    if (msg.device === 'WHEEL') {
-      const angle = msg.value?.angle ?? 0;
-      const wheelMap = { W1: 0, W2: 1, W3: 2 };
-      const idx = wheelMap[msg.id];
-      if (idx === undefined) return;
+    // WHEEL — id 1/2/3 → index 0/1/2
+    if (msg.name === 'WHEEL') {
+      const angle = msg.data?.angle ?? 0;
+      const idx = msg.id - 1;
+      if (idx < 0 || idx > 2) return;
 
       if (screenRef.current === 'home' && idx === 0) {
         const delta = angleDelta(prevAngles.current[0], angle);
@@ -298,6 +274,35 @@ export default function App() {
     return () => { ws.current?.close(); clearTimeout(wsTimer.current); stopDecay(); };
   }, [connect, stopDecay]);
 
+  // ── KEYBOARD SIMULATOR ────────────────────────────────
+  useEffect(() => {
+    const STEP = 20;
+    const wheel = (id, idx) => {
+      simAngles.current[idx] = (simAngles.current[idx] + STEP + 360) % 360;
+      handleMessage({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx] } });
+    };
+    const wheelBack = (id, idx) => {
+      simAngles.current[idx] = (simAngles.current[idx] - STEP + 360) % 360;
+      handleMessage({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx] } });
+    };
+    const onKey = (e) => {
+      switch (e.key) {
+        case 'ArrowLeft':  case 'a': case 'A': wheelBack(1, 0); break;
+        case 'ArrowRight': case 'd': case 'D': wheel(1, 0);     break;
+        case 'w': case 'W':                    wheel(2, 1);     break;
+        case 's': case 'S':                    wheelBack(2, 1); break;
+        case 'ArrowUp':                        wheel(3, 2);     break;
+        case 'ArrowDown':                      wheelBack(3, 2); break;
+        case ' ': case 'Enter':
+          e.preventDefault();
+          handleMessage({ type: 'trigger', name: 'BUTTON', id: 1, data: { pressed: true } });
+          break;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [handleMessage]);
+
   const lang = T[language];
   const zones = gauges.map(getZone);
 
@@ -306,10 +311,10 @@ export default function App() {
     return (
       <div className="screen sleep" onClick={() => setScreen('home')}>
         <img
+          ref={sleepImgRef}
           className="sleep-logo"
           src="/g/TE_S1.png"
           alt=""
-          style={{ left: `${bouncePos.x}%`, top: `${bouncePos.y}%` }}
         />
       </div>
     );
@@ -322,23 +327,20 @@ export default function App() {
         <div className="home-inner">
           <h1 className="select-title">{lang.selectFuel}</h1>
 
-          <div className="fuel-options">
+          <div className="fuel-columns">
             {FUELS.map((f, i) => (
-              <div
-                key={f}
-                className={`fuel-card ${i === fuelIdx ? 'selected' : ''}`}
-                onClick={() => setFuelIdx(i)}
-              >
-                <img src={FUEL_IMAGES[i]} alt={lang.selectFuel} className="fuel-img" />
+              <div key={f} className="fuel-column">
+                <div className={`fuel-card ${i === fuelIdx ? 'selected' : ''}`}>
+                  <img src={FUEL_IMAGES[i]} alt={FUEL_LABELS[language][i]} className="fuel-img" />
+                </div>
                 <span className="fuel-name">{FUEL_LABELS[language][i]}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="wheel-row">
-            {FUELS.map((_, i) => (
-              <div key={i} className={`wheel-icon ${i === fuelIdx ? 'active' : ''}`}>
-                <img src="/g/kolo se šipkami.png" alt="" />
+                <div className="wheel-icon">
+                  {i === fuelIdx ? (
+                    <img key="active" className="wheel-active" src="/g/TE_kola se šipkami.png" alt="Selected" />
+                  ) : (
+                    <img key="inactive" className="wheel-inactive" src="/g/navrh_obrazovky_tepelna_elektrarna-10.png" alt="Not selected" />
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -347,7 +349,6 @@ export default function App() {
             <p className="start-title">{lang.startBtn}</p>
             <p className="start-sub">{lang.startSub}</p>
           </div>
-          <div className="bottom-dash" />
         </div>
         <div className="side-arrow">
           <img src="/g/TE_OLED 2_šipka.png" alt="" />

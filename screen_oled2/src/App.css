@@ -1,9 +1,40 @@
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Regular/DINPro Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Light/DINPro Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Medium/DINPro Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Bold/DINPro Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Black/DINPro Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   background: #000;
   color: #fff;
-  font-family: 'DinPro', 'Arial Narrow', 'Arial', sans-serif;
+  font-family: 'DINPro', 'Arial Narrow', 'Arial', sans-serif;
   overflow: hidden;
 }
 
@@ -18,9 +49,11 @@ body {
 .sleep { background: #000; cursor: pointer; }
 .sleep-logo {
   position: absolute;
-  width: 80px;
+  top: 0;
+  left: 0;
+  width: 70vw;
   height: auto;
-  transform: translate(-50%, -50%);
+  will-change: transform;
 }
 
 /* ── HOME ── */
@@ -47,22 +80,26 @@ body {
   margin-bottom: 1.5rem;
   margin-top: 2rem;
 }
-.fuel-options {
+.fuel-columns {
   display: flex;
-  gap: 1.2rem;
+  gap: 2rem;
   justify-content: center;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.5rem;
 }
-.fuel-card {
-  background: #84C800;
-  width: clamp(100px, 22vw, 160px);
-  height: clamp(100px, 22vw, 160px);
+.fuel-column {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.8rem;
+}
+.fuel-card {
+  background: #84C800;
+  width: 27.5vw;
+  height: 27.5vw;
+  aspect-ratio: 1;
+  display: flex;  
+  align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  cursor: pointer;
   border: 3px solid transparent;
   transition: border-color 0.15s;
 }
@@ -70,61 +107,67 @@ body {
   border-color: #fff;
 }
 .fuel-img {
-  width: 60%;
-  height: 60%;
+  width: 72%;
+  height: 72%;
   object-fit: contain;
-  filter: brightness(0) invert(1);
 }
 .fuel-name {
-  font-size: clamp(0.7rem, 1.5vw, 1rem);
+  font-size: 3vw;
   text-align: center;
-  color: #000;
-  font-weight: 700;
+  color: #fff;
+  font-weight: 400;
   text-transform: lowercase;
 }
-.wheel-row {
-  display: flex;
-  gap: 2rem;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-}
 .wheel-icon {
-  opacity: 0.35;
-  width: clamp(50px, 10vw, 80px);
+  width: 25vw;
+  height: 25vw;
+  margin-top: 6vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
-.wheel-icon.active { opacity: 1; }
-.wheel-icon img { width: 100%; height: auto; filter: invert(1); }
+
+@keyframes wheelIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.wheel-active {
+  animation: wheelIn 0.25s ease;
+}
+
+.wheel-icon > img {
+  width: 21vw;
+  height: 21vw;
+  object-fit: contain;
+  animation: wheelIn 0.25s ease;
+}
+
 .start-area {
-  text-align: center;
+  width: 100%;
+  border: 2px solid red;
+  text-align: left;
   margin-bottom: 0.5rem;
 }
 .start-title {
-  font-size: clamp(1.4rem, 5vw, 3rem);
-  font-weight: 900;
-  letter-spacing: 0.01em;
+  font-size: 6vw;
+  font-weight: 800;
+  margin-left: 13vw;
 }
 .start-sub {
-  font-size: clamp(0.8rem, 2vw, 1.1rem);
-  color: #aaa;
+  margin-left: 13vw;
+  font-size: 2vw;
+  color: #ffffff;
   margin-top: 0.2rem;
 }
-.bottom-dash {
-  width: 100%;
-  height: 2px;
-  background: repeating-linear-gradient(
-    to right,
-    #84C800 0px, #84C800 12px,
-    transparent 12px, transparent 22px
-  );
-  margin-top: 0.8rem;
+
+.side-arrow > img {
+  border: 2px solid tomato;
+  padding-left: 4vw;
+  width: 100vw;
+  margin-bottom: 10vw;
 }
-.side-arrow {
-  position: absolute;
-  left: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.side-arrow img { width: 40px; height: auto; }
 
 /* ── GAME ── */
 .game { background: #000; }
@@ -182,11 +225,6 @@ body {
   margin-bottom: 1rem;
   padding: 0 1rem;
 }
-.wheels-img {
-  width: clamp(200px, 60vw, 360px);
-  height: auto;
-  filter: invert(1);
-}
 
 .warn-area {
   min-height: 3rem;
@@ -230,8 +268,9 @@ body {
 }
 .gauge-bar {
   position: relative;
+  border: 5px solid white;
   width: 100%;
-  max-width: 90px;
+  max-width: 80px;
   height: clamp(180px, 28vh, 280px);
   background: linear-gradient(to bottom,
     #E5351D 0%,   #E5351D 33.3%,

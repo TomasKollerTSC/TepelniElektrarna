@@ -94,6 +94,19 @@ export default function App() {
 
   const wake = () => { setScreen('active'); resetTimer(); };
 
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setScreen('active'); return; }
+      if (screen !== 'active') return;
+      const idx = parseInt(e.key) - 1;
+      if (idx >= 0 && idx < TABS.length) setActiveTab(TABS[idx]);
+      if (e.key === 'l' || e.key === 'L') setLanguage(l => l === 'cz' ? 'en' : l === 'en' ? 'de' : 'cz');
+      if (e.key === 'Escape') setScreen('sleep');
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [screen]);
+
   if (screen === 'sleep') {
     return (
       <div className="screen sleep" onClick={wake}>

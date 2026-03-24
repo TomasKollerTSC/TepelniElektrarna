@@ -69,23 +69,26 @@ export default function App() {
   const handleMessage = useCallback((msg) => {
     if (msg.type !== 'trigger') return;
 
-    if (msg.device === 'BUTTON' && msg.value?.pressed) {
+    if (msg.name === 'BUTTON' && msg.data?.pressed) {
       if (msg.id === 'LANG_CZ') setLanguage('cz');
       if (msg.id === 'LANG_EN') setLanguage('en');
       if (msg.id === 'LANG_DE') setLanguage('de');
-      // Activate from server when OLED2 game is complete
-      if (msg.id === 'OLED4_ACTIVATE') {
-        setScreen('active');
-        setStep(0);
-        prevAngle.current = null;
-        lastActivity.current = Date.now();
-      }
     }
 
-    if (msg.device === 'WHEEL' && msg.id === 'W4') {
+    // Wake when OLED2 combustion game completes
+    if (msg.name === 'GAME_STATE' && msg.data?.state === 'COMBUSTION_COMPLETE') {
+      setScreen('active');
+      setStep(0);
+      setShowTurbineMsg(false);
+      prevAngle.current = null;
+      lastActivity.current = Date.now();
+    }
+
+    // Wheel 4 — open valve
+    if (msg.name === 'WHEEL' && msg.id === 4) {
       lastActivity.current = Date.now();
       if (screenRef.current !== 'active') return;
-      const angle = msg.value?.angle ?? 0;
+      const angle = msg.data?.angle ?? 0;
       const delta = angleDelta(prevAngle.current, angle);
       prevAngle.current = angle;
       if (delta > 5) {
@@ -115,6 +118,25 @@ export default function App() {
     connect();
     return () => { ws.current?.close(); clearTimeout(wsTimer.current); };
   }, [connect]);
+
+  // ── KEYBOARD SIMULATOR ────────────────────────────────
+  useEffect(() => {
+    const simAngle = { v: 0 };
+    const onKey = (e) => {
+      switch (e.key) {
+        case 'ArrowRight': case 'd': case 'D':
+          simAngle.v = (simAngle.v + 20) % 360;
+          handleMessage({ type: 'trigger', name: 'WHEEL', id: 4, data: { angle: simAngle.v } });
+          break;
+        case ' ': case 'Enter':
+          e.preventDefault();
+          handleMessage({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'COMBUSTION_COMPLETE' } });
+          break;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [handleMessage]);
 
   const lang = T[language];
   const pct = (step / MAX_STEPS) * 100;
