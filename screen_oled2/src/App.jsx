@@ -53,6 +53,7 @@ export default function App() {
   const [warnActive, setWarnActive] = useState([false, false, false]);
   const [overloadActive, setOverloadActive] = useState(false);
   const [stoppedMsg, setStoppedMsg] = useState(false);
+  const [videoSrc, setVideoSrc] = useState('');
 
   const ws = useRef(null);
   const wsTimer = useRef(null);
@@ -66,8 +67,11 @@ export default function App() {
   const fuelIdxRef = useRef(fuelIdx);
   const gaugesRef = useRef(gauges);
   const videoRef = useRef(null);
+  const videoSwitchTimer = useRef(null);
   const simAngles = useRef([180, 180, 180]);
   const sleepImgRef = useRef(null);
+  const fuelSteps = useRef(0); // positive = CW, negative = CCW
+  const STEPS_TO_SWITCH = 18; // 18 steps (~1 full rotation at 20°/step)
 
   useEffect(() => { screenRef.current = screen; }, [screen]);
   useEffect(() => { fuelIdxRef.current = fuelIdx; }, [fuelIdx]);
@@ -125,6 +129,7 @@ export default function App() {
     overloadStart.current = null;
     dangerStart.current = [null, null, null];
     prevAngles.current = [null, null, null];
+    fuelSteps.current = 0;
   }, [stopDecay]);
 
   // Zone timing — warnings and win
@@ -187,17 +192,25 @@ export default function App() {
     return () => clearInterval(id);
   }, [screen, goHome]);
 
-  // Update video src when gauges change
+  // Set initial video src when game starts
   useEffect(() => {
-    if (screen !== 'game' || !videoRef.current) return;
-    const state = getVideoState(gauges);
-    const src = videoPath(fuelIdxRef.current, state);
-    if (videoRef.current.dataset.src !== src) {
-      videoRef.current.dataset.src = src;
-      videoRef.current.src = src;
-      videoRef.current.play().catch(() => {});
+    if (screen === 'game') {
+      setVideoSrc(videoPath(fuelIdxRef.current, getVideoState(gaugesRef.current)));
     }
+  }, [screen]);
+
+  // Debounce video src updates while gauges are moving
+  useEffect(() => {
+    if (screen !== 'game') return;
+    const src = videoPath(fuelIdxRef.current, getVideoState(gauges));
+    clearTimeout(videoSwitchTimer.current);
+    videoSwitchTimer.current = setTimeout(() => setVideoSrc(src), 1000);
   }, [gauges, screen]);
+
+  // Play whenever src changes
+  useEffect(() => {
+    if (videoSrc) videoRef.current?.play().catch(() => {});
+  }, [videoSrc]);
 
   const handleMessage = useCallback((msg) => {
     if (msg.type !== 'trigger') return;
@@ -219,9 +232,6 @@ export default function App() {
         startDecay();
         setTimeout(() => setShowIntro(false), 8000);
       }
-      if (msg.id === 1 && screenRef.current === 'sleep') {
-        setScreen('home');
-      }
     }
 
     // WHEEL — id 1/2/3 → index 0/1/2
@@ -230,11 +240,26 @@ export default function App() {
       const idx = msg.id - 1;
       if (idx < 0 || idx > 2) return;
 
+      // Wheel 1 rotation wakes from sleep (per spec)
+      if (idx === 0 && screenRef.current === 'sleep') {
+        prevAngles.current[0] = angle;
+        setScreen('home');
+        return;
+      }
+
       if (screenRef.current === 'home' && idx === 0) {
         const delta = angleDelta(prevAngles.current[0], angle);
         prevAngles.current[0] = angle;
-        if (Math.abs(delta) > 8) {
-          setFuelIdx(prev => ((prev + (delta > 0 ? 1 : -1)) % 3 + 3) % 3);
+        if (Math.abs(delta) < 5) return; // ignore noise
+        const dir = delta > 0 ? 1 : -1;
+        // reset count if direction reversed
+        if (fuelSteps.current !== 0 && Math.sign(fuelSteps.current) !== dir) {
+          fuelSteps.current = 0;
+        }
+        fuelSteps.current += dir;
+        if (Math.abs(fuelSteps.current) >= STEPS_TO_SWITCH) {
+          setFuelIdx(prev => (prev + (fuelSteps.current > 0 ? 1 : 2)) % 3);
+          fuelSteps.current = 0;
         }
         return;
       }
@@ -277,13 +302,14 @@ export default function App() {
   // ── KEYBOARD SIMULATOR ────────────────────────────────
   useEffect(() => {
     const STEP = 20;
+    const send = (msg) => ws.current?.send(JSON.stringify(msg));
     const wheel = (id, idx) => {
       simAngles.current[idx] = (simAngles.current[idx] + STEP + 360) % 360;
-      handleMessage({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx] } });
+      send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx] } });
     };
     const wheelBack = (id, idx) => {
       simAngles.current[idx] = (simAngles.current[idx] - STEP + 360) % 360;
-      handleMessage({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx] } });
+      send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx] } });
     };
     const onKey = (e) => {
       switch (e.key) {
@@ -295,13 +321,16 @@ export default function App() {
         case 'ArrowDown':                      wheelBack(3, 2); break;
         case ' ': case 'Enter':
           e.preventDefault();
-          handleMessage({ type: 'trigger', name: 'BUTTON', id: 1, data: { pressed: true } });
+          send({ type: 'trigger', name: 'BUTTON', id: 1, data: { pressed: true } });
           break;
+        case '1': send({ type: 'trigger', name: 'BUTTON', id: 'LANG_CZ', data: { pressed: true } }); break;
+        case '2': send({ type: 'trigger', name: 'BUTTON', id: 'LANG_EN', data: { pressed: true } }); break;
+        case '3': send({ type: 'trigger', name: 'BUTTON', id: 'LANG_DE', data: { pressed: true } }); break;
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [handleMessage]);
+  }, []);
 
   const lang = T[language];
   const zones = gauges.map(getZone);
@@ -333,6 +362,7 @@ export default function App() {
                 <div className={`fuel-card ${i === fuelIdx ? 'selected' : ''}`}>
                   <img src={FUEL_IMAGES[i]} alt={FUEL_LABELS[language][i]} className="fuel-img" />
                 </div>
+                
                 <span className="fuel-name">{FUEL_LABELS[language][i]}</span>
                 <div className="wheel-icon">
                   {i === fuelIdx ? (
@@ -357,36 +387,24 @@ export default function App() {
     );
   }
 
-  // ── SUCCESS ────────────────────────────────────────────
-  if (screen === 'success') {
-    return (
-      <div className="screen success">
-        <p className="success-msg">{lang.success}</p>
-      </div>
-    );
-  }
-
-  // ── GAME ───────────────────────────────────────────────
-  const videoState = getVideoState(gauges);
-  const initialVideoSrc = videoPath(fuelIdx, videoState);
-
+  // ── GAME + SUCCESS ─────────────────────────────────────
   return (
     <div className="screen game">
-      {/* Background video */}
       <video
         ref={videoRef}
         className="game-video"
-        src={initialVideoSrc}
-        autoPlay
-        loop
-        muted
-        playsInline
-        data-src={initialVideoSrc}
+        src={videoSrc}
+        loop muted playsInline
       />
 
       <div className="game-overlay">
-        {/* Intro text */}
-        {showIntro && (
+        {/* Intro text / success overlay */}
+        {screen === 'success' && (
+          <div className="intro-text success-overlay">
+            <p className="success-title">{lang.success}</p>
+          </div>
+        )}
+        {screen !== 'success' && showIntro && (
           <div className="intro-text">
             <p className="intro-body">{lang.gameIntro}</p>
           </div>

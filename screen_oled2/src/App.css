@@ -73,12 +73,11 @@ body {
   gap: 0;
 }
 .select-title {
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
-  font-weight: 900;
+  font-size: 6vw;
+  font-weight: 700;
   letter-spacing: 0.02em;
   text-align: center;
-  margin-bottom: 1.5rem;
-  margin-top: 2rem;
+  margin-bottom: 5vh;
 }
 .fuel-columns {
   display: flex;
@@ -100,11 +99,12 @@ body {
   display: flex;  
   align-items: center;
   justify-content: center;
-  border: 3px solid transparent;
   transition: border-color 0.15s;
+  border-radius: 10px;
 }
 .fuel-card.selected {
   border-color: #fff;
+  border-radius: 10px;
 }
 .fuel-img {
   width: 72%;
@@ -121,7 +121,7 @@ body {
 .wheel-icon {
   width: 25vw;
   height: 25vw;
-  margin-top: 6vw;
+  margin-top: 2vw;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -146,11 +146,11 @@ body {
 
 .start-area {
   width: 100%;
-  border: 2px solid red;
   text-align: left;
   margin-bottom: 0.5rem;
 }
 .start-title {
+  margin-top: 2vh;
   font-size: 6vw;
   font-weight: 800;
   margin-left: 13vw;
@@ -162,8 +162,15 @@ body {
   margin-top: 0.2rem;
 }
 
+.side-arrow{
+  height: 10vh
+}
+
 .side-arrow > img {
-  border: 2px solid tomato;
+  position: absolute;
+  bottom: 1px;
+  left: 0vh;
+  
   padding-left: 4vw;
   width: 100vw;
   margin-bottom: 10vw;
@@ -308,19 +315,15 @@ body {
   letter-spacing: 0.03em;
 }
 
-/* ── SUCCESS ── */
-.success {
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
+/* ── SUCCESS overlay (sits inside game screen) ── */
+.success-overlay {
+  background: rgba(0,0,0,0.75);
+  border-left-color: #84C800;
 }
-.success-msg {
-  font-size: clamp(1.3rem, 4vw, 2rem);
+.success-title {
+  font-size: clamp(1.1rem, 3vw, 1.6rem);
   font-weight: 900;
-  text-align: center;
+  color: #fff;
   white-space: pre-line;
   line-height: 1.5;
-  color: #84C800;
 }

@@ -1,9 +1,24 @@
 const { WebSocketServer } = require('ws');
+const http = require('http');
 const config = require('./config');
 
-const wss = new WebSocketServer({ port: config.PORT });
-
 const clients = new Map();
+
+// HTTP server handles both WS upgrades and status requests on the same port
+const httpServer = http.createServer((req, res) => {
+  if (req.method === 'GET' && req.url === '/status') {
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    res.end(JSON.stringify({ connected: clients.size, clients: [...clients.keys()] }));
+  } else {
+    res.writeHead(404);
+    res.end();
+  }
+});
+
+const wss = new WebSocketServer({ server: httpServer });
+httpServer.listen(config.PORT, () =>
+  console.log(`Server running on port ${config.PORT} (WS + HTTP status)`)
+);
 
 wss.on('connection', (ws, req) => {
   const id = req.headers['x-client-id'] || `client-${Date.now()}`;
@@ -21,9 +36,9 @@ wss.on('connection', (ws, req) => {
 
     console.log(`[${id}]`, JSON.stringify(msg));
 
-    // Relay to all other clients
-    for (const [cid, client] of clients) {
-      if (cid !== id && client.readyState === 1) {
+    // Relay to all clients (including sender)
+    for (const [, client] of clients) {
+      if (client.readyState === 1) {
         client.send(JSON.stringify(msg));
       }
     }
@@ -35,4 +50,3 @@ wss.on('connection', (ws, req) => {
   });
 });
 
-console.log(`WebSocket server running on ws://0.0.0.0:${config.PORT}`);
