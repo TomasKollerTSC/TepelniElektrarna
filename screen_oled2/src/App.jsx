@@ -2,6 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { T, FUEL_LABELS } from './Texts';
 
 const WS_URL = 'ws://localhost:8765';
+const STEPS_TO_SWITCH = 18;
+
+const FUELS = ['coal', 'gas', 'biomass'];
+const FUEL_IMAGES = ['/g/uhlí.png', '/g/plyn.png', '/g/biomasa.png'];
+const FUEL_VIDEO_LETTERS = ['A', 'B', 'C'];
+const FUEL_VIDEO_SUBDIRS = ['Uhlí', 'Plyn', 'Biomasa'];
 
 const DEG_PER_PT = {
   coal:    [12, 12, 12],
@@ -9,15 +15,10 @@ const DEG_PER_PT = {
   biomass: [ 6, 10, 10],
 };
 
-const FUELS = ['coal', 'gas', 'biomass'];
-const FUEL_IMAGES = ['/g/uhlí.png', '/g/plyn.png', '/g/biomasa.png'];
-const FUEL_VIDEO_LETTERS = ['A', 'B', 'C'];
-const FUEL_VIDEO_SUBDIRS = ['Uhlí', 'Plyn', 'Biomasa'];
-// Plyn subfolder has space: "OLED2_3_ B.mp4"
 function videoPath(fuelIdx, state) {
   const dir = FUEL_VIDEO_SUBDIRS[fuelIdx];
   const letter = FUEL_VIDEO_LETTERS[fuelIdx];
-  const space = fuelIdx === 1 ? ' ' : ''; // gas has space before letter
+  const space = fuelIdx === 1 ? ' ' : '';
   return `/v/${dir}/OLED2_${state}_${space}${letter}.mp4`;
 }
 
@@ -35,13 +36,11 @@ function angleDelta(prev, curr) {
   return d;
 }
 
-// Video state: flame size from fuel+air average, smoke from exhaust level
 function getVideoState(gauges) {
   const [fuel, air, exhaust] = gauges;
   const avg = (fuel + air) / 2;
   const flameBase = avg <= 60 ? 3 : avg <= 120 ? 5 : 7;
-  const smoky = exhaust <= 60;
-  return smoky ? flameBase + 1 : flameBase;
+  return exhaust <= 60 ? flameBase + 1 : flameBase;
 }
 
 export default function App() {
@@ -53,8 +52,6 @@ export default function App() {
   const [warnActive, setWarnActive] = useState([false, false, false]);
   const [overloadActive, setOverloadActive] = useState(false);
   const [stoppedMsg, setStoppedMsg] = useState(false);
-  const [videoSrc, setVideoSrc] = useState('');
-
   const ws = useRef(null);
   const wsTimer = useRef(null);
   const prevAngles = useRef([null, null, null]);
@@ -66,18 +63,21 @@ export default function App() {
   const screenRef = useRef(screen);
   const fuelIdxRef = useRef(fuelIdx);
   const gaugesRef = useRef(gauges);
-  const videoRef = useRef(null);
+  const videoARef = useRef(null);
+  const videoBRef = useRef(null);
+  const activeSlot = useRef('A');
+  const videoCache = useRef({});
+  const currentVideoState = useRef(null);
   const videoSwitchTimer = useRef(null);
   const simAngles = useRef([180, 180, 180]);
   const sleepImgRef = useRef(null);
-  const fuelSteps = useRef(0); // positive = CW, negative = CCW
-  const STEPS_TO_SWITCH = 18; // 18 steps (~1 full rotation at 20°/step)
+  const fuelSteps = useRef(0);
 
   useEffect(() => { screenRef.current = screen; }, [screen]);
   useEffect(() => { fuelIdxRef.current = fuelIdx; }, [fuelIdx]);
   useEffect(() => { gaugesRef.current = gauges; }, [gauges]);
 
-  // Screensaver bounce animation — direct DOM, no React re-renders
+  // ── SCREENSAVER BOUNCE (direct DOM, no React re-renders) ──
   useEffect(() => {
     if (screen !== 'sleep') return;
     let vx = (Math.random() > 0.5 ? 1 : -1) * 2.5;
@@ -109,6 +109,7 @@ export default function App() {
     return () => { clearTimeout(t); cancelAnimationFrame(rafId); };
   }, [screen]);
 
+  // ── DECAY ──
   const stopDecay = useCallback(() => clearInterval(decayTimer.current), []);
 
   const startDecay = useCallback(() => {
@@ -132,7 +133,7 @@ export default function App() {
     fuelSteps.current = 0;
   }, [stopDecay]);
 
-  // Zone timing — warnings and win
+  // ── ZONE TIMING (warnings + win) ──
   useEffect(() => {
     if (screen !== 'game') return;
     const id = setInterval(() => {
@@ -146,33 +147,35 @@ export default function App() {
         else if (now - greenStart.current >= 5000) {
           stopDecay();
           setScreen('success');
-          ws.current?.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'COMBUSTION_COMPLETE' } }));
+          ws.current?.send(JSON.stringify({
+            type: 'trigger', name: 'GAME_STATE', id: 1,
+            data: { state: 'COMBUSTION_COMPLETE' },
+          }));
           return;
         }
       } else {
         greenStart.current = null;
       }
 
-      const newWarn = zones.map((zone, i) => {
+      setWarnActive(zones.map((zone, i) => {
         if (zone !== 'green') {
           if (!dangerStart.current[i]) dangerStart.current[i] = now;
           return (now - dangerStart.current[i]) >= 3000;
         }
         dangerStart.current[i] = null;
         return false;
-      });
-      setWarnActive(newWarn);
+      }));
 
       const anyRed = zones.some(z => z === 'red');
       if (anyRed) {
         if (!overloadStart.current) overloadStart.current = now;
-        const t = now - overloadStart.current;
-        if (t >= 10000) {
+        const elapsed = now - overloadStart.current;
+        if (elapsed >= 10000) {
           stopDecay();
           setStoppedMsg(true);
           setGauges([0, 0, 0]);
           setTimeout(() => goHome(), 3000);
-        } else if (t >= 5000) {
+        } else if (elapsed >= 5000) {
           setOverloadActive(true);
         }
       } else {
@@ -183,7 +186,7 @@ export default function App() {
     return () => clearInterval(id);
   }, [screen, stopDecay, goHome]);
 
-  // Inactivity timeout (30s in game)
+  // ── INACTIVITY TIMEOUT (30s) ──
   useEffect(() => {
     if (screen !== 'game') return;
     const id = setInterval(() => {
@@ -192,35 +195,97 @@ export default function App() {
     return () => clearInterval(id);
   }, [screen, goHome]);
 
-  // Set initial video src when game starts
+  // ── VIDEO MANAGEMENT (blob cache + dual-video swap) ──
+  // Cache all 6 videos for active fuel when game starts; free on leave
   useEffect(() => {
-    if (screen === 'game') {
-      setVideoSrc(videoPath(fuelIdxRef.current, getVideoState(gaugesRef.current)));
+    if (screen !== 'game' && screen !== 'success') {
+      Object.values(videoCache.current).forEach(URL.revokeObjectURL);
+      videoCache.current = {};
+      currentVideoState.current = null;
+      activeSlot.current = 'A';
+      [videoARef, videoBRef].forEach(ref => {
+        if (ref.current) {
+          ref.current.pause();
+          ref.current.removeAttribute('src');
+          ref.current.load();
+        }
+      });
+      return;
     }
+    if (screen !== 'game') return;
+
+    const fuel = fuelIdxRef.current;
+    let cancelled = false;
+
+    Promise.all(
+      [3, 4, 5, 6, 7, 8].map(s =>
+        fetch(videoPath(fuel, s))
+          .then(r => r.blob())
+          .then(blob => [s, URL.createObjectURL(blob)])
+      )
+    ).then(entries => {
+      if (cancelled) {
+        entries.forEach(([, url]) => URL.revokeObjectURL(url));
+        return;
+      }
+      videoCache.current = Object.fromEntries(entries);
+      const initState = getVideoState(gaugesRef.current);
+      currentVideoState.current = initState;
+      const el = videoARef.current;
+      if (el && videoCache.current[initState]) {
+        el.src = videoCache.current[initState];
+        el.style.zIndex = '2';
+        el.play().catch(() => {});
+      }
+      if (videoBRef.current) videoBRef.current.style.zIndex = '1';
+    });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(videoSwitchTimer.current);
+    };
   }, [screen]);
 
-  // Debounce video src updates while gauges are moving
+  // Debounced dual-video swap — old video stays visible until new one is decoded
   useEffect(() => {
     if (screen !== 'game') return;
-    const src = videoPath(fuelIdxRef.current, getVideoState(gauges));
+
     clearTimeout(videoSwitchTimer.current);
-    videoSwitchTimer.current = setTimeout(() => setVideoSrc(src), 1000);
+    videoSwitchTimer.current = setTimeout(() => {
+      const newState = getVideoState(gauges);
+      if (newState === currentVideoState.current) return;
+      if (!videoCache.current[newState]) return;
+
+      currentVideoState.current = newState;
+      const isA = activeSlot.current === 'A';
+      const next = isA ? videoBRef.current : videoARef.current;
+      const curr = isA ? videoARef.current : videoBRef.current;
+      if (!next || !curr) return;
+
+      next.src = videoCache.current[newState];
+      next.oncanplay = () => {
+        next.oncanplay = null;
+        next.play().catch(() => {});
+        next.style.zIndex = '2';
+        curr.style.zIndex = '1';
+        curr.pause();
+        activeSlot.current = isA ? 'B' : 'A';
+      };
+      next.load();
+    }, 1000);
+
+    return () => clearTimeout(videoSwitchTimer.current);
   }, [gauges, screen]);
 
-  // Play whenever src changes
-  useEffect(() => {
-    if (videoSrc) videoRef.current?.play().catch(() => {});
-  }, [videoSrc]);
-
+  // ── MESSAGE HANDLER ──
   const handleMessage = useCallback((msg) => {
     if (msg.type !== 'trigger') return;
 
-    // BUTTON — hardware uses integer id; language msgs from master use string id
     if (msg.name === 'BUTTON' && msg.data?.pressed) {
       if (msg.id === 'LANG_CZ') setLanguage('cz');
       if (msg.id === 'LANG_EN') setLanguage('en');
       if (msg.id === 'LANG_DE') setLanguage('de');
-      if (msg.id === 1 && screenRef.current === 'home') {  // button 1 = START
+      if (msg.id === 1 && screenRef.current === 'home') {
         setScreen('game');
         setShowIntro(true);
         setGauges([0, 90, 90]);
@@ -234,13 +299,11 @@ export default function App() {
       }
     }
 
-    // WHEEL — id 1/2/3 → index 0/1/2
     if (msg.name === 'WHEEL') {
       const angle = msg.data?.angle ?? 0;
       const idx = msg.id - 1;
       if (idx < 0 || idx > 2) return;
 
-      // Wheel 1 rotation wakes from sleep (per spec)
       if (idx === 0 && screenRef.current === 'sleep') {
         prevAngles.current[0] = angle;
         setScreen('home');
@@ -250,10 +313,8 @@ export default function App() {
       if (screenRef.current === 'home' && idx === 0) {
         const step = msg.data?.step;
         if (step !== undefined) {
-          // keyboard sim: direction already computed, use directly
           fuelSteps.current += step > 0 ? 1 : -1;
         } else {
-          // real hardware: derive direction from angle delta
           const delta = angleDelta(prevAngles.current[0], angle);
           prevAngles.current[0] = angle;
           if (Math.abs(delta) < 5) return;
@@ -273,21 +334,19 @@ export default function App() {
         lastActivity.current = Date.now();
         const delta = angleDelta(prevAngles.current[idx], angle);
         prevAngles.current[idx] = angle;
-        const fKey = FUELS[fuelIdxRef.current];
-        const ptDelta = delta / DEG_PER_PT[fKey][idx];
+        const ptDelta = delta / DEG_PER_PT[FUELS[fuelIdxRef.current]][idx];
         setGauges(prev => {
           const next = [...prev];
-          if (idx === 0) {
-            next[0] = Math.min(180, Math.max(0, next[0] + Math.max(0, ptDelta)));
-          } else {
-            next[idx] = Math.min(180, Math.max(0, next[idx] + ptDelta));
-          }
+          next[idx] = idx === 0
+            ? Math.min(180, Math.max(0, next[0] + Math.max(0, ptDelta)))
+            : Math.min(180, Math.max(0, next[idx] + ptDelta));
           return next;
         });
       }
     }
   }, [startDecay]);
 
+  // ── WEBSOCKET ──
   const connect = useCallback(() => {
     const socket = new WebSocket(WS_URL);
     socket.onopen = () => console.log('WS connected');
@@ -304,7 +363,7 @@ export default function App() {
     return () => { ws.current?.close(); clearTimeout(wsTimer.current); stopDecay(); };
   }, [connect, stopDecay]);
 
-  // ── KEYBOARD SIMULATOR ────────────────────────────────
+  // ── KEYBOARD SIMULATOR ──
   useEffect(() => {
     const STEP = 20;
     const send = (msg) => ws.current?.send(JSON.stringify(msg));
@@ -338,36 +397,28 @@ export default function App() {
   }, []);
 
   const lang = T[language];
-  const zones = gauges.map(getZone);
 
-  // ── SLEEP ──────────────────────────────────────────────
+  // ── SLEEP ──
   if (screen === 'sleep') {
     return (
       <div className="screen sleep" onClick={() => setScreen('home')}>
-        <img
-          ref={sleepImgRef}
-          className="sleep-logo"
-          src="/g/TE_S1.png"
-          alt=""
-        />
+        <img ref={sleepImgRef} className="sleep-logo" src="/g/TE_S1.png" alt="" />
       </div>
     );
   }
 
-  // ── HOME ───────────────────────────────────────────────
+  // ── HOME ──
   if (screen === 'home') {
     return (
       <div className="screen home">
         <div className="home-inner">
           <h1 className="select-title">{lang.selectFuel}</h1>
-
           <div className="fuel-columns">
             {FUELS.map((f, i) => (
               <div key={f} className="fuel-column">
                 <div className={`fuel-card ${i === fuelIdx ? 'selected' : ''}`}>
                   <img src={FUEL_IMAGES[i]} alt={FUEL_LABELS[language][i]} className="fuel-img" />
                 </div>
-                
                 <span className="fuel-name">{FUEL_LABELS[language][i]}</span>
                 <div className="wheel-icon">
                   <img
@@ -379,7 +430,6 @@ export default function App() {
               </div>
             ))}
           </div>
-
           <div className="start-area">
             <p className="start-title">{lang.startBtn}</p>
             <p className="start-sub">{lang.startSub}</p>
@@ -392,71 +442,66 @@ export default function App() {
     );
   }
 
-  // ── GAME + SUCCESS ─────────────────────────────────────
+  // ── GAME + SUCCESS ──
+  const zones = gauges.map(getZone);
+
   return (
     <div className="screen game">
-      <video
-        ref={videoRef}
-        className="game-video"
-        src={videoSrc}
-        loop muted playsInline
-      />
+      <video ref={videoARef} className="game-video" preload="auto" loop muted playsInline />
+      <video ref={videoBRef} className="game-video" preload="auto" loop muted playsInline />
 
       <div className="game-overlay">
-        {/* Intro text / success overlay */}
-        {screen === 'success' && (
-          <div className="intro-text success-overlay">
+        {screen === 'success' ? (
+          <div className="success-overlay">
             <p className="success-title">{lang.success}</p>
           </div>
-        )}
-        {screen !== 'success' && showIntro && (
-          <div className="intro-text">
-            <p className="intro-body">{lang.gameIntro}</p>
-          </div>
-        )}
-
-        {/* Shutdown overlay */}
-        {stoppedMsg && (
-          <div className="stopped-overlay">
-            <p>{lang.stopped}</p>
-          </div>
-        )}
-
-        {/* 3 Wheel icons */}
-        <div className="wheel-row-game">
-          <img src="/g/TE_kola se šipkami.png" alt="" className="wheels-img" />
-        </div>
-
-        {/* Warning messages */}
-        <div className="warn-area">
-          {overloadActive && (
-            <div className="warn-msg overload">{lang.overload}</div>
-          )}
-          {!overloadActive && warnActive.map((active, i) => active && (
-            <div key={i} className="warn-msg">
-              {zones[i] === 'blue' ? lang.warnBlue[i] : lang.warnRed[i]}
-            </div>
-          ))}
-        </div>
-
-        {/* 3 Vertical gauges */}
-        <div className="gauges-row">
-          {gauges.map((val, i) => (
-            <div key={i} className="gauge-col">
-              <div className="gauge-bar">
-                {/* Marker: position from top = (1 - val/180) * 100% */}
-                <div
-                  className="gauge-marker"
-                  style={{ top: `${(1 - val / 180) * 100}%` }}
-                />
-                {zones[i] === 'green' && (
-                  <div className="gauge-check">✓</div>
-                )}
+        ) : (
+          <>
+            {showIntro && (
+              <div className="intro-text">
+                <p className="intro-body">{lang.gameIntro}</p>
               </div>
-              <div className="gauge-label">{lang.params[i]}</div>
+            )}
+
+            {stoppedMsg && (
+              <div className="stopped-overlay">
+                <p>{lang.stopped}</p>
+              </div>
+            )}
+
+            <div className="wheel-row-game">
+              <img src="/g/TE_kola se šipkami.png" alt="" className="wheels-img" />
             </div>
-          ))}
-        </div>
+
+            <div className="warn-area">
+              {overloadActive && (
+                <div className="warn-msg overload">{lang.overload}</div>
+              )}
+              {!overloadActive && warnActive.map((active, i) => active && (
+                <div key={i} className="warn-msg">
+                  {zones[i] === 'blue' ? lang.warnBlue[i] : lang.warnRed[i]}
+                </div>
+              ))}
+            </div>
+
+            <div className="gauges-row">
+              {gauges.map((val, i) => (
+                <div key={i} className="gauge-col">
+                  <div className="gauge-bar">
+                    <div
+                      className="gauge-marker"
+                      style={{ top: `${(1 - val / 180) * 100}%` }}
+                    />
+                    {zones[i] === 'green' && (
+                      <div className="gauge-check">✓</div>
+                    )}
+                  </div>
+                  <div className="gauge-label">{lang.params[i]}</div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

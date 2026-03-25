@@ -195,6 +195,7 @@ body {
   flex-direction: column;
   justify-content: flex-end;
   padding-bottom: 0;
+  z-index: 3;
 }
 
 .intro-text {
@@ -316,13 +317,19 @@ body {
 
 /* ── SUCCESS overlay (sits inside game screen) ── */
 .success-overlay {
-  background: rgba(0,0,0,0.75);
-  border-left-color: #84C800;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
 }
 .success-title {
-  font-size: clamp(1.1rem, 3vw, 1.6rem);
+  font-size: clamp(1.8rem, 5vw, 3rem);
   font-weight: 900;
   color: #fff;
   white-space: pre-line;
   line-height: 1.5;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.8);
 }
