@@ -248,18 +248,23 @@ export default function App() {
       }
 
       if (screenRef.current === 'home' && idx === 0) {
-        const delta = angleDelta(prevAngles.current[0], angle);
-        prevAngles.current[0] = angle;
-        if (Math.abs(delta) < 5) return; // ignore noise
-        const dir = delta > 0 ? 1 : -1;
-        // reset count if direction reversed
-        if (fuelSteps.current !== 0 && Math.sign(fuelSteps.current) !== dir) {
-          fuelSteps.current = 0;
+        const step = msg.data?.step;
+        if (step !== undefined) {
+          // keyboard sim: direction already computed, use directly
+          fuelSteps.current += step > 0 ? 1 : -1;
+        } else {
+          // real hardware: derive direction from angle delta
+          const delta = angleDelta(prevAngles.current[0], angle);
+          prevAngles.current[0] = angle;
+          if (Math.abs(delta) < 5) return;
+          fuelSteps.current += delta > 0 ? 1 : -1;
         }
-        fuelSteps.current += dir;
-        if (Math.abs(fuelSteps.current) >= STEPS_TO_SWITCH) {
-          setFuelIdx(prev => (prev + (fuelSteps.current > 0 ? 1 : 2)) % 3);
+        if (fuelSteps.current >= STEPS_TO_SWITCH) {
           fuelSteps.current = 0;
+          setFuelIdx(prev => (prev + 1) % 3);
+        } else if (fuelSteps.current <= -STEPS_TO_SWITCH) {
+          fuelSteps.current = 0;
+          setFuelIdx(prev => (prev + 2) % 3);
         }
         return;
       }
@@ -305,11 +310,11 @@ export default function App() {
     const send = (msg) => ws.current?.send(JSON.stringify(msg));
     const wheel = (id, idx) => {
       simAngles.current[idx] = (simAngles.current[idx] + STEP + 360) % 360;
-      send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx] } });
+      send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx], step: 1 } });
     };
     const wheelBack = (id, idx) => {
       simAngles.current[idx] = (simAngles.current[idx] - STEP + 360) % 360;
-      send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx] } });
+      send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx], step: -1 } });
     };
     const onKey = (e) => {
       switch (e.key) {
@@ -365,11 +370,11 @@ export default function App() {
                 
                 <span className="fuel-name">{FUEL_LABELS[language][i]}</span>
                 <div className="wheel-icon">
-                  {i === fuelIdx ? (
-                    <img key="active" className="wheel-active" src="/g/TE_kola se šipkami.png" alt="Selected" />
-                  ) : (
-                    <img key="inactive" className="wheel-inactive" src="/g/navrh_obrazovky_tepelna_elektrarna-10.png" alt="Not selected" />
-                  )}
+                  <img
+                    className={i === 0 ? 'wheel-active' : 'wheel-inactive'}
+                    src={i === 0 ? '/g/TE_kola se šipkami.png' : '/g/navrh_obrazovky_tepelna_elektrarna-10.png'}
+                    alt=""
+                  />
                 </div>
               </div>
             ))}
