@@ -147,6 +147,17 @@ body {
   text-align: justify;
   margin-bottom: 0.5rem;
 }
+
+.turbine-sub-msg {
+  width: 100%;
+  font-size: clamp(1rem, 3.5vw, 2.2rem);
+  font-weight: 500;
+  color: #ccc;
+  white-space: pre-line;
+  line-height: 1.2;
+  text-align: justify;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
