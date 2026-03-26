@@ -1,9 +1,40 @@
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Regular/DINPro Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Light/DINPro Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Medium/DINPro Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Bold/DINPro Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Black/DINPro Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   background: #000;
   color: #fff;
-  font-family: 'DinPro', 'Arial Narrow', 'Arial', sans-serif;
+  font-family: 'DINPro', 'Arial Narrow', 'Arial', sans-serif;
   overflow: hidden;
 }
 
@@ -27,12 +58,14 @@ body {
 .content-area {
   flex: 1;
   display: flex;
+  align-items: center;
   flex-direction: column;
   justify-content: center;
   padding: 3rem 3rem 0;
 }
 
 .main-title {
+  text-align: justify;
   font-size: clamp(1.6rem, 4.5vw, 2.8rem);
   font-weight: 900;
   line-height: 1.2;
@@ -41,10 +74,17 @@ body {
 }
 
 .main-body {
-  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  font-size: clamp(2rem, 4vw, 2rem);
   color: #bbb;
   line-height: 1.5;
   max-width: 600px;
+}
+
+.content-center{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .wheel-center {

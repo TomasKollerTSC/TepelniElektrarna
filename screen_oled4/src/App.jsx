@@ -167,8 +167,10 @@ export default function App() {
   return (
     <div className="screen active">
       <div className="content-area">
-        <h1 className="main-title">{lang.homeTitle}</h1>
-        <p className="main-body">{lang.homeBody}</p>
+        <div className="content-text">
+          <h1 className="main-title">{lang.homeTitle}</h1>
+          <p className="main-body">{lang.homeBody}</p>
+        </div>
 
         <div className="wheel-center">
           <img src="/g/kolo se šipkami.png" alt="" className="wheel-img" />
