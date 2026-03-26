@@ -227,16 +227,30 @@ body {
 }
 
 .wheel-row-game {
+  position: absolute;
+  top: 65vw;
+  left: 20vw;
+  width: 60vw;
   display: flex;
-  justify-content: center;
-  margin-bottom: 1rem;
+  flex-direction: column;
+  align-items: flex-start;
   padding: 0 1rem;
+}
+.wheels-imgs {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+.wheels-img {
+  width: 150px;
+  height: auto;
+  margin-top: 10vw;
 }
 
 .warn-area {
-  min-height: 3rem;
-  padding: 0 1rem;
-  margin-bottom: 0.8rem;
+  position: absolute;
+  left: 1rem;
+  bottom: 28vh;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -244,11 +258,10 @@ body {
 .warn-msg {
   background: #F5C800;
   color: #000;
-  padding: 0.5rem 1rem;
-  font-size: clamp(0.85rem, 2vw, 1.1rem);
+  padding: 0.85rem 1.5rem;
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
   font-weight: 700;
   border-radius: 2px;
-  align-self: flex-start;
 }
 .warn-msg.overload {
   background: #E5351D;
@@ -294,42 +307,47 @@ body {
   height: 5px;
   background: #fff;
   box-shadow: 0 0 6px rgba(255,255,255,0.9);
-  transform: translateY(-50%);
+  transform: translateY(50%);
   transition: top 0.15s ease;
   border-radius: 2px;
 }
 .gauge-check {
   position: absolute;
-  right: -26px;
+  left: 80px;;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1.3rem;
+  font-size: 3rem;
   color: #fff;
   font-weight: 900;
 }
 .gauge-label {
-  font-size: clamp(0.65rem, 1.5vw, 0.85rem);
+  font-size: clamp(1rem, 3vw, 1.4rem);
   color: #ccc;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
-/* ── SUCCESS overlay (sits inside game screen) ── */
-.success-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 2rem;
-}
+/* ── SUCCESS text (above wheels in same container) ── */
 .success-title {
-  font-size: clamp(1.8rem, 5vw, 3rem);
-  font-weight: 900;
+  width: 100%;
+  font-size: clamp(1.2rem, 5vw, 2.6rem);
+  font-weight: 700;
   color: #fff;
   white-space: pre-line;
   line-height: 1.5;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+  text-align: justify;
+  margin-bottom: 0.5rem;
+  
+}
+.intro-title {
+  width: 100%;
+  font-size: clamp(1.2rem, 5vw, 2.6rem);
+  font-weight: 700;
+  color: #fff;
+  white-space: pre-line;
+  line-height: 1.5;
+  text-align: justify;
+  margin-bottom: 0.5rem;
+  
 }

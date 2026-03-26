@@ -52,19 +52,23 @@ export default function App() {
   useEffect(() => { screenRef.current = screen; }, [screen]);
   useEffect(() => { stepRef.current = step; }, [step]);
 
-  // Inactivity → sleep (20s)
+  // Inactivity → sleep (20s) + reset all screens (disabled when game complete)
   useEffect(() => {
-    if (screen !== 'active') return;
+    if (screen !== 'active' || step >= MAX_STEPS) return;
     const id = setInterval(() => {
       if (Date.now() - lastActivity.current > INACTIVITY_MS) {
         setScreen('sleep');
         setStep(0);
         setShowTurbineMsg(false);
         prevAngle.current = null;
+        ws.current?.send(JSON.stringify({
+          type: 'trigger', name: 'GAME_STATE', id: 1,
+          data: { state: 'RESET' },
+        }));
       }
     }, 3000);
     return () => clearInterval(id);
-  }, [screen]);
+  }, [screen, step]);
 
   const handleMessage = useCallback((msg) => {
     if (msg.type !== 'trigger') return;
@@ -82,6 +86,14 @@ export default function App() {
       setShowTurbineMsg(false);
       prevAngle.current = null;
       lastActivity.current = Date.now();
+    }
+
+    // Reset all screens to initial state
+    if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
+      setScreen('sleep');
+      setStep(0);
+      setShowTurbineMsg(false);
+      prevAngle.current = null;
     }
 
     // Wheel 4 — open valve
@@ -119,24 +131,28 @@ export default function App() {
     return () => { ws.current?.close(); clearTimeout(wsTimer.current); };
   }, [connect]);
 
-  // ── KEYBOARD SIMULATOR ────────────────────────────────
+  // ── KEYBOARD SIMULATOR (all input goes through WS) ──
   useEffect(() => {
     const simAngle = { v: 0 };
+    const send = (msg) => ws.current?.send(JSON.stringify(msg));
     const onKey = (e) => {
       switch (e.key) {
         case 'ArrowRight': case 'd': case 'D':
           simAngle.v = (simAngle.v + 20) % 360;
-          handleMessage({ type: 'trigger', name: 'WHEEL', id: 4, data: { angle: simAngle.v } });
+          send({ type: 'trigger', name: 'WHEEL', id: 4, data: { angle: simAngle.v } });
           break;
         case ' ': case 'Enter':
           e.preventDefault();
-          handleMessage({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'COMBUSTION_COMPLETE' } });
+          send({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'COMBUSTION_COMPLETE' } });
           break;
+        case '1': send({ type: 'trigger', name: 'BUTTON', id: 'LANG_CZ', data: { pressed: true } }); break;
+        case '2': send({ type: 'trigger', name: 'BUTTON', id: 'LANG_EN', data: { pressed: true } }); break;
+        case '3': send({ type: 'trigger', name: 'BUTTON', id: 'LANG_DE', data: { pressed: true } }); break;
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [handleMessage]);
+  }, []);
 
   const lang = T[language];
   const pct = (step / MAX_STEPS) * 100;

@@ -15,7 +15,7 @@ export const T = {
     warnRed:  ['Sniž přívod paliva!', 'Sniž přívod vzduchu!', 'Sniž odvod spalin!'],
     overload: 'POZOR! HROZÍ PŘETÍŽENÍ!',
     stopped:  'Reakce zastavena z důvodu rizika selhání!',
-    success:  'Dosaženo optimálních podmínek pro spalování.\nPřesuň se k další obrazovce.',
+    success:  'Dosaženo optimálních podmínek pro spalování. Přesuň se k další obrazovce.',
   },
   en: {
     selectFuel: 'Select the type of fuel.',
@@ -27,7 +27,7 @@ export const T = {
     warnRed:  ['Reduce the fuel supply!', 'Reduce the air supply!', 'Reduce the flue gas exhaust!'],
     overload: 'CAUTION! RISK OF OVERLOADING!',
     stopped:  'Reaction stopped due to risk of failure!',
-    success:  'Optimum combustion conditions achieved.\nGo to the next screen.',
+    success:  'Optimum combustion conditions achieved. Go to the next screen.',
   },
   de: {
     selectFuel: 'Wählen Sie die Art des Kraftstoffs.',
@@ -39,6 +39,6 @@ export const T = {
     warnRed:  ['Verringere die Brennstoffzufuhr!', 'Verringere die Luftzufuhr!', 'Verringere die Abgasabfuhr!'],
     overload: 'ACHTUNG! ÜBERLASTUNG DROHT!',
     stopped:  'Der Prozess wurde wegen Störungsrisiko gestoppt.',
-    success:  'Optimale Verbrennungsbedingungen erreicht.\nWechsle zur nächsten Anzeige.',
+    success:  'Optimale Verbrennungsbedingungen erreicht. Wechsle zur nächsten Anzeige.',
   },
 };

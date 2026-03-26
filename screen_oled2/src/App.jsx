@@ -47,7 +47,7 @@ export default function App() {
   const [screen, setScreen] = useState('sleep');
   const [language, setLanguage] = useState('cz');
   const [fuelIdx, setFuelIdx] = useState(0);
-  const [gauges, setGauges] = useState([0, 90, 90]);
+  const [gauges, setGauges] = useState([0, 0, 0]);
   const [showIntro, setShowIntro] = useState(true);
   const [warnActive, setWarnActive] = useState([false, false, false]);
   const [overloadActive, setOverloadActive] = useState(false);
@@ -122,7 +122,7 @@ export default function App() {
   const goHome = useCallback(() => {
     stopDecay();
     setScreen('home');
-    setGauges([0, 90, 90]);
+    setGauges([0, 0, 0]);
     setWarnActive([false, false, false]);
     setOverloadActive(false);
     setStoppedMsg(false);
@@ -253,6 +253,7 @@ export default function App() {
     clearTimeout(videoSwitchTimer.current);
     videoSwitchTimer.current = setTimeout(() => {
       const newState = getVideoState(gauges);
+
       if (newState === currentVideoState.current) return;
       if (!videoCache.current[newState]) return;
 
@@ -272,7 +273,7 @@ export default function App() {
         activeSlot.current = isA ? 'B' : 'A';
       };
       next.load();
-    }, 1000);
+    }, 300);
 
     return () => clearTimeout(videoSwitchTimer.current);
   }, [gauges, screen]);
@@ -281,6 +282,24 @@ export default function App() {
   const handleMessage = useCallback((msg) => {
     if (msg.type !== 'trigger') return;
 
+    // Reset all screens to initial state
+    if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
+      stopDecay();
+      setScreen('sleep');
+      setFuelIdx(0);
+      setGauges([0, 0, 0]);
+      setShowIntro(true);
+      setWarnActive([false, false, false]);
+      setOverloadActive(false);
+      setStoppedMsg(false);
+      greenStart.current = null;
+      overloadStart.current = null;
+      dangerStart.current = [null, null, null];
+      prevAngles.current = [null, null, null];
+      fuelSteps.current = 0;
+      return;
+    }
+
     if (msg.name === 'BUTTON' && msg.data?.pressed) {
       if (msg.id === 'LANG_CZ') setLanguage('cz');
       if (msg.id === 'LANG_EN') setLanguage('en');
@@ -288,14 +307,13 @@ export default function App() {
       if (msg.id === 1 && screenRef.current === 'home') {
         setScreen('game');
         setShowIntro(true);
-        setGauges([0, 90, 90]);
+        setGauges([0, 0, 0]);
         prevAngles.current = [null, null, null];
         dangerStart.current = [null, null, null];
         greenStart.current = null;
         overloadStart.current = null;
         lastActivity.current = Date.now();
         startDecay();
-        setTimeout(() => setShowIntro(false), 8000);
       }
     }
 
@@ -332,6 +350,7 @@ export default function App() {
 
       if (screenRef.current === 'game') {
         lastActivity.current = Date.now();
+        setShowIntro(false);
         const delta = angleDelta(prevAngles.current[idx], angle);
         prevAngles.current[idx] = angle;
         const ptDelta = delta / DEG_PER_PT[FUELS[fuelIdxRef.current]][idx];
@@ -344,7 +363,7 @@ export default function App() {
         });
       }
     }
-  }, [startDecay]);
+  }, [startDecay, stopDecay]);
 
   // ── WEBSOCKET ──
   const connect = useCallback(() => {
@@ -451,57 +470,55 @@ export default function App() {
       <video ref={videoBRef} className="game-video" preload="auto" loop muted playsInline />
 
       <div className="game-overlay">
-        {screen === 'success' ? (
-          <div className="success-overlay">
-            <p className="success-title">{lang.success}</p>
+        {stoppedMsg && (
+          <div className="stopped-overlay">
+            <p>{lang.stopped}</p>
           </div>
-        ) : (
-          <>
-            {showIntro && (
-              <div className="intro-text">
-                <p className="intro-body">{lang.gameIntro}</p>
-              </div>
-            )}
-
-            {stoppedMsg && (
-              <div className="stopped-overlay">
-                <p>{lang.stopped}</p>
-              </div>
-            )}
-
-            <div className="wheel-row-game">
-              <img src="/g/TE_kola se šipkami.png" alt="" className="wheels-img" />
-            </div>
-
-            <div className="warn-area">
-              {overloadActive && (
-                <div className="warn-msg overload">{lang.overload}</div>
-              )}
-              {!overloadActive && warnActive.map((active, i) => active && (
-                <div key={i} className="warn-msg">
-                  {zones[i] === 'blue' ? lang.warnBlue[i] : lang.warnRed[i]}
-                </div>
-              ))}
-            </div>
-
-            <div className="gauges-row">
-              {gauges.map((val, i) => (
-                <div key={i} className="gauge-col">
-                  <div className="gauge-bar">
-                    <div
-                      className="gauge-marker"
-                      style={{ top: `${(1 - val / 180) * 100}%` }}
-                    />
-                    {zones[i] === 'green' && (
-                      <div className="gauge-check">✓</div>
-                    )}
-                  </div>
-                  <div className="gauge-label">{lang.params[i]}</div>
-                </div>
-              ))}
-            </div>
-          </>
         )}
+
+        <div className="wheel-row-game">
+          {screen === 'success' && (
+            <p className="success-title">{lang.success}</p>
+          )}
+          {screen !== 'success' && showIntro && (
+            <>
+              <p className="intro-title">{lang.gameIntro}</p>
+              <div className="wheels-imgs">
+                <img src="/g/TE_kola se šipkami.png" alt="" className="wheels-img" />
+                <img src="/g/TE_kola se šipkami.png" alt="" className="wheels-img" />
+                <img src="/g/TE_kola se šipkami.png" alt="" className="wheels-img" />
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="warn-area">
+          {overloadActive && (
+            <div className="warn-msg overload">{lang.overload}</div>
+          )}
+          {!overloadActive && warnActive.map((active, i) => active && (
+            <div key={i} className="warn-msg">
+              {zones[i] === 'blue' ? lang.warnBlue[i] : lang.warnRed[i]}
+            </div>
+          ))}
+        </div>
+
+        <div className="gauges-row">
+          {gauges.map((val, i) => (
+            <div key={i} className="gauge-col">
+              <div className="gauge-bar">
+                <div
+                  className="gauge-marker"
+                  style={{ bottom: `${(val / 180) * 100}%` }}
+                />
+                {zones[i] === 'green' && (
+                  <div className="gauge-check">✓</div>
+                )}
+              </div>
+              <div className="gauge-label">{lang.params[i]}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
