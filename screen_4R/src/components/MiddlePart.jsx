@@ -29,7 +29,7 @@ const MiddlePart = ({ language, switchLang, headline, intro, body }) => {
 
     const visibleWidth = scroll.clientWidth;
     const gapPx = visibleWidth * 0.02;
-    const colWidthPx = (visibleWidth - 2 * gapPx) / 3;
+    const colWidthPx = (visibleWidth - gapPx) / 2;
 
     // Measure content height in a single column
     Object.assign(inner.style, {
@@ -40,7 +40,7 @@ const MiddlePart = ({ language, switchLang, headline, intro, body }) => {
     });
 
     const totalHeight = inner.scrollHeight;
-    const numCols = Math.max(3, Math.ceil(totalHeight / availableHeight));
+    const numCols = Math.max(2, Math.ceil(totalHeight / availableHeight));
     const totalWidth = numCols * colWidthPx + (numCols - 1) * gapPx;
 
     Object.assign(inner.style, {

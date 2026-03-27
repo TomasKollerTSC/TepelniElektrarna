@@ -1,7 +1,7 @@
 .middle {
   flex: 0 0 35vh;
   overflow: hidden;
-  padding: 0px 50px;
+  padding: 0px 20px;
   display: flex;
   flex-direction: column;
 }
@@ -13,18 +13,18 @@
 /* ── Language flags ── */
 .lang-flags {
   display: flex;
-  gap: 0.6rem;
-  margin-bottom: 1.5vh;
+  gap: 0.4rem;
+  margin-bottom: 1vh;
 }
 
 .flag-btn {
   background: none;
   border: 2px solid transparent;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.15rem;
   border-radius: 4px;
-  min-width: 60px;
-  min-height: 48px;
+  min-width: 40px;
+  min-height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,27 +42,27 @@
 }
 
 .flag-img {
-  height: 36px;
+  height: 24px;
   width: auto;
   display: block;
 }
 
 /* ── Text hierarchy ── */
 .headline {
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-size: clamp(1.4rem, 3.5vw, 2rem);
   font-weight: 900;
   color: #fff;
   letter-spacing: 0.02em;
-  margin-bottom: 1.2vh;
+  margin-bottom: 0.8vh;
   line-height: 1.15;
 }
 
 .main-text {
-  font-size: clamp(1.3rem, 2vw, 1.6rem);
+  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
   font-weight: 700;
   color: #fff;
-  line-height: 1.6;
-  margin-bottom: 1vh;
+  line-height: 1.5;
+  margin-bottom: 0.8vh;
   white-space: pre-line;
 }
 
@@ -82,25 +82,25 @@
 
 .helper-text-inner {
   height: 100%;
-  font-size: clamp(1.3rem, 1.5vw, 1.35rem);
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
   font-weight: 400;
   color: #fff;
-  line-height: 1.6;
+  line-height: 1.5;
   opacity: 0.85;
-  column-count: 3;
-  column-gap: 2vw;
+  column-count: 2;
+  column-gap: 3vw;
   column-fill: auto;
 }
 
 .text-section {
   break-inside: avoid;
-  margin-bottom: 0.8em;
+  margin-bottom: 0.6em;
 }
 
 .section-heading {
-  font-size: clamp(1.4rem, 1.6vw, 1.45rem);
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
   font-weight: 700;
-  margin-bottom: 0.2em;
+  margin-bottom: 0.15em;
 }
 
 .section-text {

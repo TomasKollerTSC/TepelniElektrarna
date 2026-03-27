@@ -1,0 +1,34 @@
+.upper {
+  flex: 0 0 40vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 100px;
+}
+
+.photo-frame {
+  width: 100%;
+  height: calc(100% - 10vh);
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.photo-main {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.photo-source {
+  position: absolute;
+  bottom: 4vh;
+  left: 100px;
+  font-size: clamp(1.4rem, 1.4vw, 1.8rem);
+  font-weight: 400;
+  color: #666;
+  letter-spacing: 0.03em;
+}

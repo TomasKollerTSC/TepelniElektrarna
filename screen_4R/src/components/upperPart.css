@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 0 50px;
+  padding: 0 20px;
 }
 
 .photo-frame {
@@ -26,8 +26,8 @@
 .photo-source {
   position: absolute;
   bottom: 4vh;
-  left: 50px;
-  font-size: clamp(0.85rem, 1vw, 1.1rem);
+  left: 20px;
+  font-size: clamp(0.65rem, 1.2vw, 0.8rem);
   font-weight: 400;
   color: #666;
   letter-spacing: 0.03em;
