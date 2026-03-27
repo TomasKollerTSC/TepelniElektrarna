@@ -58,7 +58,7 @@ export default function App() {
   if (screen === 'sleep') {
     return (
       <div className="screen sleep" onClick={wake}>
-        <div className="touch-hint">&#9995;</div>
+        <div className="touch-hint"><img src="./g/touch-hint.png" alt="Touch hint" /></div>
       </div>
     );
   }

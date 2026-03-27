@@ -15,6 +15,13 @@ export const TAB_PHOTOS = {
   how:     '/f/4R/10.png',
 };
 
+export const PHOTO_SOURCES = {
+  what:    'Lorem ipsum dolor sit amet',
+  made:    'Lorem ipsum dolor sit amet',
+  purpose: 'Lorem ipsum dolor sit amet',
+  how:     'Lorem ipsum dolor sit amet',
+};
+
 export const CONTENT = {
   cz: {
     what: {
