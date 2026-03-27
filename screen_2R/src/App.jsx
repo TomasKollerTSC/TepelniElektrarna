@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TABS, LABELS, TITLES, TAB_PHOTOS, CONTENT } from './Texts';
+import { TABS, LABELS, TAB_PHOTOS, PHOTO_SOURCES, CONTENT } from './Texts';
+import UpperPart from './components/UpperPart';
+import MiddlePart from './components/MiddlePart';
+import BottomPart from './components/BottomPart';
 
 const SLEEP_TIMEOUT = 180_000;
 
@@ -27,11 +30,6 @@ export default function App() {
     setActiveTab(TABS[0]);
     resetTimer();
   }, [resetTimer]);
-
-  const goSleep = useCallback((e) => {
-    e.stopPropagation();
-    setScreen('sleep');
-  }, []);
 
   const switchLang = useCallback((l) => (e) => {
     e.stopPropagation();
@@ -66,48 +64,25 @@ export default function App() {
   }
 
   const content = CONTENT[language][activeTab];
-  const photo = TAB_PHOTOS[activeTab];
 
   return (
     <div className="screen active" onClick={resetTimer}>
-      <div className="header">
-        <div className="lang-bar">
-          {['cz', 'en', 'de'].map(l => (
-            <button key={l} className={`lang-btn ${language === l ? 'sel' : ''}`}
-              onClick={switchLang(l)}>
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
-        <button className="home-btn" onClick={goSleep}>&#8962;</button>
-      </div>
-
-      <div className="photo-strip">
-        <img src={photo} alt="" className="photo-img" />
-        <div className="photo-title-overlay">
-          <span className="screen-label">{TITLES[language]}</span>
-          <h1 className="tab-title">{LABELS[language][activeTab]}</h1>
-        </div>
-      </div>
-
-      <div className="content-area">
-        <div className="col intro-col">
-          <p className="intro-text">{content.intro}</p>
-        </div>
-        <div className="col body-col">
-          <p className="body-text">{content.body}</p>
-        </div>
-      </div>
-
-      <div className="tab-row">
-        {TABS.map(t => (
-          <button key={t} className={`tab-thumb ${t === activeTab ? 'active' : ''}`}
-            onClick={switchTab(t)}>
-            <img src={TAB_PHOTOS[t]} alt="" className="thumb-img" />
-            <span className="thumb-label">{LABELS[language][t]}</span>
-          </button>
-        ))}
-      </div>
+      <UpperPart photo={TAB_PHOTOS[activeTab]} source={PHOTO_SOURCES[activeTab]} />
+      <MiddlePart
+        language={language}
+        switchLang={switchLang}
+        headline={LABELS[language][activeTab]}
+        intro={content.intro}
+        body={content.body}
+      />
+      <BottomPart
+        tabs={TABS}
+        tabPhotos={TAB_PHOTOS}
+        labels={LABELS}
+        content={CONTENT}
+        language={language}
+        switchTab={switchTab}
+      />
     </div>
   );
 }
