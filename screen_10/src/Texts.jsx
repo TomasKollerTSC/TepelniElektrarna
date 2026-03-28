@@ -1,73 +1,93 @@
-export const TABS = ['what', 'made', 'purpose', 'how'];
+export const TABS = ['what', 'how', 'made', 'purpose'];
 
 export const LABELS = {
-  cz: { what: 'Co je generátor?', made: 'Z čeho se skládá?', purpose: 'K čemu slouží?', how: 'Jak funguje?' },
-  en: { what: 'What is a generator?', made: 'What is it made of?', purpose: 'What is it for?', how: 'How does it work?' },
-  de: { what: 'Was ist ein Generator?', made: 'Woraus besteht er?', purpose: 'Wozu dient er?', how: 'Wie funktioniert er?' },
+  cz: { what: 'Co je generátor?', how: 'Jak funguje?', made: 'Z čeho se skládá?', purpose: 'K čemu slouží?' },
+  en: { what: 'What is a generator?', how: 'How does it work?', made: 'What is it made of?', purpose: 'What is it used for?' },
+  de: { what: 'Was ist ein Generator?', how: 'Wie funktioniert er?', made: 'Woraus besteht er?', purpose: 'Wozu dient er?' },
 };
 
 export const TITLES = { cz: 'Generátor', en: 'Generator', de: 'Generator' };
 
+export const GENERAL_TEXT = {
+  cz: 'Generátor je poháněný turbínou. Uvnitř generátoru se otáčivý pohyb jeho rotoru mění na elektrický proud, který lze poslat dál elektrickou sítí do domů, měst i továren. Právě zde se energie z paliva definitivně promění v elektřinu, kterou běžně používáme.',
+  en: 'The generator is driven by a turbine. Inside the generator, the rotating motion of its rotor is converted into an electric current that can be supplied through the electrical mains to homes, cities, factories. This is where the energy from the fuel is finally converted into the electricity we normally use.',
+  de: 'Der Generator wird von der Turbine angetrieben. Im Inneren des Generators wird die Drehbewegung des Rotors in elektrischen Strom umgewandelt, der anschließend über das Stromnetz in Haushalte, Städte und Industrieanlagen geleitet wird. Hier wird die im Brennstoff enthaltene Energie endgültig in elektrische Energie umgewandelt, die wir im Alltag nutzen.',
+};
+
 export const TAB_PHOTOS = {
   what:    '/f/10/10_01_Co je_Generátor.jpeg',
-  made:    '/f/10/10_01_Co je_Generátor.jpeg',
+  how:     null,
+  made:    null,
   purpose: '/f/10/10_04_K čemu slouží_generátor.jpg',
-  how:     '/f/10/10_04_K čemu slouží_generátor.jpg',
+};
+
+export const PHOTO_SOURCES = {
+  what:    'Foto: ČEZ Generátor_Elektrárna Ledvice',
+  how:     null,
+  made:    null,
+  purpose: null,
+};
+
+export const TAB_VIDEOS = {
+  what: null,
+  how: null,
+  made: null,
+  purpose: null,
 };
 
 export const CONTENT = {
   cz: {
     what: {
-      intro: 'Generátor je zařízení, které mění otáčivý pohyb na elektrickou energii. V tepelné elektrárně navazuje přímo na turbínu a je místem, kde se pohyb konečně promění v elektřinu.',
-      body: 'Turbína a generátor jsou spojeny společnou hřídelí. Otáčení hřídele přenáší pohyb přímo. Jakmile se hřídel otáčí, generátor vyrábí elektřinu a dodává ji do sítě. Generátor tak uzavírá celý řetězec přeměny energie v elektrárně: palivo → teplo → pára → pohyb → elektřina. Je posledním článkem tohoto řetězce, který výslednou energii přemění do využitelné podoby.',
-    },
-    made: {
-      intro: 'Generátor se skládá z několika klíčových částí, které společně zajišťují výrobu elektřiny elektromagnetickou indukcí.',
-      body: 'Rotor (otáčivá část): Připojený k hřídeli turbíny. Při otáčení vytváří magnetické pole. Stator (pevná část): Obklopuje rotor. Obsahuje vodiče, ve kterých se indukuje elektrický proud. Ložiska: Umožňují plynulé otáčení rotoru. Chladící systém: Odvádí teplo vznikající při výrobě elektřiny. Výstupní svorky: Odvádějí vyrobenou elektřinu do transformátoru a dále do sítě.',
-    },
-    purpose: {
-      intro: 'Generátor vyrábí elektřinu z pohybu turbíny. Je místem, kde energie stává využitelnou pro domácnosti, města i průmysl.',
-      body: 'Generátor zajišťuje stabilní výrobu elektřiny. Propojuje celý proces přeměny energie: kotel dodává páru, pára pohání turbínu, turbína pohání generátor. Bez generátoru by pohyb turbíny a teplo v elektrárně nikdy nepřešly do podoby elektřiny, kterou denně používáme. Výkon generátoru odpovídá výkonu turbíny – čím více páry, tím více elektřiny.',
+      intro: 'Generátor je zařízení, které mění otáčivý pohyb na elektrickou energii.\nV tepelné elektrárně navazuje přímo na turbínu a je místem, kde se pohyb konečně promění v elektřinu.',
+      body: 'Turbína a generátor jsou spojeny společnou hřídelí, která přenáší otáčivý pohyb přímo mezi nimi. Pokud se hřídel točí, generátor vyrábí elektrickou energii, která je následně odváděna do elektrické sítě. Generátor je tak posledním článkem přeměny energie v elektrárně.',
     },
     how: {
-      intro: 'Otáčením hřídele se uvnitř generátoru vytváří měnící se magnetické pole, které vyrábí elektřinu elektromagnetickou indukcí.',
-      body: 'Rotor, připojený k hřídeli turbíny, se otáčí uvnitř statoru. Rotující rotor vytváří měnící se magnetické pole. Stator obklopující rotor obsahuje vodiče uspořádané do cívek. Měnící se magnetické pole indukuje v cívkách napětí a elektrický proud. Aby byl proud stabilní a využitelný, musí se rotor otáčet přesnou rychlostí synchronizovanou s frekvencí elektrické sítě. Výstupní elektřina pak putuje přes transformátor do přenosové sítě.',
+      intro: 'Otáčením hřídele se uvnitř generátoru vytváří měnící se magnetické pole, které vyrábí elektřinu.\nPohyb se tu mění na elektrický proud díky elektromagnetické indukci.',
+      body: 'Uvnitř generátoru se otáčí rotor, který vytváří magnetické pole. Kolem něj je stator s cívkami vodičů. Magnetické pole rotoru se pohybuje vůči cívkám statoru, a tím vzniká v cívkách elektrické napětí a proud. Aby byla elektřina stabilní a použitelná, musí se rotor otáčet přesně stanovenou rychlostí (v synchronizaci s elektrickou sítí) a magnetické pole musí být rovnoměrné.',
+    },
+    made: {
+      intro: 'Generátor má pevnou i pohyblivou část, které spolu vyrábějí elektrickou energii.\nKaždá z nich hraje svou roli v přeměně pohybu na elektrický proud.',
+      body: 'Rotor je otáčivá část spojená s turbínou, která vytváří magnetické pole. Stator je pevná část s cívkami, ve kterých se indukuje elektrické napětí, a po připojení k elektrické síti se odvádí elektrický proud. Ložiska umožňují plynulé otáčení rotoru a chladicí systém odvádí teplo vznikající při výrobě elektřiny. Hotová elektrická energie pak odchází ven přes vývody do rozvodné sítě.',
+    },
+    purpose: {
+      intro: 'Generátor vyrábí elektřinu z pohybu turbíny.\nJe místem, kde se energie stává využitelnou pro domácnosti, města i průmysl.',
+      body: 'Zajišťuje stabilní výrobu elektrické energie a propojuje celý energetický proces – od kotle přes turbínu až po elektrickou síť. Bez generátoru by se veškerý pohyb a teplo v elektrárně nikdy nepřeměnily v elektřinu, kterou můžeme používat.',
     },
   },
   en: {
     what: {
-      intro: 'The generator is a device that converts rotational motion into electrical energy. In a thermal power plant, it connects directly to the turbine and is the point where motion is finally converted into electricity.',
-      body: 'The turbine and generator are connected by a common shaft. Shaft rotation transmits motion directly. When the shaft rotates, the generator produces electricity and supplies it to the grid. The generator thus closes the entire energy conversion chain in the plant: fuel → heat → steam → motion → electricity. It is the last link in this chain that converts the resulting energy into a usable form.',
-    },
-    made: {
-      intro: 'The generator consists of several key parts that together ensure electricity production by electromagnetic induction.',
-      body: 'Rotor (rotating part): Connected to the turbine shaft. Creates a magnetic field when rotating. Stator (fixed part): Surrounds the rotor. Contains conductors in which electric current is induced. Bearings: Enable smooth rotation of the rotor. Cooling system: Removes heat generated during electricity production. Output terminals: Lead the generated electricity to the transformer and then to the grid.',
-    },
-    purpose: {
-      intro: 'The generator produces electricity from the motion of the turbine. This is the place where energy becomes usable for households, cities and industry.',
-      body: 'The generator ensures stable electricity production. It connects the entire energy conversion process: the boiler supplies steam, the steam drives the turbine, the turbine drives the generator. Without the generator, the turbine movement and heat in the plant would never be converted into the electricity we use daily. The generator output corresponds to the turbine output – the more steam, the more electricity.',
+      intro: 'The generator is a device that converts rotational motion into electrical energy.\nIn a thermal power plant, it connects directly to the turbine and is the point where motion is finally converted into electricity.',
+      body: 'The turbine and generator are connected by a common shaft that transmits the rotational motion directly between them. When the shaft rotates, the generator produces electricity, which is then supplied into the grid. The generator is therefore the last link in the power plant energy conversion.',
     },
     how: {
-      intro: 'The rotation of the shaft creates an alternating magnetic field inside the generator, which produces electricity by electromagnetic induction.',
-      body: 'The rotor, connected to the turbine shaft, rotates inside the stator. The rotating rotor creates an alternating magnetic field. The stator surrounding the rotor contains conductors arranged in coils. The alternating magnetic field induces voltage and electric current in the coils. For the current to be stable and usable, the rotor must rotate at a precise speed synchronized with the electrical grid frequency. The output electricity then travels through a transformer to the transmission network.',
+      intro: 'The rotation of the shaft creates an alternating magnetic field inside the generator, which produces electricity.\nHere, motion is converted into electric current by electromagnetic induction.',
+      body: 'Inside the generator, a rotor rotates to create a magnetic field. A stator with wire conductor coils surrounds it. The magnetic field of the rotor moves relative to the stator coils, thus generating electrical voltage and current in the coils. For the electricity to be stable and usable, the rotor must rotate at a precise speed (in synchronisation with the power network) and the magnetic field must be uniform.',
+    },
+    made: {
+      intro: 'The generator has a fixed and a moving part, which together produce electricity.\nEach of them plays its role in converting motion into electric current.',
+      body: 'The rotor is the rotating part connected to the turbine that creates the magnetic field. The stator is a solid part with coils in which electrical voltage is induced and electric current is supplied when connected to the grid. The bearings allow the rotor to rotate smoothly, and the cooling system transfers the heat generated during the power generation. The produced electricity is then supplied through outputs to the grid.',
+    },
+    purpose: {
+      intro: 'The generator produces electricity from the motion of the turbine.\nThis is the place where energy becomes usable for households, cities and industry.',
+      body: 'It ensures stable power generation and interconnects the entire energy process – from the boiler to the turbine to the power grid. Without the generator, all the motion and heat in the plant would never be converted into electricity that we can use.',
     },
   },
   de: {
     what: {
       intro: 'Der Generator ist eine Anlage, die eine Drehbewegung in elektrische Energie umwandelt. In einem thermischen Kraftwerk ist er direkt an die Turbine angeschlossen und bildet den Ort, an dem Bewegung schließlich in Strom umgewandelt wird.',
-      body: 'Turbine und Generator sind durch eine gemeinsame Welle verbunden. Die Wellendrehung überträgt die Bewegung direkt. Sobald sich die Welle dreht, erzeugt der Generator Strom und speist ihn ins Netz ein. Der Generator schließt damit die gesamte Energieumwandlungskette im Kraftwerk: Brennstoff → Wärme → Dampf → Bewegung → Strom. Er ist das letzte Glied dieser Kette, das die resultierende Energie in eine nutzbare Form umwandelt.',
-    },
-    made: {
-      intro: 'Der Generator besteht aus mehreren Schlüsselteilen, die gemeinsam die Stromerzeugung durch elektromagnetische Induktion sicherstellen.',
-      body: 'Rotor (drehbarer Teil): Mit der Turbinenwelle verbunden. Erzeugt bei Drehung ein Magnetfeld. Stator (feststehender Teil): Umgibt den Rotor. Enthält Leiter, in denen elektrischer Strom induziert wird. Lager: Ermöglichen die reibungslose Rotation des Rotors. Kühlsystem: Leitet die bei der Stromerzeugung entstehende Wärme ab. Ausgangsklemmen: Leiten den erzeugten Strom zum Transformator und dann ins Netz.',
-    },
-    purpose: {
-      intro: 'Der Generator erzeugt elektrische Energie aus der Bewegung der Turbine. Er ist der Ort, an dem Energie für Haushalte, Städte und Industrie nutzbar wird.',
-      body: 'Der Generator gewährleistet eine stabile Stromerzeugung. Er verbindet den gesamten Energieumwandlungsprozess: Der Kessel liefert Dampf, der Dampf treibt die Turbine an, die Turbine treibt den Generator an. Ohne den Generator würden die Turbinenbewegung und die Wärme im Kraftwerk niemals in den Strom umgewandelt, den wir täglich nutzen. Die Generatorleistung entspricht der Turbinenleistung – je mehr Dampf, desto mehr Strom.',
+      body: 'Turbine und Generator sind über eine gemeinsame Welle miteinander verbunden, die die Drehbewegung unmittelbar überträgt. Dreht sich die Welle, erzeugt der Generator elektrische Energie, die anschließend in das Stromnetz eingespeist wird. Der Generator ist somit das letzte Glied der Energieumwandlung im Kraftwerk.',
     },
     how: {
-      intro: 'Durch die Drehung der Welle entsteht im Inneren des Generators ein sich veränderndes Magnetfeld, das durch elektromagnetische Induktion elektrische Energie erzeugt.',
-      body: 'Der mit der Turbinenwelle verbundene Rotor dreht sich im Inneren des Stators. Der rotierende Rotor erzeugt ein sich veränderndes Magnetfeld. Der den Rotor umgebende Stator enthält in Spulen angeordnete Leiter. Das sich verändernde Magnetfeld induziert in den Spulen Spannung und elektrischen Strom. Damit der Strom stabil und nutzbar ist, muss sich der Rotor mit einer genauen, mit der Netzfrequenz synchronisierten Geschwindigkeit drehen. Der erzeugte Strom gelangt dann über einen Transformator ins Übertragungsnetz.',
+      intro: 'Durch die Drehung der Welle entsteht im Inneren des Generators ein sich veränderndes Magnetfeld, das elektrische Energie erzeugt.\nDie Bewegung wird hier durch elektromagnetische Induktion in elektrischen Strom umgewandelt.',
+      body: 'Im Generator rotiert ein Rotor, der ein Magnetfeld erzeugt. Um ihn herum befindet sich der feststehende Stator mit Leiterspulen. Bewegt sich das Magnetfeld des Rotors relativ zu den Spulen des Stators, entsteht in den Spulen eine elektrische Spannung und ein Strom. Damit der erzeugte Strom stabil und nutzbar ist, muss sich der Rotor mit einer exakt festgelegten Drehzahl bewegen (synchron zur elektrischen Netzfrequenz), und das Magnetfeld muss gleichmäßig aufgebaut sein.',
+    },
+    made: {
+      intro: 'Der Generator besteht aus einer festen und einer beweglichen Komponente, die gemeinsam elektrische Energie erzeugen.\nJede von ihnen übernimmt eine eigene Aufgabe bei der Umwandlung von Bewegung in elektrischen Strom.',
+      body: 'Der Rotor ist der rotierende Teil, der mit der Turbine verbunden ist und das Magnetfeld erzeugt. Der Stator ist der feststehende Teil mit Spulen, in denen elektrische Spannung induziert wird; nach der Verbindung mit dem Stromnetz wird der erzeugte Strom abgeführt. Lager ermöglichen eine gleichmäßige Drehbewegung des Rotors, während ein Kühlsystem die bei der Stromerzeugung entstehende Wärme abführt. Die fertige elektrische Energie verlässt den Generator schließlich über Anschlussleitungen in das Versorgungsnetz.',
+    },
+    purpose: {
+      intro: 'Der Generator erzeugt elektrische Energie aus der Bewegung der Turbine.\nEr ist der Ort, an dem Energie für Haushalte, Städte und Industrie nutzbar wird.',
+      body: 'Er gewährleistet eine stabile Stromerzeugung und verbindet den gesamten Energieumwandlungsprozess – vom Kessel über die Turbine bis hin zum Stromnetz. Ohne den Generator würden sich die Bewegung und die Wärme im Kraftwerk niemals in die elektrische Energie verwandeln, die wir im Alltag nutzen.',
     },
   },
 };

@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TABS, LABELS, TITLES, TAB_PHOTOS, CONTENT } from './Texts';
+import { TABS, LABELS, TITLES, TAB_PHOTOS, PHOTO_SOURCES, GENERAL_TEXT, CONTENT } from './Texts';
+import MiddlePart from './components/MiddlePart';
+import BottomPart from './components/BottomPart';
 
 const SLEEP_TIMEOUT = 180_000;
 
 // Preload all tab images into browser cache on module load
-Object.values(TAB_PHOTOS).forEach(src => { new Image().src = src; });
+Object.values(TAB_PHOTOS).filter(Boolean).forEach(src => { new Image().src = src; });
 
 export default function App() {
   const [screen, setScreen] = useState('sleep');
   const [language, setLanguage] = useState('cz');
-  const [activeTab, setActiveTab] = useState('what');
+  const [activeTab, setActiveTab] = useState(null);
   const timer = useRef(null);
 
   const resetTimer = useCallback(() => {
@@ -24,14 +26,9 @@ export default function App() {
 
   const wake = useCallback(() => {
     setScreen('active');
-    setActiveTab(TABS[0]);
+    setActiveTab(null);
     resetTimer();
   }, [resetTimer]);
-
-  const goSleep = useCallback((e) => {
-    e.stopPropagation();
-    setScreen('sleep');
-  }, []);
 
   const switchLang = useCallback((l) => (e) => {
     e.stopPropagation();
@@ -60,54 +57,33 @@ export default function App() {
   if (screen === 'sleep') {
     return (
       <div className="screen sleep" onClick={wake}>
-        <div className="touch-hint">&#9995;</div>
+        <div className="touch-hint"><img src="./g/touch-hint.png" alt="Touch hint" /></div>
       </div>
     );
   }
 
-  const content = CONTENT[language][activeTab];
-  const photo = TAB_PHOTOS[activeTab];
+  const content = activeTab ? CONTENT[language][activeTab] : null;
 
   return (
     <div className="screen active" onClick={resetTimer}>
-      <div className="header">
-        <div className="lang-bar">
-          {['cz', 'en', 'de'].map(l => (
-            <button key={l} className={`lang-btn ${language === l ? 'sel' : ''}`}
-              onClick={switchLang(l)}>
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
-        <button className="home-btn" onClick={goSleep}>&#8962;</button>
-      </div>
-
-      <div className="photo-strip">
-        <img src={photo} alt="" className="photo-img" />
-        <div className="photo-title-overlay">
-          <span className="screen-label">{TITLES[language]}</span>
-          <h1 className="tab-title">{LABELS[language][activeTab]}</h1>
-        </div>
-      </div>
-
-      <div className="content-area">
-        <div className="col intro-col">
-          <p className="intro-text">{content.intro}</p>
-        </div>
-        <div className="col body-col">
-          <p className="body-text">{content.body}</p>
-        </div>
-      </div>
-
-      <div className="tab-row">
-        {TABS.map(t => (
-          <button key={t} className={`tab-thumb ${t === activeTab ? 'active' : ''}`}
-            onClick={switchTab(t)}>
-            <img src={TAB_PHOTOS[t]} alt="" className="thumb-img" />
-            <span className="thumb-label">{LABELS[language][t]}</span>
-          </button>
-        ))}
-      </div>
+      <MiddlePart
+        language={language}
+        switchLang={switchLang}
+        headline={activeTab ? LABELS[language][activeTab] : TITLES[language]}
+        generalText={activeTab ? null : GENERAL_TEXT[language]}
+        intro={activeTab ? content.intro : GENERAL_TEXT[language]}
+        body={activeTab ? content.body : ''}
+        photo={activeTab ? TAB_PHOTOS[activeTab] : null}
+        photoSource={activeTab ? PHOTO_SOURCES[activeTab] : null}
+      />
+      <BottomPart
+        tabs={TABS}
+        tabPhotos={TAB_PHOTOS}
+        labels={LABELS}
+        content={CONTENT}
+        language={language}
+        switchTab={switchTab}
+      />
     </div>
   );
 }

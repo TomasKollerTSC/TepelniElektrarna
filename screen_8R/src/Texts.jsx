@@ -2,72 +2,92 @@ export const TABS = ['who', 'mix', 'heat', 'future'];
 
 export const LABELS = {
   cz: { who: 'Kdo vyrábí elektřinu?', mix: 'Co je energetický mix?', heat: 'Proč potřebujeme teplo?', future: 'Kam energetika míří?' },
-  en: { who: 'Who generates electricity?', mix: 'What is the energy mix?', heat: 'Why do we need heat?', future: 'Where is energy heading?' },
-  de: { who: 'Wer erzeugt Strom?', mix: 'Was ist der Energiemix?', heat: 'Warum brauchen wir Wärme?', future: 'Wohin geht die Energiewirtschaft?' },
+  en: { who: 'Who generates the electricity?', mix: 'What does energy mix mean?', heat: 'Why do we need heat?', future: 'In what direction is the energy sector heading?' },
+  de: { who: 'Wer erzeugt Strom?', mix: 'Was ist der Energiemix?', heat: 'Warum brauchen wir Wärme?', future: 'Wohin entwickelt sich die Energiewirtschaft?' },
 };
 
 export const TITLES = { cz: 'Energetika', en: 'Energy Industry', de: 'Energiewirtschaft' };
+
+export const GENERAL_TEXT = {
+  cz: 'Tepelné elektrárny patří mezi základní pilíře výroby elektřiny. Využívají teplo k výrobě páry, která roztáčí turbínu a ta pohání generátor. Společně s jadernými, vodními a obnovitelnými zdroji tvoří energetický mix – tedy kombinaci zdrojů, ze kterých elektřina pochází. Tepelné elektrárny jsou důležité hlavně proto, že jejich výkon lze dobře řídit podle aktuální spotřeby elektřiny. Díky tomu pomáhají udržet stabilní dodávky elektřiny i ve chvílích, kdy jiné zdroje vyrábějí méně.',
+  en: 'Thermal power plants are among the basic pillars of electricity production. They use heat to produce steam, which turns turbines that drive generators. Together with nuclear, hydro and renewable resources, they make up the energy mix – the combination of sources from which electricity comes. Thermal power plants are primarily important because their output can be well controlled according to the actual electricity consumption. This helps maintain a stable supply of electricity even when other sources produce less.',
+  de: 'Thermische Kraftwerke gehören zu den grundlegenden Säulen der Stromerzeugung. Sie nutzen Wärme zur Erzeugung von Dampf, der eine Turbine antreibt, welche wiederum den Generator in Bewegung setzt. Gemeinsam mit Kernkraftwerken, Wasserkraftwerken und erneuerbaren Energiequellen bilden sie den Energiemix – also die Kombination verschiedener Quellen, aus denen elektrische Energie gewonnen wird. Thermische Kraftwerke sind besonders wichtig, weil sich ihre Leistung gut an den aktuellen Strombedarf anpassen lässt. Dadurch tragen sie dazu bei, eine stabile Stromversorgung auch dann zu gewährleisten, wenn andere Energiequellen weniger produzieren.',
+};
 
 export const TAB_PHOTOS = {
   who:    '/f/8R/8R_01_Kdo vyrábí elektřinu.jpg',
   mix:    '/f/8R/8R_02_Co je energetický mix.jpg',
   heat:   '/f/8R/8R_03_Proč potřebujeme teplo.jpeg',
-  future: '/f/8R/Kam energetika míří.JPG',
+  future: null,
+};
+
+export const PHOTO_SOURCES = {
+  who:    'Foto: ČEZ CEZ_DISTRIBUCE_ROZVODNA',
+  mix:    null,
+  heat:   'Foto: ČEZ (JE Temelín)',
+  future: null,
+};
+
+export const TAB_VIDEOS = {
+  who: null,
+  mix: null,
+  heat: null,
+  future: null,
 };
 
 export const CONTENT = {
   cz: {
     who: {
-      intro: 'Elektřina, kterou denně používáme, vzniká na několika různých místech a různými způsoby. Česká republika si spotřebu elektřiny pokrývá sama – je soběstačná.',
-      body: 'Největší podíl elektřiny v ČR pochází z jaderných elektráren (přibližně 40 %). Důležitou roli stále hrají uhelné elektrárny, i když jejich podíl postupně klesá. Plyn a obnovitelné zdroje – solární, větrné a vodní elektrárny spolu s biomasou – tvoří rostoucí část mixu. ČR dokonce část elektřiny vyváží do zahraničí. Síť přenosových vedení a transformátorů zajišťuje, aby elektřina bezpečně doputovala ke každému spotřebiteli.',
+      intro: 'Elektřina, kterou denně používáme, vzniká na několika různých místech a různými způsoby.\nČeská republika si spotřebu elektřiny pokrývá sama, je soběstačná.',
+      body: 'Česká republika je ve výrobě elektřiny soběstačná, část vyrobené elektřiny dokonce putuje i dál do světa. Ročně se u nás vyrobí přibližně 72 až 74 TWh elektřiny (výroba se může mezi roky lišit). Největší část dodávají jaderné elektrárny, které vyrobí zhruba 40 % celkové produkce. Významnou roli mají také tepelné elektrárny, zejména uhelné a plynové. Menší, ale rostoucí podíl připadá na obnovitelné zdroje, jako jsou vodní, solární, větrné elektrárny a biomasa.',
     },
     mix: {
-      intro: 'Energetický mix ukazuje, z jakých zdrojů elektřina pochází a jaký mají podíl na celkové výrobě. Je to vyvážená kombinace zdrojů, které se musí vzájemně doplňovat.',
-      body: 'Jaderná energie tvoří přibližně 42 % výroby elektřiny v ČR a je jejím největším zdrojem. Uhlí představuje asi 35 %, zemní plyn přibližně 5 %. Obnovitelné zdroje (slunce, vítr, voda, biomasa) dosahují kolem 16,5 %. Různé zdroje se doplňují: obnovitelné zdroje jsou ekologické, ale závislé na počasí. Jaderné a tepelné elektrárny poskytují stabilní základní výkon. Správný mix zajišťuje dodávku elektřiny za každého počasí.',
+      intro: 'Energetický mix ukazuje, z jakých zdrojů elektřina pochází a jaký mají podíl na celkové výrobě.\nJe to vyvážená kombinace zdrojů, které se musí vzájemně doplňovat.',
+      body: 'V současnosti tvoří český energetický mix 42 % jádro, 35 % uhlí, 5 % zemní plyn a zhruba 16,5 % obnovitelné zdroje. Obnovitelné zdroje vyrábějí elektřinu hlavně ze slunce, vody, větru a biomasy, jejich výkon se ale mění podle počasí. Právě proto zůstávají stabilní zdroje důležitou součástí mixu – pomáhají vyrovnávat výkyvy výroby i spotřeby.',
     },
     heat: {
-      intro: 'Bez tepla by velká část elektřiny vůbec nevznikla. Tepelné i jaderné elektrárny totiž pracují na stejném principu – využívají teplo k vytvoření pohybu.',
-      body: 'Spalování uhlí, plynu nebo biomasy – případně štěpení jader uranu – uvolní teplo. Teplo přemění vodu na páru. Pára roztočí turbínu, turbína pohání generátor. Tepelné elektrárny navíc umožňují rychlou regulaci výkonu. Díky kombinované výrobě tepla a elektřiny je možné využít až 50 % tepla pro zásobování měst teplem. To zvyšuje celkovou účinnost a snižuje emise.',
+      intro: 'Bez tepla by velká část elektřiny vůbec nevznikla.\nTepelné i jaderné elektrárny totiž pracují na stejném principu – využívají teplo k vytvoření pohybu.',
+      body: 'Tepelné i jaderné elektrárny pracují na stejném principu – využívají teplo k postupné přeměně přes energii pohybovou až na energii elektrickou. Spalováním uhlí, plynu nebo štěpením jádra vzniká teplo, které mění vodu na páru. Ta roztáčí turbínu spojenou s generátorem. Tepelné elektrárny jsou důležité hlavně proto, že jejich výkon lze poměrně rychle regulovat a přizpůsobit aktuální spotřebě. Navíc přibližně polovina tepla z některých elektráren nekončí bez užitku, ale slouží k vytápění měst v rámci kombinované výroby elektřiny a tepla.',
     },
     future: {
-      intro: 'Česká energetika se postupně proměňuje, ale stabilita dodávek zůstává klíčová. Budoucnost není o jednom zdroji, ale o jejich chytré kombinaci.',
-      body: 'Do roku 2030 by obnovitelné zdroje měly tvořit 20–30 % výroby. Uhlí bude postupně utlumováno. Jaderná energetika má v budoucnosti klíčovou roli – v ČR jsou plánované nové bloky. Mix se bude stávat čistším, ale základní požadavek zůstane: bezpečná a spolehlivá dodávka elektřiny celý rok, za každého počasí. Chytrá kombinace jaderné, plynové a obnovitelné energie je cestou vpřed.',
+      intro: 'Česká energetika se postupně proměňuje, ale stabilita dodávek zůstává klíčová.\nBudoucnost není o jednom zdroji, ale o jejich chytré kombinaci.',
+      body: 'Do roku 2030 se počítá s dalším růstem obnovitelných zdrojů, které by měly tvořit zhruba 20 až 30 % výroby elektřiny. Výroba z uhlí má naopak postupně klesat. Významnou roli má do budoucna sehrát jaderná energetika, včetně plánovaných nových bloků. Energetický mix se tak bude dál měnit, aby byl čistší, ale zároveň spolehlivý v každém ročním období.',
     },
   },
   en: {
     who: {
-      intro: 'The electricity we use every day is generated in several different places and in different ways. The Czech Republic covers its own electricity consumption and is self-sufficient.',
-      body: 'The largest share of electricity in the Czech Republic comes from nuclear power plants (approximately 40%). Coal-fired power plants still play an important role, although their share is gradually declining. Gas and renewables – solar, wind and hydro power plants along with biomass – form a growing part of the mix. The Czech Republic even exports part of its electricity. The network of transmission lines and transformers ensures that electricity safely reaches every consumer.',
+      intro: 'The electricity we use every day is generated in several different places and in different ways.\nThe Czech Republic covers its own electricity consumption and is self-sufficient.',
+      body: 'The Czech Republic is self-sufficient in electricity production, and some of the electricity produced even is supplied abroad. Approximately 72 to 74 TWh of electricity is produced annually (production may vary from year to year). The largest part is supplied by nuclear power plants, which produce about 40% of the total output. Thermal power plants, especially coal and gas-fired plants, also play an important role. A smaller but growing share is accounted for by renewable sources such as hydro, solar, wind and biomass.',
     },
     mix: {
-      intro: 'The energy mix shows from which sources the electricity comes and their share of total production. It is a balanced combination of resources that must complement each other.',
-      body: 'Nuclear energy accounts for approximately 42% of Czech electricity production and is its largest source. Coal accounts for about 35%, natural gas about 5%. Renewables (sun, wind, water, biomass) reach around 16.5%. Different sources complement each other: renewables are ecological but weather-dependent. Nuclear and thermal plants provide stable base power. The right mix ensures electricity supply in any weather.',
+      intro: 'The energy mix shows from which sources the electricity comes and their share of total production.\nIt is a balanced combination of resources that must complement each other.',
+      body: 'Currently, the Czech energy mix is 42% nuclear, 35% coal, 5% natural gas and about 16.5% renewables. Renewable energy sources mainly produce electricity from the sun, water, wind and biomass, but their output may vary according to the weather. This is why stable resources remain an important part of the mix – they help to smooth out fluctuations in production and consumption.',
     },
     heat: {
-      intro: 'Without heat, much of the electricity would not be generated. Thermal and nuclear power plants work on the same principle – they use heat to create motion.',
-      body: 'Burning coal, gas or biomass – or splitting uranium nuclei – releases heat. Heat converts water into steam. Steam turns the turbine, the turbine drives the generator. Thermal power plants also enable rapid output regulation. Through combined heat and power generation, up to 50% of the heat can be used to supply cities with heating. This increases overall efficiency and reduces emissions.',
+      intro: 'Without heat, much of the electricity would not be generated.\nThermal and nuclear power plants work on the same principle – they use heat to create motion.',
+      body: 'Thermal and nuclear power plants work on the same principle – they use heat to convert kinetic energy to electrical energy. The combustion of coal, gas and nuclear fission produces heat that turns water into steam. This rotates a turbine connected to the generator. Thermal power plants are primarily important because their output can be regulated relatively quickly and adapted to current consumption. In addition, approximately half of the heat from some power plants is used to heat cities as part of combined heat and power generation rather than being wasted.',
     },
     future: {
-      intro: 'The Czech energy sector is gradually transforming, but the stability of supply remains a key factor. The future does not lie in the use of one source, but in a smart combination of them.',
-      body: 'By 2030, renewables should account for 20-30% of production. Coal will be gradually phased out. Nuclear energy has a key role in the future – new units are planned in the Czech Republic. The mix will become cleaner, but the basic requirement will remain: safe and reliable electricity supply all year, in any weather. A smart combination of nuclear, gas and renewable energy is the way forward.',
+      intro: 'The Czech energy sector is gradually transforming, but the stability of supply remains a key factor.\nThe future does not lie in the use of one source, but in a smart combination of them.',
+      body: 'Renewable energy sources are expected to continue to grow until 2030, accounting for approximately 20–30% of electricity generation. Coal production, on the other hand, is expected to gradually decline. Nuclear power is expected to play a significant role in the future, including planned new units. The energy mix will continue to be cleaner but reliable in all seasons.',
     },
   },
   de: {
     who: {
-      intro: 'Der Strom, den wir täglich nutzen, wird an verschiedenen Orten und auf unterschiedliche Weise erzeugt. Die Tschechische Republik deckt ihren Strombedarf selbst und ist in der Stromerzeugung weitgehend autark.',
-      body: 'Der größte Anteil des Stroms in der Tschechischen Republik stammt aus Kernkraftwerken (ca. 40 %). Kohlekraftwerke spielen nach wie vor eine wichtige Rolle, obwohl ihr Anteil schrittweise sinkt. Gas und erneuerbare Energien – Solar-, Wind- und Wasserkraftwerke sowie Biomasse – bilden einen wachsenden Teil des Energiemixes. Die Tschechische Republik exportiert sogar einen Teil ihres Stroms. Das Netz aus Übertragungsleitungen und Transformatoren sorgt dafür, dass Strom sicher zu jedem Verbraucher gelangt.',
+      intro: 'Der Strom, den wir täglich nutzen, wird an verschiedenen Orten und auf unterschiedliche Weise erzeugt.\nDie Tschechische Republik deckt ihren Strombedarf selbst und ist in der Stromerzeugung weitgehend autark.',
+      body: 'Die Tschechische Republik ist in der Stromerzeugung autark; ein Teil des produzierten Stroms wird sogar ins Ausland exportiert. Jährlich werden in Tschechien etwa 72 bis 74 TWh elektrische Energie erzeugt (die Produktion kann von Jahr zu Jahr variieren). Den größten Anteil liefern Kernkraftwerke mit rund 40 % der Gesamtproduktion. Eine bedeutende Rolle spielen außerdem thermische Kraftwerke, insbesondere Kohle- und Gaskraftwerke. Einen kleineren, jedoch wachsenden Anteil übernehmen erneuerbare Energiequellen wie Wasserkraft-, Solar- und Windkraftanlagen sowie Biomasse.',
     },
     mix: {
-      intro: 'Der Energiemix zeigt, aus welchen Quellen Strom stammt und welchen Anteil sie an der Gesamterzeugung haben. Er ist eine ausgewogene Kombination verschiedener Energiequellen, die sich gegenseitig ergänzen müssen.',
-      body: 'Kernenergie macht etwa 42 % der tschechischen Stromerzeugung aus und ist die größte Quelle. Kohle hat einen Anteil von ca. 35 %, Erdgas ca. 5 %. Erneuerbare Energien (Sonne, Wind, Wasser, Biomasse) erreichen rund 16,5 %. Verschiedene Quellen ergänzen sich: Erneuerbare sind umweltfreundlich, aber wetterabhängig. Kern- und Wärmekraftwerke liefern stabile Grundlastleistung. Der richtige Mix gewährleistet die Stromversorgung bei jedem Wetter.',
+      intro: 'Der Energiemix zeigt, aus welchen Quellen Strom stammt und welchen Anteil sie an der gesamten Stromerzeugung haben.\nEr ist eine ausgewogene Kombination verschiedener Energiequellen, die sich gegenseitig ergänzen müssen.',
+      body: 'Derzeit besteht der Energiemix in Tschechien zu etwa 42 % aus Kernenergie, zu 35 % aus Kohle, zu 5 % aus Erdgas und zu rund 16,5 % aus erneuerbaren Energiequellen. Erneuerbare Energien erzeugen Strom vor allem aus Sonne, Wasser, Wind und Biomasse, ihre Leistung schwankt jedoch je nach Wetterbedingungen. Gerade deshalb bleiben stabile Energiequellen ein wichtiger Bestandteil des Energiemix – sie helfen, Schwankungen in der Stromerzeugung und im Verbrauch auszugleichen.',
     },
     heat: {
-      intro: 'Ohne Wärme würde ein großer Teil der elektrischen Energie überhaupt nicht entstehen. Sowohl thermische als auch Kernkraftwerke arbeiten nach demselben Prinzip – sie nutzen Wärme, um Bewegung zu erzeugen.',
-      body: 'Das Verbrennen von Kohle, Gas oder Biomasse – oder die Spaltung von Urankernen – setzt Wärme frei. Die Wärme wandelt Wasser in Dampf um. Der Dampf dreht die Turbine, die Turbine treibt den Generator an. Wärmekraftwerke ermöglichen zudem eine schnelle Leistungsregelung. Durch Kraft-Wärme-Kopplung können bis zu 50 % der Wärme für die Fernwärmeversorgung von Städten genutzt werden. Dies erhöht den Gesamtwirkungsgrad und senkt die Emissionen.',
+      intro: 'Ohne Wärme würde ein großer Teil der elektrischen Energie überhaupt nicht entstehen.\nSowohl thermische als auch Kernkraftwerke arbeiten nach demselben Prinzip – sie nutzen Wärme, um Bewegung zu erzeugen.',
+      body: 'Thermische und Kernkraftwerke arbeiten nach demselben Grundprinzip – sie nutzen Wärme, um Energie schrittweise von der thermischen über die mechanische in elektrische Energie umzuwandeln. Durch die Verbrennung von Kohle oder Erdgas sowie durch die Kernspaltung entsteht Wärme, die Wasser in Dampf verwandelt. Dieser treibt eine mit dem Generator verbundene Turbine an. Thermische Kraftwerke sind besonders wichtig, weil sich ihre Leistung vergleichsweise schnell regulieren und an den aktuellen Strombedarf anpassen lässt. Darüber hinaus wird in einigen Anlagen etwa die Hälfte der erzeugten Wärme nicht ungenutzt abgeführt, sondern im Rahmen der Kraft-Wärme-Kopplung zur Beheizung von Städten eingesetzt.',
     },
     future: {
-      intro: 'Die tschechische Energiewirtschaft befindet sich im Wandel, doch die Versorgungssicherheit bleibt entscheidend. Die Zukunft liegt nicht in einer einzelnen Energiequelle, sondern in ihrer intelligenten Kombination.',
-      body: 'Bis 2030 sollen erneuerbare Energien 20-30 % der Erzeugung ausmachen. Kohle wird schrittweise auslaufen. Kernenergie spielt in der Zukunft eine Schlüsselrolle – in der Tschechischen Republik sind neue Blöcke geplant. Der Mix wird sauberer werden, aber die Grundanforderung bleibt: sichere und zuverlässige Stromversorgung das ganze Jahr über, bei jedem Wetter. Eine intelligente Kombination aus Kern-, Gas- und erneuerbarer Energie ist der Weg nach vorn.',
+      intro: 'Die tschechische Energiewirtschaft befindet sich im Wandel, doch die Versorgungssicherheit bleibt entscheidend.\nDie Zukunft liegt nicht in einer einzelnen Energiequelle, sondern in ihrer intelligenten Kombination.',
+      body: 'Bis zum Jahr 2030 wird mit einem weiteren Ausbau der erneuerbaren Energien gerechnet, die etwa 20 bis 30 % der Stromerzeugung ausmachen sollen. Die Stromproduktion aus Kohle hingegen soll schrittweise zurückgehen. Eine wichtige Rolle wird künftig auch die Kernenergie spielen, einschließlich geplanter neuer Reaktorblöcke. Der Energiemix wird sich daher weiter verändern – mit dem Ziel, sauberer zu werden und zugleich in allen Jahreszeiten zuverlässig zu bleiben.',
     },
   },
 };
