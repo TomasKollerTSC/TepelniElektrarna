@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TABS, LABELS, TAB_PHOTOS, PHOTO_SOURCES, CONTENT } from './Texts';
+import { TABS, LABELS, TAB_PHOTOS, PHOTO_SOURCES, CONTENT, tabPhoto } from './Texts';
 import UpperPart from './components/UpperPart';
 import MiddlePart from './components/MiddlePart';
 import BottomPart from './components/BottomPart';
@@ -8,6 +8,7 @@ const SLEEP_TIMEOUT = 180_000;
 
 // Preload all tab images into browser cache on module load
 Object.values(TAB_PHOTOS).forEach(src => { new Image().src = src; });
+['CZ', 'EN', 'DE'].forEach(l => { new Image().src = `/f/4R/kondenzator-${l}.png`; });
 
 export default function App() {
   const [screen, setScreen] = useState('sleep');
@@ -67,7 +68,7 @@ export default function App() {
 
   return (
     <div className="screen active" onClick={resetTimer}>
-      <UpperPart photo={TAB_PHOTOS[activeTab]} source={PHOTO_SOURCES[activeTab]} />
+      <UpperPart photo={tabPhoto(activeTab, language)} source={PHOTO_SOURCES[activeTab]} />
       <MiddlePart
         language={language}
         switchLang={switchLang}
@@ -77,7 +78,7 @@ export default function App() {
       />
       <BottomPart
         tabs={TABS}
-        tabPhotos={TAB_PHOTOS}
+        tabPhoto={tabPhoto}
         labels={LABELS}
         content={CONTENT}
         language={language}

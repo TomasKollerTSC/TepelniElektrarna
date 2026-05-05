@@ -9,10 +9,15 @@ export const LABELS = {
 export const TITLES = { cz: 'Tepelný výměník', en: 'Heat Exchanger', de: 'Wärmetauscher' };
 
 export const TAB_PHOTOS = {
-  what:    '/f/4R/10.png',
-  made:    '/f/4R/10.png',
-  purpose: '/f/4R/10.png',
-  how:     '/f/4R/10.png',
+  what:    '/f/4R/kondenzator-CZ.png',
+  made:    '/f/4R/iStock-model trubkového výměníku.jpg',
+  purpose: '/f/4R/iStock-vnitřek výměníku.jpg',
+  how:     '/f/4R/iStock-trubkový svazek výměníku .jpg',
+};
+
+export const tabPhoto = (tab, lang) => {
+  if (tab === 'what') return `/f/4R/kondenzator-${lang.toUpperCase()}.png`;
+  return TAB_PHOTOS[tab];
 };
 
 export const PHOTO_SOURCES = {

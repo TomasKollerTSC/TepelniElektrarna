@@ -16,16 +16,21 @@ export const GENERAL_TEXT = {
 
 export const TAB_PHOTOS = {
   what:    '/f/10/10_01_Co je_Generátor.jpeg',
-  how:     null,
-  made:    null,
+  how:     '/f/10/Generator-CZ.png',
+  made:    '/f/10/FOTO_92_vinutí.jpg',
   purpose: '/f/10/10_04_K čemu slouží_generátor.jpg',
 };
 
+export const tabPhoto = (tab, lang) => {
+  if (tab === 'how') return `/f/10/Generator-${lang.toUpperCase()}.png`;
+  return TAB_PHOTOS[tab];
+};
+
 export const PHOTO_SOURCES = {
-  what:    'Foto: ČEZ Generátor_Elektrárna Ledvice',
-  how:     null,
-  made:    null,
-  purpose: null,
+  what:    'Foto: ČEZ (Generátor Elektrárna Ledvice)',
+  how:     'Grafika: www.svetenergie.cz (princip generátoru)',
+  made:    'Foto: ČEZ (vinutí)',
+  purpose: 'Foto: ČEZ (generátor elektrárny Ledvice)',
 };
 
 export const TAB_VIDEOS = {

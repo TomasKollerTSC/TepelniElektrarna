@@ -18,14 +18,14 @@ export const TAB_PHOTOS = {
   who:    '/f/8R/8R_01_Kdo vyrábí elektřinu.jpg',
   mix:    '/f/8R/8R_02_Co je energetický mix.jpg',
   heat:   '/f/8R/8R_03_Proč potřebujeme teplo.jpeg',
-  future: null,
+  future: '/f/8R/iStock žárovka.jpg',
 };
 
 export const PHOTO_SOURCES = {
-  who:    'Foto: ČEZ CEZ_DISTRIBUCE_ROZVODNA',
-  mix:    null,
+  who:    'Foto: ČEZ (rozvodna)',
+  mix:    'Foto: ČEZ (druhy elektráren)',
   heat:   'Foto: ČEZ (JE Temelín)',
-  future: null,
+  future: 'Ilustrační obrázek: žárovka',
 };
 
 export const TAB_VIDEOS = {

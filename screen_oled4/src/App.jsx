@@ -1,9 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { T } from './Texts';
+import { createSoundManager } from './soundManager';
 
 const WS_URL = 'ws://localhost:8765';
 const MAX_STEPS = 15;
 const INACTIVITY_MS = 20000;
+
+const sm = createSoundManager({
+  AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 0.8 },
+  AUDIO_4: { src: '/a/AUDIO_4.mp3', loop: true,  channel: 'right', volume: 0.5 },
+  AUDIO_5: { src: '/a/AUDIO_5.mp3', loop: true,  channel: 'right', volume: 1.0 },
+  AUDIO_6: { src: '/a/AUDIO_6.mp3', loop: true,  channel: 'right', volume: 0.5 },
+});
 
 function angleDelta(prev, curr) {
   if (prev === null) return 0;
@@ -28,6 +36,42 @@ export default function App() {
 
   useEffect(() => { screenRef.current = screen; }, [screen]);
   useEffect(() => { stepRef.current = step; }, [step]);
+
+  // ── AUDIO ──
+  const prevStep = useRef(0);
+  useEffect(() => {
+    if (screen === 'sleep') {
+      sm.stopAll({ fadeMs: 200 });
+      prevStep.current = 0;
+      return;
+    }
+    if (step >= 1 && prevStep.current === 0) {
+      sm.unlock();
+      sm.play('AUDIO_4');
+    }
+    if (step >= MAX_STEPS && prevStep.current < MAX_STEPS) {
+      sm.stop('AUDIO_4', { fadeMs: 300 });
+      const t6 = setTimeout(() => sm.play('AUDIO_6'), 1000);
+      const t5 = setTimeout(() => sm.play('AUDIO_5'), 3000);
+      const t3 = setTimeout(() => sm.play('AUDIO_3'), 3000);
+      prevStep.current = step;
+      return () => { clearTimeout(t6); clearTimeout(t5); clearTimeout(t3); };
+    }
+    prevStep.current = step;
+  }, [step, screen]);
+
+  // Notify other screens when valve is fully open (after 3s turbine message delay)
+  useEffect(() => {
+    if (step === MAX_STEPS) {
+      const id = setTimeout(() => {
+        ws.current?.send(JSON.stringify({
+          type: 'trigger', name: 'GAME_STATE', id: 1,
+          data: { state: 'VALVE_COMPLETE' },
+        }));
+      }, 3000);
+      return () => clearTimeout(id);
+    }
+  }, [step]);
 
   // Inactivity → sleep (20s) + reset all screens (disabled when game complete)
   useEffect(() => {
@@ -113,6 +157,7 @@ export default function App() {
     const simAngle = { v: 0 };
     const send = (msg) => ws.current?.send(JSON.stringify(msg));
     const onKey = (e) => {
+      sm.unlock();
       switch (e.key) {
         case 'ArrowRight': case 'd': case 'D':
           simAngle.v = (simAngle.v + 20) % 360;

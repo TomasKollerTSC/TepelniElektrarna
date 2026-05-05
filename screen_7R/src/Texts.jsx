@@ -9,17 +9,17 @@ export const LABELS = {
 export const TITLES = { cz: 'Turbína', en: 'Turbine', de: 'Turbine' };
 
 export const TAB_PHOTOS = {
-  what:    '/f/7R/7R_01_turbína.jpg',
-  made:    '/f/7R/7R Z čeho se skládá.png',
+  what:    '/f/7R/IMG_0016.jpg',
+  made:    '/f/7R/FOTO_27_rotor turbíny.jpg',
   purpose: '/f/7R/7R_04_K čemu slouží.jpg',
-  how:     '/f/7R/7R jak funguje.png',
+  how:     '/f/7R/IMG_0011.jpg',
 };
 
 export const PHOTO_SOURCES = {
   what:    'Foto: ČEZ (Turbína, elektrárny Ledvice)',
-  made:    'Lorem ipsum dolor sit amet',
+  made:    'Foto: ČEZ (rotor turbíny)',
   purpose: 'Foto: ČEZ (Turbína, elektrárny Ledvice)',
-  how:     'Lorem ipsum dolor sit amet',
+  how:     'Foto: Doosan (části turbíny)',
 };
 
 export const CONTENT = {

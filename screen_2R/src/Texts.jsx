@@ -15,10 +15,10 @@ export const GENERAL_TEXT = {
 };
 
 export const TAB_PHOTOS = {
-  what:    '/f/2R/Elektrárna Ledvice_dron.png',
-  made:    '/f/2R/FOTO_10_pohled do kotle.jpg',
-  purpose: '/f/2R/FOTO_11_plynové hořáky kotle.jpg',
-  how:     '/f/2R/FOTO_10_pohled do kotle.jpg',
+  what:    '/f/2R/FOTO_10_pohled do kotle.jpg',
+  made:    '/f/2R/FOTO_11_plynové hořáky kotle.jpg',
+  purpose: '/f/2R/Elektrárna Ledvice_dron.png',
+  how:     '/f/2R/FOTO_7_kotelna.jpg',
 };
 
 export const PHOTO_SOURCES = {

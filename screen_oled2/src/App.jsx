@@ -1,8 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { T, FUEL_LABELS } from './Texts';
+import { createSoundManager } from './soundManager';
 
 const WS_URL = 'ws://localhost:8765';
 const STEPS_TO_SWITCH = 18;
+
+const sm = createSoundManager({
+  AUDIO_1: { src: '/a/AUDIO_1.mp3', loop: true,  channel: 'left',  volume: 0.3 },
+  AUDIO_2: { src: '/a/AUDIO_2.mp3', loop: false, channel: 'left',  volume: 0.8 },
+  AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 0.8 },
+});
+const FLAME_VOL = { 3: 0.3, 4: 0.3, 5: 0.6, 6: 0.6, 7: 1.0, 8: 1.0 };
 
 const FUELS = ['coal', 'gas', 'biomass'];
 const FUEL_IMAGES = ['/g/uhlí.png', '/g/plyn.png', '/g/biomasa.png'];
@@ -76,6 +84,26 @@ export default function App() {
   useEffect(() => { screenRef.current = screen; }, [screen]);
   useEffect(() => { fuelIdxRef.current = fuelIdx; }, [fuelIdx]);
   useEffect(() => { gaugesRef.current = gauges; }, [gauges]);
+
+  // ── AUDIO ──
+  const prevOverload = useRef(false);
+  const prevScreen = useRef(screen);
+  useEffect(() => {
+    if (screen === 'game' || screen === 'success') {
+      sm.unlock();
+      sm.play('AUDIO_1');
+      if (screen === 'success') sm.volume('AUDIO_1', 0.6);
+      if (screen === 'success' && prevScreen.current !== 'success') sm.play('AUDIO_3');
+    } else {
+      sm.stopAll({ fadeMs: 200 });
+    }
+    prevScreen.current = screen;
+  }, [screen]);
+
+  useEffect(() => {
+    if (overloadActive && !prevOverload.current) sm.play('AUDIO_2');
+    prevOverload.current = overloadActive;
+  }, [overloadActive]);
 
   // ── SCREENSAVER BOUNCE (direct DOM, no React re-renders) ──
   useEffect(() => {
@@ -258,6 +286,7 @@ export default function App() {
       if (!videoCache.current[newState]) return;
 
       currentVideoState.current = newState;
+      if (screen === 'game' && FLAME_VOL[newState] != null) sm.volume('AUDIO_1', FLAME_VOL[newState]);
       const isA = activeSlot.current === 'A';
       const next = isA ? videoBRef.current : videoARef.current;
       const curr = isA ? videoARef.current : videoBRef.current;
@@ -395,6 +424,7 @@ export default function App() {
       send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx], step: -1 } });
     };
     const onKey = (e) => {
+      sm.unlock();
       switch (e.key) {
         case 'ArrowLeft':  case 'a': case 'A': wheelBack(1, 0); break;
         case 'ArrowRight': case 'd': case 'D': wheel(1, 0);     break;
