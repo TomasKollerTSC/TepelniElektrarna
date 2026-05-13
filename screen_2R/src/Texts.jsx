@@ -17,15 +17,29 @@ export const GENERAL_TEXT = {
 export const TAB_PHOTOS = {
   what:    '/f/2R/FOTO_10_pohled do kotle.jpg',
   made:    '/f/2R/FOTO_11_plynové hořáky kotle.jpg',
-  purpose: '/f/2R/Elektrárna Ledvice_dron.png',
+  purpose: '/f/2R/Elektrárna Ledvice_dron.jpg',
   how:     '/f/2R/FOTO_7_kotelna.jpg',
 };
 
 export const PHOTO_SOURCES = {
-  what:    'Lorem ipsum dolor sit amet',
-  made:    'Lorem ipsum dolor sit amet',
-  purpose: 'Lorem ipsum dolor sit amet',
-  how:     'Lorem ipsum dolor sit amet',
+  cz: {
+    what:    'Foto: ČEZ (pohled do kotle)',
+    made:    'Foto: ČEZ (plynové hořáky kotle)',
+    purpose: 'Foto: ČEZ (elektrárna Ledvice)',
+    how:     'Foto: ČEZ (kotelna)',
+  },
+  en: {
+    what:    'Photo: ČEZ (view inside the boiler)',
+    made:    'Photo: ČEZ (gas boiler burners)',
+    purpose: 'Photo: ČEZ (Ledvice power plant)',
+    how:     'Photo: ČEZ (boiler room)',
+  },
+  de: {
+    what:    'Foto: ČEZ (Blick in den Kessel)',
+    made:    'Foto: ČEZ (Gasbrenner des Kessels)',
+    purpose: 'Foto: ČEZ (Kraftwerk Ledvice)',
+    how:     'Foto: ČEZ (Kesselhaus)',
+  },
 };
 
 export const CONTENT = {

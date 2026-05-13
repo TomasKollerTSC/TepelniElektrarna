@@ -14,15 +14,23 @@ export const GENERAL_TEXT = {
   de: 'Der Generator wird von der Turbine angetrieben. Im Inneren des Generators wird die Drehbewegung des Rotors in elektrischen Strom umgewandelt, der anschließend über das Stromnetz in Haushalte, Städte und Industrieanlagen geleitet wird. Hier wird die im Brennstoff enthaltene Energie endgültig in elektrische Energie umgewandelt, die wir im Alltag nutzen.',
 };
 
+export const OVERVIEW_PHOTO = '/f/10/Generátor_Elektrárna Ledvice.jpg';
+
+export const OVERVIEW_SOURCE = {
+  cz: 'Foto: ČEZ (generátor elektrárny Ledvice)',
+  en: 'Photo: ČEZ (Ledvice power plant generator)',
+  de: 'Foto: ČEZ (Generator, Kraftwerk Ledvice)',
+};
+
 export const TAB_PHOTOS = {
   what:    '/f/10/10_01_Co je_Generátor.jpeg',
-  how:     '/f/10/Generator-CZ.png',
+  how:     '/f/10/Gen_CZ.jpg',
   made:    '/f/10/FOTO_92_vinutí.jpg',
-  purpose: '/f/10/10_04_K čemu slouží_generátor.jpg',
+  purpose: '/f/10/Generátor_Elektrárna Ledvice.jpg',
 };
 
 export const tabPhoto = (tab, lang) => {
-  if (tab === 'how') return `/f/10/Generator-${lang.toUpperCase()}.png`;
+  if (tab === 'how') return `/f/10/Gen_${lang.toUpperCase()}.jpg`;
   return TAB_PHOTOS[tab];
 };
 

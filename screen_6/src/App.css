@@ -30,7 +30,7 @@ body {
 .active {
   display: flex;
   flex-direction: row;
-  background: #fff;
+  background: #000;
 }
 
 .text-panel {
@@ -57,128 +57,11 @@ body {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: #fff;
+  background: #000;
 }
 
-.diagram-container {
-  position: relative;
+.diagram-video {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.diagram-img {
-  max-width: 100%;
-  max-height: 100%;
   object-fit: contain;
-}
-
-/* ── FLOW ARROWS (placeholder) ── */
-.flow-arrow {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  z-index: 10;
-}
-
-/* Red flow: hot steam/water (top path, right to left) */
-.flow-red {
-  background: radial-gradient(circle, #ff4040 30%, rgba(255, 40, 40, 0) 70%);
-  box-shadow: 0 0 20px 6px rgba(255, 40, 40, 0.7);
-}
-
-.flow-red-1 {
-  top: 25%;
-  animation: flow-right-to-left 4s linear infinite;
-}
-.flow-red-2 {
-  top: 25%;
-  animation: flow-right-to-left 4s linear infinite 1.3s;
-}
-.flow-red-3 {
-  top: 25%;
-  animation: flow-right-to-left 4s linear infinite 2.6s;
-}
-
-@keyframes flow-right-to-left {
-  0%   { left: 90%; opacity: 0; }
-  5%   { opacity: 1; }
-  95%  { opacity: 1; }
-  100% { left: 10%; opacity: 0; }
-}
-
-/* Blue flow: cooled water (bottom path, left to right) */
-.flow-blue {
-  background: radial-gradient(circle, #4090ff 30%, rgba(64, 144, 255, 0) 70%);
-  box-shadow: 0 0 20px 6px rgba(64, 144, 255, 0.7);
-}
-
-.flow-blue-1 {
-  top: 70%;
-  animation: flow-left-to-right 4s linear infinite;
-}
-.flow-blue-2 {
-  top: 70%;
-  animation: flow-left-to-right 4s linear infinite 1.3s;
-}
-.flow-blue-3 {
-  top: 70%;
-  animation: flow-left-to-right 4s linear infinite 2.6s;
-}
-
-@keyframes flow-left-to-right {
-  0%   { left: 10%; opacity: 0; }
-  5%   { opacity: 1; }
-  95%  { opacity: 1; }
-  100% { left: 90%; opacity: 0; }
-}
-
-/* ── PUMP SYMBOL (placeholder) ── */
-.pump-symbol {
-  position: absolute;
-  top: 48%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 4rem;
-  color: #333;
-  text-shadow: 0 0 10px rgba(0,0,0,0.3);
-  animation: spin 1.5s linear infinite;
-  z-index: 10;
-}
-
-@keyframes spin {
-  0%   { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-/* ── RISING STEAM (placeholder) ── */
-.steam {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(120, 120, 120, 0.6);
-  z-index: 10;
-}
-
-.steam-1 {
-  left: 72%;
-  animation: rise 3s ease-out infinite;
-}
-.steam-2 {
-  left: 76%;
-  animation: rise 3s ease-out infinite 1s;
-}
-.steam-3 {
-  left: 80%;
-  animation: rise 3s ease-out infinite 2s;
-}
-
-@keyframes rise {
-  0%   { bottom: 30%; opacity: 0; transform: scale(1); }
-  15%  { opacity: 0.7; }
-  100% { bottom: 85%; opacity: 0; transform: scale(3); }
 }

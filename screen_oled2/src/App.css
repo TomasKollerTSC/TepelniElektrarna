@@ -46,7 +46,7 @@ body {
 }
 
 /* ── SLEEP ── */
-.sleep { background: #000; cursor: pointer; }
+.sleep { background: #000; }
 .sleep-logo {
   position: absolute;
   top: 0;
@@ -322,9 +322,15 @@ body {
   font-weight: 900;
 }
 .gauge-label {
-  font-size: clamp(1rem, 3vw, 1.4rem);
+  padding: 10px;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.333) ;
+  font-size: clamp(1rem, 4vw, 1.4rem);
   color: #ccc;
   text-align: center;
+  font-weight: bold;
+  outline-color: #000;
+  outline-width: 2px; 
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }

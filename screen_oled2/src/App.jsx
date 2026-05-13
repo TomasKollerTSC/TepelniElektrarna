@@ -80,6 +80,7 @@ export default function App() {
   const simAngles = useRef([180, 180, 180]);
   const sleepImgRef = useRef(null);
   const fuelSteps = useRef(0);
+  const anyWheelTouched = useRef(false);
 
   useEffect(() => { screenRef.current = screen; }, [screen]);
   useEffect(() => { fuelIdxRef.current = fuelIdx; }, [fuelIdx]);
@@ -159,6 +160,7 @@ export default function App() {
     dangerStart.current = [null, null, null];
     prevAngles.current = [null, null, null];
     fuelSteps.current = 0;
+    anyWheelTouched.current = false;
   }, [stopDecay]);
 
   // ── ZONE TIMING (warnings + win) ──
@@ -185,14 +187,19 @@ export default function App() {
         greenStart.current = null;
       }
 
-      setWarnActive(zones.map((zone, i) => {
-        if (zone !== 'green') {
-          if (!dangerStart.current[i]) dangerStart.current[i] = now;
-          return (now - dangerStart.current[i]) >= 3000;
-        }
-        dangerStart.current[i] = null;
-        return false;
-      }));
+      if (!anyWheelTouched.current) {
+        setWarnActive([false, false, false]);
+        dangerStart.current = [null, null, null];
+      } else {
+        setWarnActive(zones.map((zone, i) => {
+          if (zone !== 'green') {
+            if (!dangerStart.current[i]) dangerStart.current[i] = now;
+            return (now - dangerStart.current[i]) >= 3000;
+          }
+          dangerStart.current[i] = null;
+          return false;
+        }));
+      }
 
       const anyRed = zones.some(z => z === 'red');
       if (anyRed) {
@@ -326,6 +333,7 @@ export default function App() {
       dangerStart.current = [null, null, null];
       prevAngles.current = [null, null, null];
       fuelSteps.current = 0;
+      anyWheelTouched.current = false;
       return;
     }
 
@@ -342,6 +350,7 @@ export default function App() {
         greenStart.current = null;
         overloadStart.current = null;
         lastActivity.current = Date.now();
+        anyWheelTouched.current = false;
         startDecay();
       }
     }
@@ -351,8 +360,8 @@ export default function App() {
       const idx = msg.id - 1;
       if (idx < 0 || idx > 2) return;
 
-      if (idx === 0 && screenRef.current === 'sleep') {
-        prevAngles.current[0] = angle;
+      if (screenRef.current === 'sleep') {
+        prevAngles.current[idx] = angle;
         setScreen('home');
         return;
       }
@@ -380,6 +389,7 @@ export default function App() {
       if (screenRef.current === 'game') {
         lastActivity.current = Date.now();
         setShowIntro(false);
+        anyWheelTouched.current = true;
         const delta = angleDelta(prevAngles.current[idx], angle);
         prevAngles.current[idx] = angle;
         const ptDelta = delta / DEG_PER_PT[FUELS[fuelIdxRef.current]][idx];
@@ -450,7 +460,7 @@ export default function App() {
   // ── SLEEP ──
   if (screen === 'sleep') {
     return (
-      <div className="screen sleep" onClick={() => setScreen('home')}>
+      <div className="screen sleep">
         <img ref={sleepImgRef} className="sleep-logo" src="/g/TE_S1.png" alt="" />
       </div>
     );

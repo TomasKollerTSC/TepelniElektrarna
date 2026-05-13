@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { TABS, LABELS, TAB_PHOTOS, PHOTO_SOURCES, CONTENT } from './Texts';
+import { SLEEP_TIMEOUT_MS } from './config';
 import UpperPart from './components/UpperPart';
 import MiddlePart from './components/MiddlePart';
 import BottomPart from './components/BottomPart';
-
-const SLEEP_TIMEOUT = 180_000;
 
 // Preload all tab images into browser cache on module load
 Object.values(TAB_PHOTOS).forEach(src => { new Image().src = src; });
@@ -17,7 +16,7 @@ export default function App() {
 
   const resetTimer = useCallback(() => {
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setScreen('sleep'), SLEEP_TIMEOUT);
+    timer.current = setTimeout(() => setScreen('sleep'), SLEEP_TIMEOUT_MS);
   }, []);
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export default function App() {
 
   return (
     <div className="screen active" onClick={resetTimer}>
-      <UpperPart photo={TAB_PHOTOS[activeTab]} source={PHOTO_SOURCES[activeTab]} />
+      <UpperPart photo={TAB_PHOTOS[activeTab]} source={PHOTO_SOURCES[language][activeTab]} />
       <MiddlePart
         language={language}
         switchLang={switchLang}

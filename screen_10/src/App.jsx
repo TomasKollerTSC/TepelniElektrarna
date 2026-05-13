@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TABS, LABELS, TITLES, TAB_PHOTOS, PHOTO_SOURCES, GENERAL_TEXT, CONTENT, tabPhoto } from './Texts';
+import { TABS, LABELS, TITLES, TAB_PHOTOS, PHOTO_SOURCES, GENERAL_TEXT, CONTENT, tabPhoto, OVERVIEW_PHOTO, OVERVIEW_SOURCE } from './Texts';
+import { SLEEP_TIMEOUT_MS } from './config';
 import MiddlePart from './components/MiddlePart';
 import BottomPart from './components/BottomPart';
 
-const SLEEP_TIMEOUT = 180_000;
-
 // Preload all tab images into browser cache on module load
 Object.values(TAB_PHOTOS).filter(Boolean).forEach(src => { new Image().src = src; });
-['CZ', 'EN', 'DE'].forEach(l => { new Image().src = `/f/10/Generator-${l}.png`; });
+['CZ', 'EN', 'DE'].forEach(l => { new Image().src = `/f/10/Gen_${l}.jpg`; });
+new Image().src = OVERVIEW_PHOTO;
 
 export default function App() {
   const [screen, setScreen] = useState('sleep');
@@ -17,7 +17,7 @@ export default function App() {
 
   const resetTimer = useCallback(() => {
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setScreen('sleep'), SLEEP_TIMEOUT);
+    timer.current = setTimeout(() => setScreen('sleep'), SLEEP_TIMEOUT_MS);
   }, []);
 
   useEffect(() => {
@@ -74,8 +74,8 @@ export default function App() {
         generalText={activeTab ? null : GENERAL_TEXT[language]}
         intro={activeTab ? content.intro : GENERAL_TEXT[language]}
         body={activeTab ? content.body : ''}
-        photo={activeTab ? tabPhoto(activeTab, language) : null}
-        photoSource={activeTab ? PHOTO_SOURCES[activeTab] : null}
+        photo={activeTab ? tabPhoto(activeTab, language) : OVERVIEW_PHOTO}
+        photoSource={activeTab ? PHOTO_SOURCES[activeTab] : OVERVIEW_SOURCE[language]}
       />
       <BottomPart
         tabs={TABS}

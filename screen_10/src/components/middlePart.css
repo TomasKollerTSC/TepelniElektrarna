@@ -141,11 +141,18 @@
   position: relative;
 }
 
-.media-img {
+.media-frame {
+  position: relative;
   width: 50vw;
   height: 100%;
-  object-fit: cover;
   border-radius: 4px;
+  overflow: hidden;
+}
+
+.media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
@@ -158,10 +165,13 @@
 
 .photo-source {
   position: absolute;
-  bottom: 8px;
-  left: 8px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #000;
+  color: #fff;
+  padding: 6px 14px;
   font-size: clamp(0.75rem, 0.9vw, 1rem);
   font-weight: 400;
-  color: #666;
   letter-spacing: 0.03em;
 }

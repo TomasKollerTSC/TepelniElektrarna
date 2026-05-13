@@ -26,6 +26,7 @@ export default function App() {
   const [language, setLanguage] = useState('cz');
   const [step, setStep] = useState(0);
   const [showTurbineMsg, setShowTurbineMsg] = useState(false);
+  const [videoPhase, setVideoPhase] = useState('intro'); // intro | idle | open
 
   const ws = useRef(null);
   const wsTimer = useRef(null);
@@ -33,6 +34,9 @@ export default function App() {
   const lastActivity = useRef(Date.now());
   const screenRef = useRef(screen);
   const stepRef = useRef(step);
+  const videoARef = useRef(null);
+  const videoBRef = useRef(null);
+  const activeSlot = useRef('A');
 
   useEffect(() => { screenRef.current = screen; }, [screen]);
   useEffect(() => { stepRef.current = step; }, [step]);
@@ -63,6 +67,7 @@ export default function App() {
   // Notify other screens when valve is fully open (after 3s turbine message delay)
   useEffect(() => {
     if (step === MAX_STEPS) {
+      setVideoPhase('open');
       const id = setTimeout(() => {
         ws.current?.send(JSON.stringify({
           type: 'trigger', name: 'GAME_STATE', id: 1,
@@ -81,6 +86,7 @@ export default function App() {
         setScreen('sleep');
         setStep(0);
         setShowTurbineMsg(false);
+        setVideoPhase('intro');
         prevAngle.current = null;
         ws.current?.send(JSON.stringify({
           type: 'trigger', name: 'GAME_STATE', id: 1,
@@ -105,6 +111,7 @@ export default function App() {
       setScreen('active');
       setStep(0);
       setShowTurbineMsg(false);
+      setVideoPhase('intro');
       prevAngle.current = null;
       lastActivity.current = Date.now();
     }
@@ -114,6 +121,7 @@ export default function App() {
       setScreen('sleep');
       setStep(0);
       setShowTurbineMsg(false);
+      setVideoPhase('intro');
       prevAngle.current = null;
     }
 
@@ -180,6 +188,55 @@ export default function App() {
   const pct = (step / MAX_STEPS) * 100;
   const done = step >= MAX_STEPS;
 
+  const VIDEO_SRC = {
+    intro: '/animace/OLED4_2.mp4',
+    idle:  '/animace/OLED4_3.mp4',
+    open:  '/animace/OLED4_4.mp4',
+  };
+
+  // Dual-video swap: load next phase on the inactive slot, switch z-index on canplay
+  useEffect(() => {
+    if (screen !== 'active') {
+      [videoARef, videoBRef].forEach(r => {
+        if (r.current) {
+          r.current.pause();
+          r.current.removeAttribute('src');
+          r.current.load();
+          r.current.style.zIndex = '0';
+        }
+      });
+      activeSlot.current = 'A';
+      return;
+    }
+
+    const a = videoARef.current;
+    const b = videoBRef.current;
+    if (!a || !b) return;
+
+    const isFirstLoad = !a.src && !b.src;
+    const isA = activeSlot.current === 'A';
+    const next = isFirstLoad ? a : (isA ? b : a);
+    const curr = isFirstLoad ? null : (isA ? a : b);
+
+    next.loop = videoPhase === 'idle';
+    next.onended = videoPhase === 'intro' ? () => setVideoPhase('idle') : null;
+    next.oncanplay = () => {
+      next.oncanplay = null;
+      next.play().catch(() => {});
+      next.style.zIndex = '1';
+      if (curr) {
+        // Hold old frame until next has rendered, then drop it
+        requestAnimationFrame(() => {
+          curr.style.zIndex = '0';
+          curr.pause();
+        });
+      }
+      activeSlot.current = isFirstLoad ? 'A' : (isA ? 'B' : 'A');
+    };
+    next.src = VIDEO_SRC[videoPhase];
+    next.load();
+  }, [videoPhase, screen]);
+
   // ── SLEEP: blank black screen ──
   if (screen === 'sleep') {
     return <div className="screen sleep" />;
@@ -188,6 +245,8 @@ export default function App() {
   // ── ACTIVE ──
   return (
     <div className="screen active">
+      <video ref={videoARef} className="bg-video" preload="auto" muted playsInline />
+      <video ref={videoBRef} className="bg-video" preload="auto" muted playsInline />
       <div className="content-area">
         <div className="content-text">
           {!showTurbineMsg && (
@@ -199,7 +258,13 @@ export default function App() {
           {showTurbineMsg && (
             <>
               <p className="turbine-msg">{lang.turbineMsg}</p>
-              <p className='turbine-sub-msg'>{lang.turbineSubMsg}</p>
+              <p className='turbine-sub-msg'>
+                {lang.turbineSubMsg.split('{BLESK}').flatMap((part, i, arr) =>
+                  i < arr.length - 1
+                    ? [part, <img key={i} src="/g/blesk.png" className="inline-icon" alt="" />]
+                    : [part]
+                )}
+              </p>
             </>
           )}
         </div>

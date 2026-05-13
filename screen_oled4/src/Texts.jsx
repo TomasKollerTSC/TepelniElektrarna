@@ -5,7 +5,7 @@ export const T = {
     stepMsg: 'Tlak páry je příliš nízký.',
     doneMsg: 'Ventil je plně otevřen, pára proudí do turbíny.',
     turbineMsg: 'Pára pohání lopatky rotoru turbíny. Ten je připojen ke generátoru, který elektromagnetickou indukcí vyrábí elektřinu.',
-    turbineSubMsg: 'Pro odeslání vyrobené elektřiny stiskněte tlačítko „O".'
+    turbineSubMsg: 'Pro odeslání vyrobené elektřiny stiskněte tlačítko {BLESK}.'
   },
 
   en: {
@@ -14,7 +14,7 @@ export const T = {
     stepMsg: 'The steam pressure is too low.',
     doneMsg: 'The valve is fully open, steam flows into the turbine.',
     turbineMsg: 'The steam drives the turbine rotor blades. The turbine rotor is connected to the generator rotor that produces electricity by electromagnetic induction.',
-    turbineSubMsg: 'To provide the electricity produced, press the "O" button.',
+    turbineSubMsg: 'To provide the electricity produced, press the {BLESK} button.',
   },
   
   de: {
@@ -23,6 +23,6 @@ export const T = {
     stepMsg: 'Der Dampfdruck ist zu niedrig.',
     doneMsg: 'Das Ventil ist vollständig geöffnet, der Dampf strömt in die Turbine.',
     turbineMsg: 'Der Dampf treibt die Schaufeln des Turbinenrotors an. Dieser ist mit dem Rotor des Generators verbunden, der durch elektromagnetische Induktion Strom erzeugt. ',
-    turbineSubMsg: 'Um die erzeugte Elektrizität bereitzustellen, drücken Sie die "O"-Taste.',
+    turbineSubMsg: 'Um die erzeugte Elektrizität bereitzustellen, drücken Sie die {BLESK}-Taste.',
   },
 };

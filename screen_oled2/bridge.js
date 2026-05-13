@@ -39,9 +39,12 @@ wss.on('connection', (ws) => {
   ws.on('message', (data) => {
     try {
       const msg = JSON.parse(data);
-      if (msg.type === 'trigger' && msg.name === 'GAME_STATE' && msg.data?.state === 'COMBUSTION_COMPLETE') {
-        console.log('Combustion complete — notifying master');
-        sendToMaster({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'COMBUSTION_COMPLETE' } });
+      // Forward every GAME_STATE transition upstream (COMBUSTION_COMPLETE,
+      // VALVE_COMPLETE, RESET, …). Other events (LEVER/WHEEL/BUTTON) are
+      // local hardware-input echoes and stay on this Pi.
+      if (msg.type === 'trigger' && msg.name === 'GAME_STATE') {
+        console.log(`[Bridge] React → master: GAME_STATE=${msg.data?.state}`);
+        sendToMaster(msg);
       }
     } catch {}
   });

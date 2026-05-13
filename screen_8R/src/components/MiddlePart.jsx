@@ -93,10 +93,10 @@ const MiddlePart = ({ language, switchLang, headline, generalText, intro, body, 
         </div>
         <div className="media-area">
           {photo ? (
-            <>
+            <div className="media-frame">
               <img src={photo} alt="" className="media-img" />
               {photoSource && <span className="photo-source">{photoSource}</span>}
-            </>
+            </div>
           ) : (
             <div className="media-placeholder" />
           )}

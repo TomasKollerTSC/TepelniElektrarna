@@ -112,32 +112,15 @@ export default function App() {
 
   return (
     <div className="screen active">
-      <div className="text-panel">
-        <p className="panel-body">{lang.body}</p>
-      </div>
       <div className="diagram-area">
-        <div className="diagram-container">
-          <img src="/g/chladici_vez_koty_oprava-01.png" alt="Cooling circuit" className="diagram-img" />
-
-          {/* CHLAD_1 animation overlays — placeholder arrows & pump */}
-          {/* Red flow: hot water/steam path (top, from chamber 7 to 6) */}
-          <div className="flow-arrow flow-red flow-red-1" />
-          <div className="flow-arrow flow-red flow-red-2" />
-          <div className="flow-arrow flow-red flow-red-3" />
-
-          {/* Blue flow: cooled water path (bottom, from chamber 6 to 2) */}
-          <div className="flow-arrow flow-blue flow-blue-1" />
-          <div className="flow-arrow flow-blue flow-blue-2" />
-          <div className="flow-arrow flow-blue flow-blue-3" />
-
-          {/* Rotating pump symbol */}
-          <div className="pump-symbol">&#x21BB;</div>
-
-          {/* Rising steam from cooling tower */}
-          <div className="steam steam-1" />
-          <div className="steam steam-2" />
-          <div className="steam steam-3" />
-        </div>
+        <video
+          className="diagram-video"
+          src="/v/chladici_vez.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
       </div>
     </div>
   );

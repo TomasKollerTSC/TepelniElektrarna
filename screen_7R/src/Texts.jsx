@@ -1,4 +1,4 @@
-export const TABS = ['what', 'made', 'purpose', 'how'];
+export const TABS = ['what', 'how', 'made', 'purpose'];
 
 export const LABELS = {
   cz: { what: 'Co je turbína?', made: 'Z čeho se skládá?', purpose: 'K čemu slouží?', how: 'Jak funguje?' },
@@ -16,10 +16,24 @@ export const TAB_PHOTOS = {
 };
 
 export const PHOTO_SOURCES = {
-  what:    'Foto: ČEZ (Turbína, elektrárny Ledvice)',
-  made:    'Foto: ČEZ (rotor turbíny)',
-  purpose: 'Foto: ČEZ (Turbína, elektrárny Ledvice)',
-  how:     'Foto: Doosan (části turbíny)',
+  cz: {
+    what:    'Foto: ČEZ (Turbína, elektrárny Ledvice)',
+    how:     'Foto: Doosan (části turbíny)',
+    made:    'Foto: ČEZ (rotor turbíny)',
+    purpose: 'Foto: ČEZ (Turbína, elektrárny Ledvice)',
+  },
+  en: {
+    what:    'Photo: ČEZ (turbine, Ledvice power plants)',
+    how:     'Photo: Doosan (turbine components)',
+    made:    'Photo: ČEZ (turbine rotor)',
+    purpose: 'Photo: ČEZ (turbine, Ledvice power plants)',
+  },
+  de: {
+    what:    'Foto: ČEZ (Turbine, Kraftwerk Ledvice)',
+    how:     'Foto: Doosan (Teile der Turbine)',
+    made:    'Foto: ČEZ (Turbinenrotor)',
+    purpose: 'Foto: ČEZ (Turbine, Kraftwerk Ledvice)',
+  },
 };
 
 export const CONTENT = {

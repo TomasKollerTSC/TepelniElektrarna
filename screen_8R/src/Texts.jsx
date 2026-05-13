@@ -14,6 +14,14 @@ export const GENERAL_TEXT = {
   de: 'Thermische Kraftwerke gehören zu den grundlegenden Säulen der Stromerzeugung. Sie nutzen Wärme zur Erzeugung von Dampf, der eine Turbine antreibt, welche wiederum den Generator in Bewegung setzt. Gemeinsam mit Kernkraftwerken, Wasserkraftwerken und erneuerbaren Energiequellen bilden sie den Energiemix – also die Kombination verschiedener Quellen, aus denen elektrische Energie gewonnen wird. Thermische Kraftwerke sind besonders wichtig, weil sich ihre Leistung gut an den aktuellen Strombedarf anpassen lässt. Dadurch tragen sie dazu bei, eine stabile Stromversorgung auch dann zu gewährleisten, wenn andere Energiequellen weniger produzieren.',
 };
 
+export const OVERVIEW_PHOTO = '/f/8R/Elektrárna Prunéřov_dron_D.jpg';
+
+export const OVERVIEW_SOURCE = {
+  cz: 'Foto: ČEZ (elektrárna Prunéřov)',
+  en: 'Photo: ČEZ (Prunéřov power plant)',
+  de: 'Foto: ČEZ (Kraftwerk Prunéřov)',
+};
+
 export const TAB_PHOTOS = {
   who:    '/f/8R/8R_01_Kdo vyrábí elektřinu.jpg',
   mix:    '/f/8R/8R_02_Co je energetický mix.jpg',

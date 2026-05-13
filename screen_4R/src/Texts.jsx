@@ -10,9 +10,10 @@ export const TITLES = { cz: 'Tepelný výměník', en: 'Heat Exchanger', de: 'W�
 
 export const TAB_PHOTOS = {
   what:    '/f/4R/kondenzator-CZ.png',
+  how:     '/f/4R/iStock-trubkový svazek výměníku .jpg',
   made:    '/f/4R/iStock-model trubkového výměníku.jpg',
   purpose: '/f/4R/iStock-vnitřek výměníku.jpg',
-  how:     '/f/4R/iStock-trubkový svazek výměníku .jpg',
+  
 };
 
 export const tabPhoto = (tab, lang) => {
@@ -21,10 +22,24 @@ export const tabPhoto = (tab, lang) => {
 };
 
 export const PHOTO_SOURCES = {
-  what:    'Lorem ipsum dolor sit amet',
-  made:    'Lorem ipsum dolor sit amet',
-  purpose: 'Lorem ipsum dolor sit amet',
-  how:     'Lorem ipsum dolor sit amet',
+  cz: {
+    what:    'Grafika: www.svetenergie.cz (princip výměníku)',
+    made:    'Ilustrativní obrázek: model trubkového výměníku',
+    purpose: 'Ilustrativní obrázek: vnitřek výměníku',
+    how:     'Ilustrativní obrázek: trubkový svazek výměníku',
+  },
+  en: {
+    what:    'Graphics: www.svetenergie.cz (how a heat exchanger works)',
+    made:    'Illustrative image: model of a tube heat exchanger',
+    purpose: 'Illustrative image: inside the heat exchanger',
+    how:     'Illustrative image: heat exchanger tube bundle',
+  },
+  de: {
+    what:    'Grafik: www.svetenergie.cz (Prinzip des Wärmetauschers)',
+    made:    'Illustration: Modell eines Rohrwärmetauschers',
+    purpose: 'Illustration: Inneres des Wärmetauschers',
+    how:     'Illustration: Rohrbündel des Wärmetauschers',
+  },
 };
 
 export const CONTENT = {
