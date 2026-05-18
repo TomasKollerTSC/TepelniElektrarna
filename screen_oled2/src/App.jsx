@@ -532,16 +532,18 @@ export default function App() {
           )}
         </div>
 
-        <div className="warn-area">
-          {overloadActive && (
-            <div className="warn-msg overload">{lang.overload}</div>
-          )}
-          {!overloadActive && warnActive.map((active, i) => active && (
-            <div key={i} className="warn-msg">
-              {zones[i] === 'blue' ? lang.warnBlue[i] : lang.warnRed[i]}
-            </div>
-          ))}
-        </div>
+        {!stoppedMsg && (
+          <div className="warn-area">
+            {overloadActive && (
+              <div className="warn-msg overload">{lang.overload}</div>
+            )}
+            {!overloadActive && warnActive.map((active, i) => active && (
+              <div key={i} className="warn-msg">
+                {zones[i] === 'blue' ? lang.warnBlue[i] : lang.warnRed[i]}
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="gauges-row">
           {gauges.map((val, i) => (

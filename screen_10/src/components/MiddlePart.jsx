@@ -1,7 +1,7 @@
 import { useRef, useLayoutEffect } from 'react';
 import './middlePart.css';
 
-const LANGUAGES = ['cz', 'de', 'en'];
+const LANGUAGES = ['cz', 'en', 'de'];
 const FLAG_ALTS = { cz: 'Čeština', de: 'Deutsch', en: 'English' };
 
 function parseBody(text) {
@@ -15,7 +15,7 @@ function parseBody(text) {
   });
 }
 
-const MiddlePart = ({ language, switchLang, headline, generalText, intro, body, photo, photoSource }) => {
+const MiddlePart = ({ language, switchLang, headline, generalText, intro, body, photo, photoSource, goHome }) => {
   const scrollRef = useRef(null);
   const innerRef = useRef(null);
 
@@ -57,20 +57,27 @@ const MiddlePart = ({ language, switchLang, headline, generalText, intro, body, 
 
   return (
     <section className="middle">
-      <div className="lang-flags">
-        {LANGUAGES.map(l => (
-          <button
-            key={l}
-            className={`flag-btn${language === l ? ' flag-active' : ''}`}
-            onClick={switchLang(l)}
-          >
-            <img
-              src={`./g/${l}-flag.png`}
-              alt={FLAG_ALTS[l]}
-              className="flag-img"
-            />
+      <div className="top-bar">
+        <div className="lang-flags">
+          {LANGUAGES.map(l => (
+            <button
+              key={l}
+              className={`flag-btn${language === l ? ' flag-active' : ''}`}
+              onClick={switchLang(l)}
+            >
+              <img
+                src={`./g/${l}-flag.png`}
+                alt={FLAG_ALTS[l]}
+                className="flag-img"
+              />
+            </button>
+          ))}
+        </div>
+        {goHome && (
+          <button className="home-btn" onClick={goHome}>
+            <img src="./g/homeimage.png" alt="Home" className="home-img" />
           </button>
-        ))}
+        )}
       </div>
       <div className="content-row">
         <div className="text-area">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TABS, LABELS, TAB_PHOTOS, PHOTO_SOURCES, CONTENT } from './Texts';
+import { TABS, LABELS, TITLES, GENERAL_TEXT, TAB_PHOTOS, PHOTO_SOURCES, CONTENT } from './Texts';
 import { SLEEP_TIMEOUT_MS } from './config';
 import UpperPart from './components/UpperPart';
 import MiddlePart from './components/MiddlePart';
@@ -11,7 +11,7 @@ Object.values(TAB_PHOTOS).forEach(src => { new Image().src = src; });
 export default function App() {
   const [screen, setScreen] = useState('sleep');
   const [language, setLanguage] = useState('cz');
-  const [activeTab, setActiveTab] = useState('what');
+  const [activeTab, setActiveTab] = useState(null);
   const timer = useRef(null);
 
   const resetTimer = useCallback(() => {
@@ -26,7 +26,7 @@ export default function App() {
 
   const wake = useCallback(() => {
     setScreen('active');
-    setActiveTab(TABS[0]);
+    setActiveTab(null);
     resetTimer();
   }, [resetTimer]);
 
@@ -62,17 +62,21 @@ export default function App() {
     );
   }
 
-  const content = CONTENT[language][activeTab];
+  const content = activeTab ? CONTENT[language][activeTab] : null;
 
   return (
     <div className="screen active" onClick={resetTimer}>
-      <UpperPart photo={TAB_PHOTOS[activeTab]} source={PHOTO_SOURCES[language][activeTab]} />
+      <UpperPart
+        photo={activeTab ? TAB_PHOTOS[activeTab] : null}
+        source={activeTab ? PHOTO_SOURCES[language][activeTab] : null}
+      />
       <MiddlePart
         language={language}
         switchLang={switchLang}
-        headline={LABELS[language][activeTab]}
-        intro={content.intro}
-        body={content.body}
+        headline={activeTab ? LABELS[language][activeTab] : TITLES[language]}
+        intro={activeTab ? content.intro : GENERAL_TEXT[language]}
+        body={activeTab ? content.body : ''}
+        goHome={activeTab ? switchTab(null) : null}
       />
       <BottomPart
         tabs={TABS}

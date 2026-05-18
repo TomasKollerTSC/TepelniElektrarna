@@ -121,6 +121,7 @@ export default function App() {
           muted
           playsInline
         />
+        <p className="diagram-text">{lang.body}</p>
       </div>
     </div>
   );

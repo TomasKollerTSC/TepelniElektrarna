@@ -1,4 +1,4 @@
-export const TABS = ['what', 'how', 'made', 'purpose'];
+export const TABS = ['what',  'made', 'purpose', 'how'];
 
 export const LABELS = {
   cz: { what: 'Co je turbína?', made: 'Z čeho se skládá?', purpose: 'K čemu slouží?', how: 'Jak funguje?' },
@@ -6,13 +6,27 @@ export const LABELS = {
   de: { what: 'Was ist eine Turbine?', made: 'Woraus besteht sie?', purpose: 'Wozu dient sie?', how: 'Wie funktioniert sie?' },
 };
 
-export const TITLES = { cz: 'Turbína', en: 'Turbine', de: 'Turbine' };
+export const TITLES = { cz: 'Turbína', en: 'The turbine', de: 'Die Turbine' };
+
+export const GENERAL_TEXT = {
+  cz: 'Turbína je stroj, ve kterém se pomocí páry roztáčí jeho rotor. Po cestě elektrárnou nese pára velké množství energie, ale teprve v turbíně ji skutečně odevzdá. Proud páry postupně roztáčí lopatky rotoru a tím uvádí celý stroj do pohybu. Právě tady se energie páry poprvé mění na pohyb, který může pohánět další zařízení.',
+  en: 'The turbine is a machine in which steam is used to turn its rotor. The steam carries a large amount of energy on its way through the power plant, but only in the turbine does it actually transfer its energy. The steam flow gradually rotates the rotor blades and thus sets the whole machine in motion. This is where the energy of the steam is first converted into motion that can power other devices.',
+  de: 'Die Turbine ist eine Maschine, in der der Rotor durch Dampf in Drehung versetzt wird. Auf ihrem Weg durch das Kraftwerk trägt der Dampf eine große Energiemenge in sich – doch erst in der Turbine gibt er sie tatsächlich ab. Der Dampfstrom setzt nach und nach die Schaufeln des Rotors in Bewegung und bringt so die gesamte Maschine zum Rotieren. Genau hier wird die Energie des Dampfes erstmals in mechanische Bewegung umgewandelt, die anschließend weitere Anlagen antreiben kann.',
+};
 
 export const TAB_PHOTOS = {
   what:    '/f/7R/IMG_0016.jpg',
   made:    '/f/7R/FOTO_27_rotor turbíny.jpg',
   purpose: '/f/7R/7R_04_K čemu slouží.jpg',
   how:     '/f/7R/IMG_0011.jpg',
+};
+
+export const OVERVIEW_PHOTO = '/f/7R/Turbína rotory_Elektrárna Ledvice.jpg';
+
+export const OVERVIEW_SOURCE = {
+  cz: 'Foto: ČEZ (rotory turbíny, elektrárna Ledvice)',
+  en: 'Photo: ČEZ (turbine rotors, Ledvice power plant)',
+  de: 'Foto: ČEZ (Turbinenrotoren, Kraftwerk Ledvice)',
 };
 
 export const PHOTO_SOURCES = {

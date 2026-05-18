@@ -1,7 +1,7 @@
 export const TABS = ['what', 'made', 'purpose', 'how'];
 
 export const LABELS = {
-  cz: { what: 'Co je kotel?', made: 'Z čeho je?', purpose: 'K čemu slouží?', how: 'Jak funguje?' },
+  cz: { what: 'Co je kotel?', made: 'Z čeho se skládá?', purpose: 'K čemu slouží?', how: 'Jak funguje?' },
   en: { what: 'What is a boiler?', made: 'What is it made of?', purpose: 'What is it used for?', how: 'How does it work?' },
   de: { what: 'Was ist ein Kessel?', made: 'Woraus besteht er?', purpose: 'Wozu dient er?', how: 'Wie funktioniert er?' },
 };

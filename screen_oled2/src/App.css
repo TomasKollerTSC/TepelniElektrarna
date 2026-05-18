@@ -215,15 +215,23 @@ body {
 .stopped-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(180,0,0,0.88);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2rem;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.stopped-overlay p {
+  background: rgba(180, 0, 0, 0.88);
+  color: #fff;
   font-size: clamp(1.2rem, 3vw, 2rem);
   font-weight: 700;
   text-align: center;
-  padding: 2rem;
-  z-index: 10;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  max-width: 80%;
 }
 
 .wheel-row-game {

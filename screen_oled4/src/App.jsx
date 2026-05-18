@@ -43,23 +43,26 @@ export default function App() {
 
   // ── AUDIO ──
   const prevStep = useRef(0);
+  const audioStartedRef = useRef(false);
   useEffect(() => {
     if (screen === 'sleep') {
       sm.stopAll({ fadeMs: 200 });
       prevStep.current = 0;
+      audioStartedRef.current = false;
       return;
     }
-    if (step >= 1 && prevStep.current === 0) {
+    if (!audioStartedRef.current) {
       sm.unlock();
       sm.play('AUDIO_4');
+      audioStartedRef.current = true;
     }
     if (step >= MAX_STEPS && prevStep.current < MAX_STEPS) {
       sm.stop('AUDIO_4', { fadeMs: 300 });
+      sm.play('AUDIO_5');
+      sm.play('AUDIO_3');
       const t6 = setTimeout(() => sm.play('AUDIO_6'), 1000);
-      const t5 = setTimeout(() => sm.play('AUDIO_5'), 3000);
-      const t3 = setTimeout(() => sm.play('AUDIO_3'), 3000);
       prevStep.current = step;
-      return () => { clearTimeout(t6); clearTimeout(t5); clearTimeout(t3); };
+      return () => { clearTimeout(t6); };
     }
     prevStep.current = step;
   }, [step, screen]);
@@ -189,9 +192,10 @@ export default function App() {
   const done = step >= MAX_STEPS;
 
   const VIDEO_SRC = {
-    intro: '/animace/OLED4_2.mp4',
-    idle:  '/animace/OLED4_3.mp4',
-    open:  '/animace/OLED4_4.mp4',
+    intro:   '/animace/OLED4_2.mp4',
+    idle:    '/animace/OLED4_3.mp4',
+    open:    '/animace/OLED4_4.mp4',
+    flowing: '/animace/OLED4_5.mp4',
   };
 
   // Dual-video swap: load next phase on the inactive slot, switch z-index on canplay
@@ -218,8 +222,11 @@ export default function App() {
     const next = isFirstLoad ? a : (isA ? b : a);
     const curr = isFirstLoad ? null : (isA ? a : b);
 
-    next.loop = videoPhase === 'idle';
-    next.onended = videoPhase === 'intro' ? () => setVideoPhase('idle') : null;
+    next.loop = videoPhase === 'idle' || videoPhase === 'flowing';
+    next.onended =
+      videoPhase === 'intro' ? () => setVideoPhase('idle') :
+      videoPhase === 'open'  ? () => setVideoPhase('flowing') :
+      null;
     next.oncanplay = () => {
       next.oncanplay = null;
       next.play().catch(() => {});
@@ -249,7 +256,7 @@ export default function App() {
       <video ref={videoBRef} className="bg-video" preload="auto" muted playsInline />
       <div className="content-area">
         <div className="content-text">
-          {!showTurbineMsg && (
+          {step === 0 && !showTurbineMsg && (
             <>
               <h1 className="main-title">{lang.homeTitle}</h1>
               <p className="main-body">{lang.homeBody}</p>
@@ -269,7 +276,7 @@ export default function App() {
           )}
         </div>
 
-        {!showTurbineMsg && (
+        {step === 0 && !showTurbineMsg && (
           <div className="wheel-center">
             <img src="/g/kolo se šipkami.png" alt="" className="wheel-img" />
           </div>

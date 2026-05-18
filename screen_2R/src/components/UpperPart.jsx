@@ -4,9 +4,9 @@ const UpperPart = ({ photo, source }) => {
   return (
     <section className="upper">
       <div className="photo-frame">
-        <img src={photo} alt="" className="photo-main" />
+        {photo && <img src={photo} alt="" className="photo-main" />}
       </div>
-      <span className="photo-source">{source}</span>
+      {photo && source && <span className="photo-source">{source}</span>}
     </section>
   );
 };

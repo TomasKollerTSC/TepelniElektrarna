@@ -6,37 +6,43 @@ export const LABELS = {
   de: { what: 'Was ist ein Wärmetauscher?', made: 'Woraus besteht er?', purpose: 'Wozu dient er?', how: 'Wie funktioniert er?' },
 };
 
-export const TITLES = { cz: 'Tepelný výměník', en: 'Heat Exchanger', de: 'Wärmetauscher' };
+export const TITLES = { cz: 'Tepelný výměník', en: 'Heat exchanger', de: 'Wärmetauscher' };
+
+export const GENERAL_TEXT = {
+  cz: 'V tepelné elektrárně není důležité jen teplo vyrobit, ale hlavně ho chytře využít. Tepelný výměník se stará o to, aby teplo neodcházelo bez užitku, ale využívalo se znovu a znovu. Když pára odevzdá část své energie v turbíně, výměník ji ochladí a promění zpět na vodu, kterou lze znovu ohřát. Proto elektrárna funguje jako uzavřený oběh vody a páry.',
+  en: 'In a thermal power plant, it is not only important to produce heat but, above all, to use it in a smart way. The heat exchanger ensures that the heat is not dissipated without use but is used again and again. When steam releases some of its energy in the turbine, the heat exchanger cools it and converts it back into water that can be reheated. Therefore, the plant operates as a closed water and steam circuit.',
+  de: 'In einem thermischen Kraftwerk ist es nicht nur wichtig, Wärme zu erzeugen, sondern sie vor allem effizient zu nutzen. Der Wärmetauscher sorgt dafür, dass Wärme nicht ungenutzt verloren geht, sondern immer wieder in den Prozess zurückgeführt wird. Wenn der Dampf in der Turbine einen Teil seiner Energie abgegeben hat, wird er im Wärmetauscher abgekühlt und wieder in Wasser umgewandelt. Dieses Wasser kann anschließend erneut erhitzt werden. Deshalb arbeitet das Kraftwerk als geschlossener Kreislauf aus Wasser und Dampf.',
+};
 
 export const TAB_PHOTOS = {
-  what:    '/f/4R/kondenzator-CZ.png',
+  what:    '/f/4R/iStock-model trubkového výměníku.jpg',
   how:     '/f/4R/iStock-trubkový svazek výměníku .jpg',
-  made:    '/f/4R/iStock-model trubkového výměníku.jpg',
+  made:    '/f/4R/kondenzator-CZ.png',
   purpose: '/f/4R/iStock-vnitřek výměníku.jpg',
   
 };
 
 export const tabPhoto = (tab, lang) => {
-  if (tab === 'what') return `/f/4R/kondenzator-${lang.toUpperCase()}.png`;
+  if (tab === 'made') return `/f/4R/kondenzator-${lang.toUpperCase()}.png`;
   return TAB_PHOTOS[tab];
 };
 
 export const PHOTO_SOURCES = {
   cz: {
-    what:    'Grafika: www.svetenergie.cz (princip výměníku)',
-    made:    'Ilustrativní obrázek: model trubkového výměníku',
+    what:    'Ilustrativní obrázek: model trubkového výměníku',
+    made:    'Grafika: www.svetenergie.cz (princip výměníku)',
     purpose: 'Ilustrativní obrázek: vnitřek výměníku',
     how:     'Ilustrativní obrázek: trubkový svazek výměníku',
   },
   en: {
-    what:    'Graphics: www.svetenergie.cz (how a heat exchanger works)',
-    made:    'Illustrative image: model of a tube heat exchanger',
+    what:    'Illustrative image: model of a tube heat exchanger',
+    made:    'Graphics: www.svetenergie.cz (how a heat exchanger works)',
     purpose: 'Illustrative image: inside the heat exchanger',
     how:     'Illustrative image: heat exchanger tube bundle',
   },
   de: {
-    what:    'Grafik: www.svetenergie.cz (Prinzip des Wärmetauschers)',
-    made:    'Illustration: Modell eines Rohrwärmetauschers',
+    what:    'Illustration: Modell eines Rohrwärmetauschers',
+    made:    'Grafik: www.svetenergie.cz (Prinzip des Wärmetauschers)',
     purpose: 'Illustration: Inneres des Wärmetauschers',
     how:     'Illustration: Rohrbündel des Wärmetauschers',
   },

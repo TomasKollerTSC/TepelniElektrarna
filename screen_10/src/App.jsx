@@ -76,6 +76,7 @@ export default function App() {
         body={activeTab ? content.body : ''}
         photo={activeTab ? tabPhoto(activeTab, language) : OVERVIEW_PHOTO}
         photoSource={activeTab ? PHOTO_SOURCES[activeTab] : OVERVIEW_SOURCE[language]}
+        goHome={activeTab ? switchTab(null) : null}
       />
       <BottomPart
         tabs={TABS}
