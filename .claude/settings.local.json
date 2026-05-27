@@ -139,7 +139,12 @@
       "Bash(cp OLED4_2*.mp4 screen_oled4/public/animace/OLED4_2.mp4)",
       "Bash(cp OLED2_3*.mp4 screen_oled4/public/animace/OLED4_3.mp4)",
       "Bash(cp OLED4_4*.mp4 screen_oled4/public/animace/OLED4_4.mp4)",
-      "Bash(curl -s -o /dev/null -w \"page:%{http_code} v2:%{http_code} v3:%{http_code} v4:%{http_code}\\\\n\" http://localhost:3004 http://localhost:3004/animace/OLED4_2.mp4 http://localhost:3004/animace/OLED4_3.mp4 http://localhost:3004/animace/OLED4_4.mp4)"
+      "Bash(curl -s -o /dev/null -w \"page:%{http_code} v2:%{http_code} v3:%{http_code} v4:%{http_code}\\\\n\" http://localhost:3004 http://localhost:3004/animace/OLED4_2.mp4 http://localhost:3004/animace/OLED4_3.mp4 http://localhost:3004/animace/OLED4_4.mp4)",
+      "Bash(curl -s --max-time 1 -o /dev/null -w \"8765:%{http_code} \" http://localhost:8765/status)",
+      "Bash(curl -s --max-time 1 -o /dev/null -w '__TRACKED_VAR__:%{http_code} ' http://localhost:__TRACKED_VAR__)",
+      "Bash(echo \"\")",
+      "Bash(sleep 6)",
+      "PowerShell($ports = 3002,3004,3006,3021,3030,3041,3071,3081,3100,8765; $pids = @\\(\\); foreach \\($p in $ports\\) { try { \\(Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction Stop\\).OwningProcess | ForEach-Object { $pids += $_ } } catch {} }; $unique = $pids | Sort-Object -Unique; if \\($unique\\) { Stop-Process -Id $unique -Force; Start-Sleep -Seconds 1 } ; foreach \\($p in $ports\\) { try { $c = Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction Stop; Write-Output \"Port $p -> STILL OPEN\" } catch { Write-Output \"Port $p -> closed\" } })"
     ],
     "additionalDirectories": [
       "C:\\Users\\tomas.koller\\Projekty\\Energetika\\JadernaElektrarna"

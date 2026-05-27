@@ -8,7 +8,7 @@ const INACTIVITY_MS = 20000;
 
 const sm = createSoundManager({
   AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 0.8 },
-  AUDIO_4: { src: '/a/AUDIO_4.mp3', loop: true,  channel: 'right', volume: 0.5 },
+  AUDIO_4: { src: '/a/AUDIO_4.mp3', loop: true,  channel: 'right', volume: 1.0 },
   AUDIO_5: { src: '/a/AUDIO_5.mp3', loop: true,  channel: 'right', volume: 1.0 },
   AUDIO_6: { src: '/a/AUDIO_6.mp3', loop: true,  channel: 'right', volume: 0.5 },
 });
@@ -57,7 +57,7 @@ export default function App() {
       audioStartedRef.current = true;
     }
     if (step >= MAX_STEPS && prevStep.current < MAX_STEPS) {
-      sm.stop('AUDIO_4', { fadeMs: 300 });
+      sm.stop('AUDIO_4');
       sm.play('AUDIO_5');
       sm.play('AUDIO_3');
       const t6 = setTimeout(() => sm.play('AUDIO_6'), 1000);
