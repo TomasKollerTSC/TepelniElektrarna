@@ -81,15 +81,6 @@
   line-height: 1.15;
 }
 
-.general-text {
-  font-size: clamp(0.85rem, 1.2vw, 1.1rem);
-  font-weight: 400;
-  color: #aaa;
-  line-height: 1.5;
-  margin-bottom: 1.2vh;
-  white-space: pre-line;
-}
-
 /* ── Content row: text + media side by side ── */
 .content-row {
   flex: 1 1 0;

@@ -15,7 +15,7 @@ function parseBody(text) {
   });
 }
 
-const MiddlePart = ({ language, switchLang, headline, generalText, intro, body, photo, photoSource, goHome }) => {
+const MiddlePart = ({ language, switchLang, headline, intro, body, photo, photoSource, goHome }) => {
   const scrollRef = useRef(null);
   const innerRef = useRef(null);
 
@@ -82,7 +82,6 @@ const MiddlePart = ({ language, switchLang, headline, generalText, intro, body, 
       <div className="content-row">
         <div className="text-area">
           <h1 className="headline">{headline}</h1>
-          {generalText && <p className="general-text">{generalText}</p>}
           <div className="helper-text" ref={scrollRef}>
             <div className="helper-text-inner" ref={innerRef}>
               <p className="main-text">{intro}</p>

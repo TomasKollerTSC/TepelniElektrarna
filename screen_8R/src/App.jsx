@@ -70,7 +70,6 @@ export default function App() {
         language={language}
         switchLang={switchLang}
         headline={activeTab ? LABELS[language][activeTab] : TITLES[language]}
-        generalText={activeTab ? null : GENERAL_TEXT[language]}
         intro={activeTab ? content.intro : GENERAL_TEXT[language]}
         body={activeTab ? content.body : ''}
         photo={activeTab ? TAB_PHOTOS[activeTab] : OVERVIEW_PHOTO}
