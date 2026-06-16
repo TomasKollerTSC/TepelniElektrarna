@@ -1,0 +1,66 @@
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Regular/DINPro Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Light/DINPro Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Medium/DINPro Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Bold/DINPro Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro';
+  src: url('/font/DINPro/DINPro Black/DINPro Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: 'DINPro', 'Arial Narrow', 'Arial', sans-serif;
+  overflow: hidden;
+}
+
+.screen {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── SLEEP ── */
+.sleep {
+  background: #000;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.touch-hint {
+  font-size: 8rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+/* ── ACTIVE ── */
+.active { background: #000; }
