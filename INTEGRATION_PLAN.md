@@ -2,7 +2,7 @@
 
 This plan defines the immediate path for understanding, running, and later integrating the TepelniElektrarna External Exhibit Apps.
 
-Installation and display discovery are complete enough for Version 8 work. The source-backed event, topology, state, timer, supplier-mismatch, input-profile, exact control-transition, and API-specialization matrices live in `FRONT_GAME_BEHAVIOR_MAP.md`. Version 8 Task 1 and every product decision required by Task 2 are complete; production code remains intentionally unchanged until Task 2 begins.
+Installation and display discovery are complete enough for Version 8 work. The source-backed event, topology, state, timer, supplier-mismatch, input-profile, exact control-transition, and API-specialization matrices live in `FRONT_GAME_BEHAVIOR_MAP.md`. Version 8 Tasks 1–2 are complete; Task 3 validated control mappings are ready.
 
 ## Terms
 
@@ -62,7 +62,7 @@ Deliverables:
 - game-state flow between Display Apps
 - questions that require real hardware or supplier clarification
 
-Status: source baseline and Version 8 Task 1 control contract complete; Task 2 is ready.
+Status: source baseline and Version 8 Task 1 control contract complete; Task 2 typed input translation is implemented and verified.
 
 ### 4. Control App Compatibility Assessment
 
@@ -88,7 +88,15 @@ Approved boundary:
 - typed Tepelni input translation and profile-owned target mappings;
 - no hardware protocol, scene composition, game-state inference, or relay modification in the adapter.
 
-Status: architecture approved; Task 2 typed input translation is ready.
+Status: architecture approved; Task 2 typed input translation is complete and Task 3 is ready.
+
+### Version 8 Task 2 implementation record
+
+- Added a separate typed `tepelni_elektrarna` adapter module and simulation-only input profile; no production Device Instance or wiring decision was added.
+- Implemented exact numeric start id `1`, string language/energy ids, strict debounced rising-edge presses, and four independent numeric wheels with absolute integer angles and no `step` field.
+- Runtime availability is independent per input source and control target after global schema validation. Recovery rebaselines only the affected source; no release, zero, reset, substitute event, or control request is synthesized.
+- The profile contains no motor, lighting, scene, Display App, Screen 9, OLED 2 bridge, or production control mapping. Those exclusions remain authoritative.
+- Verified 44 Integration Adapter tests and 108 Control App tests on 2026-07-25; the simulation deployment also loads through the real Control App configuration parser.
 
 ## Known Risks
 

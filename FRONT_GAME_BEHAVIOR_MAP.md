@@ -4,6 +4,8 @@ This document is the source-backed behavior and contract record for Version 8 Ta
 
 Production code is outside this task. The approved event and control matrices will be completed here and in `../../docs/control-app-plan-version-8.md` as the decision interview proceeds.
 
+Version 8 Task 2 was completed on 2026-07-25. The typed adapter now implements only the approved input matrix: five buttons, four independent absolute wheels, and per-source runtime recovery. Control mappings and Display App changes remain later tasks.
+
 ## Evidence And Authority
 
 Evidence inspected on 2026-07-24:
