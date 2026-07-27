@@ -43,6 +43,18 @@ const DEG_PER_PT = {
   biomass: [ 6, 10, 10],
 };
 
+const LANGUAGE_LAMP_TARGETS = {
+  cz: 'language_cz_button_lamp',
+  en: 'language_en_button_lamp',
+  de: 'language_de_button_lamp',
+};
+
+const setLanguageLamps = (socket, selected) => {
+  Object.entries(LANGUAGE_LAMP_TARGETS).forEach(([language, target]) => {
+    sendExhibitControl(socket, target, 'set_state', language === selected);
+  });
+};
+
 function videoPath(fuelIdx, state) {
   const dir = FUEL_VIDEO_SUBDIRS[fuelIdx];
   const letter = FUEL_VIDEO_LETTERS[fuelIdx];
@@ -89,6 +101,7 @@ export default function App() {
   const lastActivity = useRef(Date.now());
   const decayTimer = useRef(null);
   const screenRef = useRef(screen);
+  const languageRef = useRef(language);
   const fuelIdxRef = useRef(fuelIdx);
   const gaugesRef = useRef(gauges);
   const videoARef = useRef(null);
@@ -103,6 +116,7 @@ export default function App() {
   const anyWheelTouched = useRef(false);
 
   useEffect(() => { screenRef.current = screen; }, [screen]);
+  useEffect(() => { languageRef.current = language; }, [language]);
   useEffect(() => { fuelIdxRef.current = fuelIdx; }, [fuelIdx]);
   useEffect(() => { gaugesRef.current = gauges; }, [gauges]);
 
@@ -170,6 +184,8 @@ export default function App() {
 
   const goHome = useCallback(() => {
     stopDecay();
+    sendExhibitControl(ws.current, 'tepelni_lighting', 'activate_scene', 'phase1_ready');
+    sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', true);
     setScreen('home');
     setGauges([0, 0, 0]);
     setWarnActive([false, false, false]);
@@ -196,10 +212,18 @@ export default function App() {
         if (!greenStart.current) greenStart.current = now;
         else if (now - greenStart.current >= 5000) {
           stopDecay();
+          const fuel = FUELS[fuelIdxRef.current];
+          sendExhibitControl(
+            ws.current,
+            'tepelni_lighting',
+            'activate_scene',
+            `combustion_complete_${fuel}`,
+          );
+          setLanguageLamps(ws.current, null);
           setScreen('success');
           ws.current?.send(JSON.stringify({
             type: 'trigger', name: 'GAME_STATE', id: 1,
-            data: { state: 'COMBUSTION_COMPLETE' },
+            data: { state: 'COMBUSTION_COMPLETE', fuel },
           }));
           return;
         }
@@ -349,7 +373,10 @@ export default function App() {
     // Reset all screens to initial state
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
       stopDecay();
+      sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', false);
+      setLanguageLamps(ws.current, languageRef.current);
       setScreen('sleep');
+      fuelIdxRef.current = 0;
       setFuelIdx(0);
       setGauges([0, 0, 0]);
       setShowIntro(true);
@@ -366,10 +393,27 @@ export default function App() {
     }
 
     if (msg.name === 'BUTTON' && msg.data?.pressed) {
-      if (msg.id === 'LANG_CZ') setLanguage('cz');
-      if (msg.id === 'LANG_EN') setLanguage('en');
-      if (msg.id === 'LANG_DE') setLanguage('de');
+      const selectedLanguage = {
+        LANG_CZ: 'cz',
+        LANG_EN: 'en',
+        LANG_DE: 'de',
+      }[msg.id];
+      if (selectedLanguage) {
+        languageRef.current = selectedLanguage;
+        setLanguage(selectedLanguage);
+        if (screenRef.current === 'sleep' || screenRef.current === 'home') {
+          setLanguageLamps(ws.current, selectedLanguage);
+        }
+      }
       if (msg.id === 1 && screenRef.current === 'home') {
+        const fuel = FUELS[fuelIdxRef.current];
+        sendExhibitControl(
+          ws.current,
+          'tepelni_lighting',
+          'activate_scene',
+          `combustion_${fuel}`,
+        );
+        sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', false);
         setScreen('game');
         setShowIntro(true);
         setGauges([0, 0, 0]);
@@ -408,10 +452,18 @@ export default function App() {
         }
         if (fuelSteps.current >= STEPS_TO_SWITCH) {
           fuelSteps.current = 0;
-          setFuelIdx(prev => (prev + 1) % 3);
+          setFuelIdx(prev => {
+            const next = (prev + 1) % 3;
+            fuelIdxRef.current = next;
+            return next;
+          });
         } else if (fuelSteps.current <= -STEPS_TO_SWITCH) {
           fuelSteps.current = 0;
-          setFuelIdx(prev => (prev + 2) % 3);
+          setFuelIdx(prev => {
+            const next = (prev + 2) % 3;
+            fuelIdxRef.current = next;
+            return next;
+          });
         }
         return;
       }

@@ -5,6 +5,27 @@ import { createSoundManager } from './soundManager';
 const WS_URL = 'ws://localhost:8765';
 const MAX_STEPS = 15;
 const INACTIVITY_MS = 20000;
+const FUELS = new Set(['coal', 'gas', 'biomass']);
+
+const sendExhibitControl = (socket, target, action, value) => {
+  if (socket?.readyState !== WebSocket.OPEN) {
+    console.error(`[screen_oled4] EXHIBIT_CONTROL not sent: relay unavailable (${target}/${action})`);
+    return null;
+  }
+  const requestId = crypto.randomUUID();
+  const request = {
+    type: 'request',
+    name: 'EXHIBIT_CONTROL',
+    request_id: requestId,
+    sender: 'screen_oled4',
+    target,
+    action,
+    ...(value === undefined ? {} : { value }),
+  };
+  socket.send(JSON.stringify(request));
+  console.info(`[screen_oled4] EXHIBIT_CONTROL request ${requestId}`, { target, action, value });
+  return requestId;
+};
 
 const sm = createSoundManager({
   AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 0.8 },
@@ -34,6 +55,7 @@ export default function App() {
   const lastActivity = useRef(Date.now());
   const screenRef = useRef(screen);
   const stepRef = useRef(step);
+  const fuelRef = useRef(null);
   const videoARef = useRef(null);
   const videoBRef = useRef(null);
   const activeSlot = useRef('A');
@@ -72,6 +94,17 @@ export default function App() {
     if (step === MAX_STEPS) {
       setVideoPhase('open');
       const id = setTimeout(() => {
+        sendExhibitControl(ws.current, 'turbine_generator_axis', 'start');
+        if (fuelRef.current) {
+          sendExhibitControl(
+            ws.current,
+            'tepelni_lighting',
+            'activate_scene',
+            `generation_active_${fuelRef.current}`,
+          );
+        } else {
+          console.error('[screen_oled4] tepelni_lighting request not sent: missing canonical fuel context');
+        }
         ws.current?.send(JSON.stringify({
           type: 'trigger', name: 'GAME_STATE', id: 1,
           data: { state: 'VALVE_COMPLETE' },
@@ -86,6 +119,8 @@ export default function App() {
     if (screen !== 'active' || step >= MAX_STEPS) return;
     const id = setInterval(() => {
       if (Date.now() - lastActivity.current > INACTIVITY_MS) {
+        sendExhibitControl(ws.current, 'turbine_generator_axis', 'stop');
+        sendExhibitControl(ws.current, 'tepelni_lighting', 'activate_scene', 'sleep');
         setScreen('sleep');
         setStep(0);
         setShowTurbineMsg(false);
@@ -101,6 +136,14 @@ export default function App() {
   }, [screen, step]);
 
   const handleMessage = useCallback((msg) => {
+    if (msg.type === 'result' && msg.name === 'EXHIBIT_CONTROL') {
+      if (msg.recipient === 'screen_oled4') {
+        const method = msg.status === 'rejected' || msg.status === 'failed' ? 'error' : 'info';
+        console[method](`[screen_oled4] EXHIBIT_CONTROL result ${msg.request_id}`, msg);
+      }
+      return;
+    }
+
     if (msg.type !== 'trigger') return;
 
     if (msg.name === 'BUTTON' && msg.data?.pressed) {
@@ -111,6 +154,7 @@ export default function App() {
 
     // Wake when OLED2 combustion game completes
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'COMBUSTION_COMPLETE') {
+      fuelRef.current = FUELS.has(msg.data?.fuel) ? msg.data.fuel : null;
       setScreen('active');
       setStep(0);
       setShowTurbineMsg(false);
@@ -121,6 +165,7 @@ export default function App() {
 
     // Reset all screens to initial state
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
+      fuelRef.current = null;
       setScreen('sleep');
       setStep(0);
       setShowTurbineMsg(false);
@@ -176,7 +221,7 @@ export default function App() {
           break;
         case ' ': case 'Enter':
           e.preventDefault();
-          send({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'COMBUSTION_COMPLETE' } });
+          send({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'COMBUSTION_COMPLETE', fuel: 'coal' } });
           break;
         case '1': send({ type: 'trigger', name: 'BUTTON', id: 'LANG_CZ', data: { pressed: true } }); break;
         case '2': send({ type: 'trigger', name: 'BUTTON', id: 'LANG_EN', data: { pressed: true } }); break;

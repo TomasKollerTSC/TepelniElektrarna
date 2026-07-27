@@ -2,9 +2,9 @@
 
 This document is the source-backed behavior and contract record for Version 8 Task 1. It covers the current TepelniElektrarna Display Apps, Exhibit Relay, OLED 2 relay/serial process, embedded keyboard emulators, supplier documents, and the Control App integration boundary. It records current behavior separately from product decisions so implementation does not silently choose between source and supplier intent.
 
-Production code is outside this task. The approved event and control matrices will be completed here and in `../../docs/control-app-plan-version-8.md` as the decision interview proceeds.
+The approved event and control matrices below remain the implementation contract; completion notes identify which increments now exist in source.
 
-Version 8 Tasks 2–4 are complete. The typed adapter implements the approved input and control mappings, and OLED 2 now implements the approved two-request first-wheel tracer. Remaining Display App transitions belong to Task 5.
+Version 8 Tasks 2–5 are complete. The typed adapter implements the approved input/control mappings, and all approved OLED 2, OLED 4, and Screen 6 request transitions now exist at their source guards. Task 6 owns the complete multi-display Chromium matrix.
 
 ## Evidence And Authority
 
@@ -23,10 +23,10 @@ The current External Exhibit Apps source remains authoritative when it conflicts
 | Actor | Current role | Actual network behavior | Contract consequence |
 | --- | --- | --- | --- |
 | `server/` | Exhibit Relay and `/status` endpoint | Parses arbitrary JSON and broadcasts it to every connected client, including the sender. It does not route or validate by `type:name`. Client ids come from `x-client-id` only when a caller supplies that header. | The Integration Adapter must validate messages and mappings itself. |
-| `screen_oled2/src/App.jsx` | Phase 1 combustion Display App | Connects only to `ws://localhost:8765`; consumes local/upstream events and emits `COMBUSTION_COMPLETE`. | Its working start id is numeric `1`; wheel ids are numeric `1..3`. |
+| `screen_oled2/src/App.jsx` | Phase 1 combustion Display App | Connects only to `ws://localhost:8765`; consumes local/upstream events, emits fuel-qualified `COMBUSTION_COMPLETE`, and sends its allowlisted scene/backlight requests. | Its working start id is numeric `1`; wheel ids are numeric `1..3`. |
 | `screen_oled2/bridge.js` | OLED 2 local WebSocket/serial process | Opens a local WebSocket server on `8765`, connects to `MASTER_WS_URL`, forwards all master messages to local React clients, forwards only React-origin `trigger:GAME_STATE` upstream, and forwards serial input only to local React clients. | It is not a transparent relay. Physical OLED 2 inputs do not reach the master Exhibit Relay. It also directly owns RS-485 hardware, conflicting with the approved Control App-exclusive hardware boundary. |
-| `screen_oled4/src/App.jsx` | Phase 2 valve Display App | Connects only to `ws://localhost:8765`; consumes `COMBUSTION_COMPLETE` and wheel `4`; emits `VALVE_COMPLETE` or inactivity `RESET`. | Deployment must provide a relay/proxy at localhost or co-locate this app with the master relay. No such proxy is supplied here. |
-| `screen_6/src/App.jsx` | Phase 3 cooling Display App | Connects only to `ws://localhost:8765`; wakes on `VALVE_COMPLETE`; consumes `ENERGY_SEND` only to play audio. | Current source has no Phase 3 ready state, completion transition, inactivity timer, or automatic reset. |
+| `screen_oled4/src/App.jsx` | Phase 2 valve Display App | Connects only to `ws://localhost:8765`; consumes fuel-qualified `COMBUSTION_COMPLETE` and wheel `4`; emits `VALVE_COMPLETE` or inactivity `RESET` alongside its owned requests. | It never defaults missing fuel or infers a scene below the Display App boundary. |
+| `screen_6/src/App.jsx` | Phase 3 cooling Display App | Connects only to `ws://localhost:8765`; wakes and lights its button on `VALVE_COMPLETE`; consumes `ENERGY_SEND` for audio and explicit lamp/axis/scene requests. | Source still has no Phase 3 ready state, completion transition, inactivity timer, or automatic reset. |
 | `screen_9/src/App.jsx` | Non-product stub; excluded from Version 8 | Opens one WebSocket and logs messages. Its `phase` and `energyReady` state never change. Its reconnect creates a socket without restoring handlers. | Do not deploy, complete, integrate, or assign contract ownership to Screen 9. The supplier-required physical progress behavior must be owned elsewhere. |
 | `screen_2R`, `4R`, `7R`, `8R`, `10` | Independent rear information Display Apps | No WebSocket connection. Language is local UI state. Each returns to sleep after 120 seconds. | They are outside the front Exhibit Event Contract unless product scope explicitly changes. |
 
@@ -42,10 +42,10 @@ All current gameplay messages use `type: "trigger"`. The Exhibit Relay accepts o
 | Czech language | `BUTTON`, id `"LANG_CZ"`, `pressed:true` | OLED 2 and OLED 4 keyboard emulators | OLED 2, OLED 4, Screen 6 in every state | Source-authoritative input. |
 | English language | `BUTTON`, id `"LANG_EN"`, `pressed:true` | OLED 2 and OLED 4 keyboard emulators | OLED 2, OLED 4, Screen 6 in every state | Source-authoritative input. |
 | German language | `BUTTON`, id `"LANG_DE"`, `pressed:true` | OLED 2 and OLED 4 keyboard emulators | OLED 2, OLED 4, Screen 6 in every state | Source-authoritative input. |
-| Energy send press | `{ "type":"trigger", "name":"BUTTON", "id":"ENERGY_SEND", "data":{"pressed":true} }` | Screen 6 keyboard emulator | Screen 6 in every state: preserve audio and send one explicit `turbine_generator_axis` `stop` request | Source-authoritative id and shape. Version 8 adds no readiness guard, state transition, or inferred adapter command. |
+| Energy send press | `{ "type":"trigger", "name":"BUTTON", "id":"ENERGY_SEND", "data":{"pressed":true} }` | Screen 6 keyboard emulator | Screen 6 in every state: preserve audio and independently request lamp off, axis `stop`, and scene `sleep` | Source-authoritative id and shape. Version 8 adds no readiness guard, state transition, or inferred adapter command. |
 | Combustion wheels | `{ "type":"trigger", "name":"WHEEL", "id":1..3, "data":{"angle":0..359} }` | OLED 2 keyboard emulator and supplier serial source; keyboard also adds optional `step:-1|1` | OLED 2: any combustion wheel wakes `sleep -> home`; wheel `1` selects fuel in `home`; all three adjust gauges in `game` | Source-authoritative numeric ids and absolute angle. Production translation does not require `step`; source derives direction from `angle` when it is absent. |
 | Valve wheel | `{ "type":"trigger", "name":"WHEEL", "id":4, "data":{"angle":0..359} }` | OLED 4 keyboard emulator | OLED 4 only advances while `active`; strict numeric id; only clockwise delta greater than 5 degrees counts | Source-authoritative numeric id and absolute angle. |
-| Phase 1 complete | `{ "type":"trigger", "name":"GAME_STATE", "id":1, "data":{"state":"COMBUSTION_COMPLETE"} }` | OLED 2 after all gauges remain green for five seconds; development shortcut in OLED 4 | OLED 4 resets and enters `active` | Existing progression event; diagnostic only to the adapter. |
+| Phase 1 complete | `{ "type":"trigger", "name":"GAME_STATE", "id":1, "data":{"state":"COMBUSTION_COMPLETE","fuel":"coal|gas|biomass"} }` | OLED 2 after all gauges remain green for five seconds; development shortcut in OLED 4 | OLED 4 resets, stores only canonical fuel context, and enters `active` | Existing progression event with Display App-owned fuel context; diagnostic only to the adapter. |
 | Phase 2 complete | `{ "type":"trigger", "name":"GAME_STATE", "id":1, "data":{"state":"VALVE_COMPLETE"} }` | OLED 4 three seconds after reaching step 15; Screen 6 development shortcut | Screen 6 enters `active` | Existing progression event; diagnostic only to the adapter. |
 | Global reset | `{ "type":"trigger", "name":"GAME_STATE", "id":1, "data":{"state":"RESET"} }` | OLED 4 after active pre-completion inactivity; Screen 6 development shortcut | OLED 2 -> `sleep`; OLED 4 -> `sleep`; Screen 6 -> `sleep` | OLED 4's production origin also sends explicit axis `stop` and scene `sleep`; the reset event remains diagnostic only to the adapter. The Screen 6 shortcut is not production authority. |
 
@@ -70,15 +70,15 @@ The supplier API's generic `trigger:LED` and `trigger:MOTOR` messages have no se
 
 | Current state/condition | Accepted event or timer | Resulting state/effect | Emitted event |
 | --- | --- | --- | --- |
-| Initial `sleep` | Any valid wheel id `1..3` | Stores that wheel's current angle and enters `home` | None |
+| Initial `sleep` | Any valid wheel id `1..3` | Stores that wheel's current angle and enters `home` | `phase1_ready` and `start_button_lamp=true` requests |
 | `home` | Wheel `1` movement | Changes fuel after 18 accepted directional samples; wheels `2` and `3` do not select fuel | None |
-| `home` | Numeric `BUTTON id:1`, `pressed:true` | Resets gauges/timers and enters `game`; starts 12-point decay every two seconds | None |
-| Any state | `BUTTON LANG_*`, `pressed:true` | Updates local language | None |
+| `home` | Numeric `BUTTON id:1`, `pressed:true` | Resets gauges/timers and enters `game`; starts 12-point decay every two seconds | Selected-fuel `combustion_*` and `start_button_lamp=false` requests |
+| Any state | `BUTTON LANG_*`, `pressed:true` | Updates local language; before START, updates the three independent language lamps | Three `set_state` requests only in `sleep|home` |
 | `game` | Wheel `1..3` | Updates activity, hides intro, and adjusts one gauge. Fuel never decreases; air and exhaust may move both ways. | None |
-| `game` | All three gauges remain in green `61..120` for five seconds | Stops decay and enters `success` | `COMBUSTION_COMPLETE` |
-| `game` | Any gauge remains red above `120` | At five seconds shows overload; at ten seconds stops, clears all gauges, and schedules `home` after three seconds | None |
-| `game` | No wheel activity for more than 30 seconds; checked every five seconds | Returns locally to `home` | None |
-| Any state | `GAME_STATE RESET` | Stops decay, restores Czech-default game values except current language, and enters `sleep` | None |
+| `game` | All three gauges remain in green `61..120` for five seconds | Stops decay and enters `success` | Matching `combustion_complete_*`, three language-lamp-off requests, and fuel-qualified `COMBUSTION_COMPLETE` |
+| `game` | Any gauge remains red above `120` | At five seconds shows overload; at ten seconds stops, clears all gauges, and schedules `home` after three seconds | On the scheduled local `home`, `phase1_ready` and `start_button_lamp=true`; no global reset |
+| `game` | No wheel activity for more than 30 seconds; checked every five seconds | Returns locally to `home` | `phase1_ready` and `start_button_lamp=true` requests; no global reset |
+| Any state | `GAME_STATE RESET` | Stops decay, restores Czech-default game values except current language, and enters `sleep` | Start lamp off and exactly the current language lamp restored |
 
 OLED 2 has no home/success-to-sleep timer and no global reset on local inactivity or overload failure. Its source decay is fixed at 12 points every two seconds, unlike the supplier text's fuel-dependent `X` description. The source returns from overload to `home` after three seconds, while the supplier document describes a longer warning/failure/animation sequence.
 
@@ -88,20 +88,20 @@ OLED 2 has no home/success-to-sleep timer and no global reset on local inactivit
 | --- | --- | --- | --- |
 | Initial `sleep` or any state | `COMBUSTION_COMPLETE` | Enters `active`, resets step to `0`, starts audio/video, and resets wheel baseline | None |
 | `active`, step `<15` | Numeric wheel `4` clockwise delta `>5` | Increments one step, capped at 15 | None |
-| Step first reaches `15` | Immediate effects plus two separate three-second timers | Switches video/audio; after three seconds shows turbine message | After three seconds, one explicit `turbine_generator_axis` `start` request alongside `VALVE_COMPLETE` |
-| `active`, step `<15` | No accepted wheel progress for more than 20 seconds; checked every three seconds | Returns to `sleep`, resets local state | `RESET` |
+| Step first reaches `15` | Immediate effects plus two separate three-second timers | Switches video/audio; after three seconds shows turbine message | After three seconds, axis `start`, matching `generation_active_*` when canonical fuel exists, and `VALVE_COMPLETE` |
+| `active`, step `<15` | No accepted wheel progress for more than 20 seconds; checked every three seconds | Returns to `sleep`, resets local state | Axis `stop`, scene `sleep`, and `RESET` |
 | Step `15` complete | Inactivity | Inactivity reset is disabled | None |
 | Any state | `GAME_STATE RESET` | Returns to `sleep` and resets local state | None |
 
-There is no supplier-described three-second gate before the first valve movement. Counter-clockwise movement never reduces the step. The source does not emit motor or lighting requests when Phase 2 completes.
+There is no supplier-described three-second gate before the first valve movement. Counter-clockwise movement never reduces the step. Phase 2 control requests remain independent of each other and of `VALVE_COMPLETE`.
 
 ### Screen 6: cooling/energy audio
 
 | Current state/condition | Accepted event | Resulting state/effect | Emitted event |
 | --- | --- | --- | --- |
-| Initial `sleep` or any state | `VALVE_COMPLETE` | Enters `active`; plays Phase 3 audio | None |
-| Any state | `BUTTON ENERGY_SEND`, `pressed:true` | Plays `AUDIO_7` only | None |
-| Any state | `GAME_STATE RESET` | Enters `sleep` and stops audio | None |
+| Initial `sleep` or any state | `VALVE_COMPLETE` | Enters `active`; plays Phase 3 audio | `energy_send_button_lamp=true` |
+| Any state | `BUTTON ENERGY_SEND`, `pressed:true` | Plays `AUDIO_7`; preserves current screen state | Energy lamp off, axis `stop`, and scene `sleep` |
+| Any state | `GAME_STATE RESET` | Enters `sleep` and stops audio | `energy_send_button_lamp=false` only |
 
 There is no readiness guard, third-phase progress, 30-second energy-send timeout, success state, or runtime-emitted reset.
 
@@ -178,16 +178,16 @@ The adapter suppresses only the unavailable input's events and emits no release,
 
 | Existing Display App owner and path | Existing game behavior preserved | Explicit Version 8 hardware request(s) |
 | --- | --- | --- |
-| OLED 2 overload or inactivity returns to `home` | Only OLED 2 returns to fuel selection; no global `RESET` | OLED 2 requests `tepelni_lighting activate_scene phase1_ready` only. |
+| OLED 2 overload or inactivity returns to `home` | Only OLED 2 returns to fuel selection; no global `RESET` | OLED 2 requests `tepelni_lighting activate_scene phase1_ready` and `start_button_lamp=true` independently. |
 | OLED 4 pre-completion inactivity | OLED 4 emits its existing global `GAME_STATE RESET`; all receivers perform their current local reset | The reset originator requests `turbine_generator_axis stop` and `tepelni_lighting activate_scene sleep` before/alongside `RESET`. |
-| Screen 6 handles pressed `ENERGY_SEND` | Preserve current audio and state behavior; emit no new `GAME_STATE`, success, readiness, or reset | Screen 6 requests `turbine_generator_axis stop` and `tepelni_lighting activate_scene sleep`. |
-| Any Display App receives `GAME_STATE RESET` | Perform only its existing local reset behavior | No duplicate hardware request from a receiver. |
+| Screen 6 handles pressed `ENERGY_SEND` | Preserve current audio and state behavior; emit no new `GAME_STATE`, success, readiness, or reset | Screen 6 independently requests its lamp off, axis `stop`, and scene `sleep`. |
+| Any Display App receives `GAME_STATE RESET` | Perform only its existing local reset behavior | No duplicate motor/scene request. OLED 2 restores owned backlights; Screen 6 turns its owned lamp off. |
 
 Screen 6 gains no timeout. Neither the adapter nor Control App derives a game reset/transition from a timer, command result, connection state, or observed event.
 
 ## 5. Supplier-Only Physical Behavior Inventory
 
-The supplier behavior PDF describes these effects, none of which currently has a guarded runtime request. Product direction confirms that the complete supplier-prescribed physical choreography is current Version 8 intent, including the turbine/generator and chamber/flow/progress lighting. This adopts the physical outcomes, not the stale generic `trigger:LED` or `trigger:MOTOR` wire messages.
+The supplier behavior PDF described these effects even though the originally supplied source had no guarded runtime request for them. Tasks 4–5 now implement the approved requests. Version 8 adopts the physical outcomes, not the stale generic `trigger:LED` or `trigger:MOTOR` wire messages.
 
 | Supplier transition | Supplier physical effect | Current source owner/evidence | Existing Control App compatibility |
 | --- | --- | --- | --- |
@@ -361,6 +361,8 @@ Task 1 is complete. The source/event matrix, exact control transitions, sender/v
 Task 4's approved tracer is the existing first combustion-wheel movement that changes OLED 2 from `sleep` to fuel selection (`home`). At that one unchanged guard OLED 2 adds two independent requests with distinct UUIDs: `tepelni_lighting activate_scene phase1_ready` and `start_button_lamp set_state true`. Acceptance proves both public API paths, fake effects, correlated results, per-target partial failure, rendered fuel-selection UI, and no page-load/reconnect replay; neither request waits for, retries, rolls back, or compensates the other.
 
 Task 4 now implements that exact tracer without changing the state machine. Its focused Chromium slice proves explicit orchestrator-style `sleep` initialization, two unique request ids and correlated immediate results, fake scene and Quido effects, duplicate result reuse without execution, definite rejection and ambiguous failure with independent lamp success, subsequent lighting-target unavailability, rendered `home` UI, and no page-load/reconnect replay. No remaining Task 5 transition was added.
+
+Task 5 now implements every remaining approved Display App transition. OLED 2 owns the selected-fuel Phase 1 scenes and its four backlights; its fuel-qualified existing completion event gives OLED 4 source-owned context without lower-layer memory. OLED 4 owns the coupled-axis and generation-scene completion pair plus the only production motor/scene reset pair. Screen 6 owns the energy-send lamp and its existing unguarded energy-send stop/sleep pair. Each request has its own UUID/result and logs independently. Focused Chromium coverage proves normal progression, exact lamp outcomes, local/global reset ownership, rejected-scene partial failure without compensation or progression blocking, and absence of a generation-scene request when canonical fuel context is missing.
 
 The tested physical Control App baseline is recorded in `ControlApp/config/tepelni-elektrarna.yaml` and `docs/tepelni-elektrarna-commissioning.md`: the Quido and its I/O shape, shared encoder bus and addresses, separate turbine-motor bus, Device Instance ids, motor address, direction, speed range/default, and JOG ramp are known; no maximum continuous runtime is required. The remaining unknowns are commissioning facts rather than product decisions: encoder direction/zero; actual UDP-versus-OSC variant, destination, and message schema; production scene-controller Device Instance and strictly typed Driver connection settings; real program references; visual tuning and Phase 3 duration; lifecycle scripts/service names; and exact External Exhibit App initialization messages. Simulation mappings must not overwrite or masquerade as that production baseline.
 

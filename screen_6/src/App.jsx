@@ -3,6 +3,26 @@ import { createSoundManager } from './soundManager';
 
 const WS_URL = 'ws://localhost:8765';
 
+const sendExhibitControl = (socket, target, action, value) => {
+  if (socket?.readyState !== WebSocket.OPEN) {
+    console.error(`[screen_6] EXHIBIT_CONTROL not sent: relay unavailable (${target}/${action})`);
+    return null;
+  }
+  const requestId = crypto.randomUUID();
+  const request = {
+    type: 'request',
+    name: 'EXHIBIT_CONTROL',
+    request_id: requestId,
+    sender: 'screen_6',
+    target,
+    action,
+    ...(value === undefined ? {} : { value }),
+  };
+  socket.send(JSON.stringify(request));
+  console.info(`[screen_6] EXHIBIT_CONTROL request ${requestId}`, { target, action, value });
+  return requestId;
+};
+
 const sm = createSoundManager({
   AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 0.8 },
   AUDIO_7: { src: '/a/AUDIO_7.mp3', loop: false, channel: 'right', volume: 1.0 },
@@ -27,6 +47,14 @@ export default function App() {
   const wsTimer = useRef(null);
 
   const handleMessage = useCallback((msg) => {
+    if (msg.type === 'result' && msg.name === 'EXHIBIT_CONTROL') {
+      if (msg.recipient === 'screen_6') {
+        const method = msg.status === 'rejected' || msg.status === 'failed' ? 'error' : 'info';
+        console[method](`[screen_6] EXHIBIT_CONTROL result ${msg.request_id}`, msg);
+      }
+      return;
+    }
+
     if (msg.type !== 'trigger') return;
 
     // Language buttons
@@ -35,6 +63,9 @@ export default function App() {
       if (msg.id === 'LANG_EN') setLanguage('en');
       if (msg.id === 'LANG_DE') setLanguage('de');
       if (msg.id === 'ENERGY_SEND') {
+        sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', false);
+        sendExhibitControl(ws.current, 'turbine_generator_axis', 'stop');
+        sendExhibitControl(ws.current, 'tepelni_lighting', 'activate_scene', 'sleep');
         sm.unlock();
         sm.play('AUDIO_7');
       }
@@ -42,11 +73,13 @@ export default function App() {
 
     // Wake when OLED4 valve game completes
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'VALVE_COMPLETE') {
+      sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', true);
       setScreen('active');
     }
 
     // Reset to sleep
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
+      sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', false);
       setScreen('sleep');
     }
   }, []);
