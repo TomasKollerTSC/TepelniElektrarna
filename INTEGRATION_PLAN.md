@@ -88,7 +88,7 @@ Approved boundary:
 - typed Tepelni input translation and profile-owned target mappings;
 - no hardware protocol, scene composition, game-state inference, or relay modification in the adapter.
 
-Status: Tasks 2–6 are implemented and locally verified. Post-Task-6 audit closure work remains before Version 8 can be marked complete.
+Status: Tasks 2–7 are implemented and locally verified. Version 8 is complete.
 
 ### Version 8 Task 3 implementation boundary
 
@@ -124,13 +124,13 @@ Status: Tasks 2–6 are implemented and locally verified. Post-Task-6 audit clos
 - `screen_oled2` source uses numeric button id `1` for start, while docs describe `START`.
 - `screen_6` uses `ENERGY_SEND`, which is not fully aligned with the Tepelni API section.
 - Documented LED/MOTOR messages are not implemented in inspected source.
-- `screen_oled2/bridge.js` forwards serial input only locally and is therefore excluded from production. The Version 8 closure package must replace the hard-coded localhost URL in OLED 2, OLED 4, and Screen 6 with one configurable relay URL while retaining localhost as the development default.
+- `screen_oled2/bridge.js` forwards serial input only locally and is therefore excluded from production. OLED 2, OLED 4, and Screen 6 now use one `VITE_EXHIBIT_RELAY_WS_URL`, retaining localhost only as the development default.
 - Existing `node_modules` can be stale or missing platform optional packages; run `npm install` in each app folder on the target machine.
 - Some Vite shims may need executable permission restored after copy/install.
 
 Production adapter enablement requires a new validated Tepelni production Integration Profile, but that profile is a separate later commissioning package and does not block Version 8 closure. Its Control App and relay URLs, service layout, final production mappings, and commissioned scene-controller transport/program references must be supplied rather than copied from simulation or represented by placeholders.
 
-The implementation-ready Tepelni closure change is limited to replacing the hard-coded relay URL in OLED 2, OLED 4, and Screen 6 with one shared build-time configurable URL whose development default remains `ws://localhost:8765`. It changes no state, guard, event, request, retry, or reconnect behavior. The repository-level Version 8 closure launcher must build all three production front apps and rerun the existing focused and complete Tepelni Chromium suites.
+The completed Tepelni closure change replaces the hard-coded relay URL in OLED 2, OLED 4, and Screen 6 with one shared build-time `VITE_EXHIBIT_RELAY_WS_URL` whose development default remains `ws://localhost:8765`. It changes no state, guard, event, request, retry, or reconnect behavior. The repository-level Version 8 closure launcher builds all three production front apps with a non-local URL and reruns the focused and complete Tepelni Chromium suites.
 
 ## Version 8 Task 1 Approved Decisions
 

@@ -16,9 +16,9 @@ Immediate scope: installability, display validation, local ports, and known setu
 
 | Folder | Purpose | Local URL | WebSocket |
 | --- | --- | --- | --- |
-| `screen_oled2/` | Phase 1 combustion/fuel game | `http://localhost:3002/` | Connects to `ws://localhost:8765`. |
-| `screen_oled4/` | Phase 2 valve/wheel game | `http://localhost:3004/` | Connects to `ws://localhost:8765`. |
-| `screen_6/` | Phase 3 cooling/energy-send screen | `http://localhost:3006/` | Connects to `ws://localhost:8765`. |
+| `screen_oled2/` | Phase 1 combustion/fuel game | `http://localhost:3002/` | Uses `VITE_EXHIBIT_RELAY_WS_URL` (default `ws://localhost:8765`). |
+| `screen_oled4/` | Phase 2 valve/wheel game | `http://localhost:3004/` | Uses the same configured relay URL. |
+| `screen_6/` | Phase 3 cooling/energy-send screen | `http://localhost:3006/` | Uses the same configured relay URL. |
 | `screen_9/` | Front LED/progress style panel | `http://localhost:3009/` | Opens WebSocket and logs messages; source semantics are minimal. |
 
 ### Back Kiosk Display Apps
@@ -200,7 +200,13 @@ Recommended first-pass deployment:
 - Open Chromium in kiosk mode to the local app URL.
 - Keep the relay reachable at `ws://<relay-pi-ip>:8765`.
 
-Important: the source uses `ws://localhost:8765` in front apps. If the relay is on a different Pi, the WebSocket URL must be adjusted or the app must be served on the same Pi as the relay/bridge that exposes `localhost:8765`.
+OLED 2, OLED 4, and Screen 6 use `VITE_EXHIBIT_RELAY_WS_URL` at build/dev-server time. It defaults to `ws://localhost:8765` for one-box development. When the relay is on another host, start or build each front app with the same full URL, for example:
+
+```bash
+VITE_EXHIBIT_RELAY_WS_URL=ws://relay.local:8765 npm run build
+```
+
+The value is baked into production bundles, so all three front apps must be rebuilt when the relay URL changes.
 
 Validate on each display:
 

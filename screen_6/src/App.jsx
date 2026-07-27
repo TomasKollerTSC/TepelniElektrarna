@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createSoundManager } from './soundManager';
 
-const WS_URL = 'ws://localhost:8765';
+const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
 
 const sendExhibitControl = (socket, target, action, value) => {
   if (socket?.readyState !== WebSocket.OPEN) {

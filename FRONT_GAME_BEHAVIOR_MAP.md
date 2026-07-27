@@ -4,7 +4,7 @@ This document is the source-backed behavior and contract record for Version 8 Ta
 
 The approved event and control matrices below remain the implementation contract; completion notes identify which increments now exist in source.
 
-Version 8 Tasks 2–6 are complete. The typed adapter implements the approved input/control mappings, all approved OLED 2, OLED 4, and Screen 6 request transitions exist at their source guards, and the complete shared-relay Chromium matrix is green. The post-Task-6 audit reopened closure work because all three production front Display Apps still hard-code localhost despite the approved shared-relay topology. Task 7 must correct that deployment drift and finish the remaining stabilization contract before Version 8 closes.
+Version 8 Tasks 2–7 are complete. The typed adapter implements the approved input/control mappings, all approved OLED 2, OLED 4, and Screen 6 request transitions exist at their source guards, and the complete shared-relay Chromium matrix is green. All three production front Display Apps read the same build-time `VITE_EXHIBIT_RELAY_WS_URL`; `ws://localhost:8765` remains only the development default.
 
 ## Evidence And Authority
 
@@ -23,10 +23,10 @@ The current External Exhibit Apps source remains authoritative when it conflicts
 | Actor | Current role | Actual network behavior | Contract consequence |
 | --- | --- | --- | --- |
 | `server/` | Exhibit Relay and `/status` endpoint | Parses arbitrary JSON and broadcasts it to every connected client, including the sender. It does not route or validate by `type:name`. Client ids come from `x-client-id` only when a caller supplies that header. | The Integration Adapter must validate messages and mappings itself. |
-| `screen_oled2/src/App.jsx` | Phase 1 combustion Display App | Connects only to `ws://localhost:8765`; consumes local/upstream events, emits fuel-qualified `COMBUSTION_COMPLETE`, and sends its allowlisted scene/backlight requests. | Its working start id is numeric `1`; wheel ids are numeric `1..3`. |
+| `screen_oled2/src/App.jsx` | Phase 1 combustion Display App | Connects to `VITE_EXHIBIT_RELAY_WS_URL` (development default `ws://localhost:8765`); consumes relay events, emits fuel-qualified `COMBUSTION_COMPLETE`, and sends its allowlisted scene/backlight requests. | Its working start id is numeric `1`; wheel ids are numeric `1..3`. |
 | `screen_oled2/bridge.js` | OLED 2 local WebSocket/serial process | Opens a local WebSocket server on `8765`, connects to `MASTER_WS_URL`, forwards all master messages to local React clients, forwards only React-origin `trigger:GAME_STATE` upstream, and forwards serial input only to local React clients. | It is not a transparent relay. Physical OLED 2 inputs do not reach the master Exhibit Relay. It also directly owns RS-485 hardware, conflicting with the approved Control App-exclusive hardware boundary. |
-| `screen_oled4/src/App.jsx` | Phase 2 valve Display App | Connects only to `ws://localhost:8765`; consumes fuel-qualified `COMBUSTION_COMPLETE` and wheel `4`; emits `VALVE_COMPLETE` or inactivity `RESET` alongside its owned requests. | It never defaults missing fuel or infers a scene below the Display App boundary. |
-| `screen_6/src/App.jsx` | Phase 3 cooling Display App | Connects only to `ws://localhost:8765`; wakes and lights its button on `VALVE_COMPLETE`; consumes `ENERGY_SEND` for audio and explicit lamp/axis/scene requests. | Source still has no Phase 3 ready state, completion transition, inactivity timer, or automatic reset. |
+| `screen_oled4/src/App.jsx` | Phase 2 valve Display App | Connects to the same configured relay URL; consumes fuel-qualified `COMBUSTION_COMPLETE` and wheel `4`; emits `VALVE_COMPLETE` or inactivity `RESET` alongside its owned requests. | It never defaults missing fuel or infers a scene below the Display App boundary. |
+| `screen_6/src/App.jsx` | Phase 3 cooling Display App | Connects to the same configured relay URL; wakes and lights its button on `VALVE_COMPLETE`; consumes `ENERGY_SEND` for audio and explicit lamp/axis/scene requests. | Source still has no Phase 3 ready state, completion transition, inactivity timer, or automatic reset. |
 | `screen_9/src/App.jsx` | Non-product stub; excluded from Version 8 | Opens one WebSocket and logs messages. Its `phase` and `energyReady` state never change. Its reconnect creates a socket without restoring handlers. | Do not deploy, complete, integrate, or assign contract ownership to Screen 9. The supplier-required physical progress behavior must be owned elsewhere. |
 | `screen_2R`, `4R`, `7R`, `8R`, `10` | Independent rear information Display Apps | No WebSocket connection. Language is local UI state. Each returns to sleep after 120 seconds. | They are outside the front Exhibit Event Contract unless product scope explicitly changes. |
 
@@ -127,7 +127,7 @@ Consequences:
 - a Control App Integration Adapter attached to the master relay can send inputs to OLED 2 through the local process;
 - serial wheel/button events cannot be observed by other master clients or the adapter;
 - keeping the serial reader as production hardware owner would violate the Control App-exclusive hardware decision;
-- OLED 4 and Screen 6 also hard-code localhost but have no equivalent supplied local relay proxy, so source alone did not establish deployment topology; the approved topology below resolves it;
+- At Task 1 inspection time OLED 4 and Screen 6 also hard-coded localhost but had no equivalent supplied local relay proxy, so source alone did not establish deployment topology; Task 7 implements the approved shared configurable URL;
 - no message replay or current-state synchronization occurs after any connection is re-established.
 
 ### Approved production topology

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { T, FUEL_LABELS } from './Texts';
 import { createSoundManager } from './soundManager';
 
-const WS_URL = 'ws://localhost:8765';
+const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
 const STEPS_TO_SWITCH = 18;
 
 const sendExhibitControl = (socket, target, action, value) => {
