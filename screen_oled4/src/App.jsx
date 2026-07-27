@@ -192,21 +192,27 @@ export default function App() {
     }
   }, []);
 
-  const connect = useCallback(() => {
-    const socket = new WebSocket(WS_URL);
-    socket.onopen = () => console.log('WS connected');
-    socket.onmessage = (e) => { try { handleMessage(JSON.parse(e.data)); } catch {} };
-    socket.onclose = () => {
-      clearTimeout(wsTimer.current);
-      wsTimer.current = setTimeout(connect, 2000);
-    };
-    ws.current = socket;
-  }, [handleMessage]);
-
   useEffect(() => {
+    let disposed = false;
+    let socket = null;
+    const connect = () => {
+      socket = new WebSocket(WS_URL);
+      socket.onopen = () => console.log('WS connected');
+      socket.onmessage = (e) => { try { handleMessage(JSON.parse(e.data)); } catch {} };
+      socket.onclose = () => {
+        if (disposed) return;
+        clearTimeout(wsTimer.current);
+        wsTimer.current = setTimeout(connect, 2000);
+      };
+      ws.current = socket;
+    };
     connect();
-    return () => { ws.current?.close(); clearTimeout(wsTimer.current); };
-  }, [connect]);
+    return () => {
+      disposed = true;
+      socket?.close();
+      clearTimeout(wsTimer.current);
+    };
+  }, [handleMessage]);
 
   // ── KEYBOARD SIMULATOR (all input goes through WS) ──
   useEffect(() => {

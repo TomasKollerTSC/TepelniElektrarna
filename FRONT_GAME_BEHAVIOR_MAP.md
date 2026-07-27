@@ -4,7 +4,7 @@ This document is the source-backed behavior and contract record for Version 8 Ta
 
 The approved event and control matrices below remain the implementation contract; completion notes identify which increments now exist in source.
 
-Version 8 Tasks 2–5 are complete. The typed adapter implements the approved input/control mappings, and all approved OLED 2, OLED 4, and Screen 6 request transitions now exist at their source guards. Task 6 owns the complete multi-display Chromium matrix.
+Version 8 Tasks 2–6 are complete. The typed adapter implements the approved input/control mappings, all approved OLED 2, OLED 4, and Screen 6 request transitions exist at their source guards, and the complete shared-relay Chromium matrix is green. Task 7 documentation finalization remains.
 
 ## Evidence And Authority
 
@@ -348,7 +348,7 @@ The complete button-backlight matrix is separate from scenes. The Exhibit Lifecy
 
 ### Task 3 implementation boundary
 
-Status: Tasks 3–4 complete on 2026-07-27; Task 5 is ready.
+Status: Tasks 3–6 complete on 2026-07-27; Task 7 documentation finalization remains.
 
 The approved scene contract requires Task 3 to implement the complete reusable fake-backed `scene_controller` capability and its validated adapter mapping: Control App configuration and Device Type, Device State, runtime, public API v1 Command, injectable Driver seam, reusable fake Driver, strict request/result specialization, target validation, resolver, and simulation-only Tepelni mappings. Task 3 also implements continuous-motor startup/reconnect quick-stop verification without a duration limit. It does not add Display App request emission and does not choose or implement controller transport, program ids, artistic parameters, production scene-controller configuration, or hardware protocol behavior. Tasks 4–5 consume these foundations at the approved guarded Display App transitions.
 
@@ -363,6 +363,8 @@ Task 4's approved tracer is the existing first combustion-wheel movement that ch
 Task 4 now implements that exact tracer without changing the state machine. Its focused Chromium slice proves explicit orchestrator-style `sleep` initialization, two unique request ids and correlated immediate results, fake scene and Quido effects, duplicate result reuse without execution, definite rejection and ambiguous failure with independent lamp success, subsequent lighting-target unavailability, rendered `home` UI, and no page-load/reconnect replay. No remaining Task 5 transition was added.
 
 Task 5 now implements every remaining approved Display App transition. OLED 2 owns the selected-fuel Phase 1 scenes and its four backlights; its fuel-qualified existing completion event gives OLED 4 source-owned context without lower-layer memory. OLED 4 owns the coupled-axis and generation-scene completion pair plus the only production motor/scene reset pair. Screen 6 owns the energy-send lamp and its existing unguarded energy-send stop/sleep pair. Each request has its own UUID/result and logs independently. Focused Chromium coverage proves normal progression, exact lamp outcomes, local/global reset ownership, rejected-scene partial failure without compensation or progression blocking, and absence of a generation-scene request when canonical fuel context is missing.
+
+Task 6 now runs OLED 2, OLED 4, and Screen 6 concurrently through the shared Exhibit Relay at their kiosk viewports. Its coal/gas/biomass matrix proves complete rendered progression, exact ordered requests/events and fake effects, correlated results, stored-result deduplication without re-execution, local/global reset, and reconnect without replay. It also enforces one live relay socket per Display App and adapter-only relay connectivity after browser teardown. The three front apps now prevent a disposed React connection effect from scheduling a replacement socket; no game logic, request guard, retry, state, or timer changed. Screen 9 and the OLED 2 serial bridge remain excluded.
 
 The tested physical Control App baseline is recorded in `ControlApp/config/tepelni-elektrarna.yaml` and `docs/tepelni-elektrarna-commissioning.md`: the Quido and its I/O shape, shared encoder bus and addresses, separate turbine-motor bus, Device Instance ids, motor address, direction, speed range/default, and JOG ramp are known; no maximum continuous runtime is required. The remaining unknowns are commissioning facts rather than product decisions: encoder direction/zero; actual UDP-versus-OSC variant, destination, and message schema; production scene-controller Device Instance and strictly typed Driver connection settings; real program references; visual tuning and Phase 3 duration; lifecycle scripts/service names; and exact External Exhibit App initialization messages. Simulation mappings must not overwrite or masquerade as that production baseline.
 
