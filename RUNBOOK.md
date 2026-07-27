@@ -1,226 +1,106 @@
-# TepelniElektrarna Runbook
+# TepelniElektrarna Display App Runbook
 
-This runbook documents how to run the TepelniElektrarna External Exhibit Apps locally without the Control App.
+This runbook covers local installation, development, production builds, static-bundle checks, and browser verification for the eight included Tepelni Display Apps. It does not define Raspberry Pi deployment, kiosk services, touch calibration, or production Integration Adapter configuration.
 
-Immediate scope: installability, display validation, local ports, and known setup issues. Control App integration is out of scope.
+## Inventory and development ports
 
-## Current App Inventory
-
-### Exhibit Relay
-
-| Folder | Purpose | Local port | Notes |
-| --- | --- | ---: | --- |
-| `server/` | Node.js WebSocket relay plus HTTP `/status` endpoint | `8765` | Parses incoming JSON and broadcasts it to all connected clients. |
-
-### Front Display Apps
-
-| Folder | Purpose | Local URL | WebSocket |
+| Folder | Purpose | Development URL | Relay |
 | --- | --- | --- | --- |
-| `screen_oled2/` | Phase 1 combustion/fuel game | `http://localhost:3002/` | Uses `VITE_EXHIBIT_RELAY_WS_URL` (default `ws://localhost:8765`). |
-| `screen_oled4/` | Phase 2 valve/wheel game | `http://localhost:3004/` | Uses the same configured relay URL. |
-| `screen_6/` | Phase 3 cooling/energy-send screen | `http://localhost:3006/` | Uses the same configured relay URL. |
-| `screen_9/` | Front LED/progress style panel | `http://localhost:3009/` | Opens WebSocket and logs messages; source semantics are minimal. |
+| `screen_oled2/` | Front combustion and fuel-selection game | `http://localhost:3002/` | `ws://localhost:8765` by default |
+| `screen_oled4/` | Front valve and turbine game | `http://localhost:3004/` | `ws://localhost:8765` by default |
+| `screen_6/` | Front cooling and energy-send screen | `http://localhost:3006/` | `ws://localhost:8765` by default |
+| `screen_2R/` | Boiler kiosk | `http://localhost:3021/` | none |
+| `screen_4R/` | Heat-exchanger kiosk | `http://localhost:3041/` | none |
+| `screen_7R/` | Turbine kiosk | `http://localhost:3071/` | none |
+| `screen_8R/` | Energy-industry kiosk | `http://localhost:3081/` | none |
+| `screen_10/` | Generator kiosk | `http://localhost:3100/` | none |
 
-### Back Kiosk Display Apps
+`server/` is the Exhibit Relay and listens on port `8765`. `screen_9/` is not a product Display App and is excluded from installation, builds, testing, and deployment.
 
-| Folder | Local URL | Notes |
-| --- | --- | --- |
-| `screen_2R/` | `http://localhost:3021/` | Standalone information kiosk. |
-| `screen_4R/` | `http://localhost:3041/` | Standalone information kiosk. |
-| `screen_7R/` | `http://localhost:3071/` | Standalone information kiosk. |
-| `screen_8R/` | `http://localhost:3081/` | Standalone information kiosk. |
-| `screen_10/` | `http://localhost:3100/` | Standalone information kiosk. |
+## Locked installation and production build
 
-## Local Prerequisites
-
-Verified locally on 2026-07-09 with:
-
-- Node.js `v26.4.0`
-- npm `11.17.0`
-
-For Raspberry Pi, use Node.js LTS rather than relying on the local desktop version.
-
-## Install Dependencies
-
-Run `npm install` in every app folder on the target machine:
+Run from this repository root:
 
 ```bash
-cd external_apps/TepelniElektrarna/server
-npm install
-
-cd ../screen_oled2
-npm install
-
-cd ../screen_oled4
-npm install
-
-cd ../screen_6
-npm install
-
-cd ../screen_9
-npm install
-
-cd ../screen_2R
-npm install
-
-cd ../screen_4R
-npm install
-
-cd ../screen_7R
-npm install
-
-cd ../screen_8R
-npm install
-
-cd ../screen_10
-npm install
+for app in screen_oled2 screen_oled4 screen_6 screen_2R screen_4R screen_7R screen_8R screen_10
+do
+  npm ci --no-audit --no-fund --prefix "$app"
+  npm run build --prefix "$app"
+done
 ```
 
-Known install notes:
-
-- Existing copied `node_modules` may be stale. Re-run `npm install` on the target machine to restore platform-specific optional packages such as Rollup native packages.
-- If `npm run dev` fails with `Permission denied` for `node_modules/.bin/vite`, restore execute permission:
+Every app produces its own ignored `dist/` directory. The three front bundles read one build-time relay endpoint:
 
 ```bash
-find external_apps/TepelniElektrarna -path '*/node_modules/.bin/vite' -exec chmod +x {} +
+for app in screen_oled2 screen_oled4 screen_6
+do
+  VITE_EXHIBIT_RELAY_WS_URL=ws://192.168.55.20:8765 npm run build --prefix "$app"
+done
 ```
 
-- npm reported vulnerabilities during local install. Do not run `npm audit fix` before the client call; that could change dependency versions and introduce unrelated risk.
+Confirm that the configured URL is present in each built asset tree. The immutable release/build and Raspberry Pi serving procedure belongs to Version 9 Task 7; do not use a Vite development server as the production kiosk baseline.
 
-## Run Apps One By One
+## Local development
 
-Open a separate terminal per app.
-
-### Exhibit Relay
+Start the relay for front-app work:
 
 ```bash
-cd external_apps/TepelniElektrarna/server
-npm run dev
+npm ci --prefix server
+npm start --prefix server
 ```
 
-Expected check:
+Start one app in another terminal, for example:
 
 ```bash
-curl -s http://127.0.0.1:8765/status
+npm run dev --prefix screen_oled2
 ```
 
-Expected shape:
+The relay exposes `GET /status` on port `8765`. Front apps use `VITE_EXHIBIT_RELAY_WS_URL=ws://localhost:8765` by default.
 
-```json
-{"connected":0,"clients":[]}
-```
+`screen_oled2/bridge.js` is legacy hardware-specific material and is not part of the included Display App runtime or the production integration boundary.
 
-### Front Apps
+## Rear-kiosk behavior contract
 
-```bash
-cd external_apps/TepelniElektrarna/screen_oled2
-npm run dev
-# http://localhost:3002/
-```
+All five rear kiosks must:
 
-```bash
-cd external_apps/TepelniElektrarna/screen_oled4
-npm run dev
-# http://localhost:3004/
-```
+- start on the touch-hint sleep screen;
+- wake on touch/click, Space, or Enter;
+- show complete initial content and imagery after wake;
+- expose all four configured content cards and open them on touch/click;
+- render Czech, English, and German content and images without failed requests;
+- return from a content tab with the home control;
+- return to sleep on Escape and after 120 seconds without activity;
+- remain within the assigned viewport without document overflow.
 
-```bash
-cd external_apps/TepelniElektrarna/screen_6
-npm run dev
-# http://localhost:3006/
-```
+Keyboard shortcuts are a development fallback: number keys open tabs and `L` cycles `cz -> en -> de -> cz`.
 
-```bash
-cd external_apps/TepelniElektrarna/screen_9
-npm run dev
-# http://localhost:3009/
-```
+## Assigned browser viewports
 
-### Back Kiosk Apps
-
-```bash
-cd external_apps/TepelniElektrarna/screen_2R
-npm run dev
-# http://localhost:3021/
-```
-
-```bash
-cd external_apps/TepelniElektrarna/screen_4R
-npm run dev
-# http://localhost:3041/
-```
-
-```bash
-cd external_apps/TepelniElektrarna/screen_7R
-npm run dev
-# http://localhost:3071/
-```
-
-```bash
-cd external_apps/TepelniElektrarna/screen_8R
-npm run dev
-# http://localhost:3081/
-```
-
-```bash
-cd external_apps/TepelniElektrarna/screen_10
-npm run dev
-# http://localhost:3100/
-```
-
-## Useful Local Full Setup
-
-For display validation, run:
-
-- relay: `server` on `8765`
-- front apps: `3002`, `3004`, `3006`, `3009`
-- back kiosks: `3021`, `3041`, `3071`, `3081`, `3100`
-
-Local smoke check performed on 2026-07-09:
-
-| URL | Result |
+| App | Effective viewport |
 | --- | --- |
-| `http://127.0.0.1:8765/status` | `200` with relay JSON using `GET` |
-| `http://127.0.0.1:3002` | `200 OK` |
-| `http://127.0.0.1:3004` | `200 OK` |
-| `http://127.0.0.1:3006` | `200 OK` |
-| `http://127.0.0.1:3009` | `200 OK` |
-| `http://127.0.0.1:3021` | `200 OK` |
-| `http://127.0.0.1:3041` | `200 OK` |
-| `http://127.0.0.1:3071` | `200 OK` |
-| `http://127.0.0.1:3081` | `200 OK` |
-| `http://127.0.0.1:3100` | `200 OK` |
+| `screen_oled2` | 1080×1920 |
+| `screen_oled4` | 768×1366 |
+| `screen_6` | 1920×1080 |
+| `screen_2R` | 1080×1920 |
+| `screen_4R` | 768×1366 |
+| `screen_7R` | 2160×3840 |
+| `screen_8R` | 1920×1080 |
+| `screen_10` | 1920×1080 |
 
-## Raspberry Pi Validation Notes
+Portrait compositor direction (`90` or `270`) and physical touch calibration are field choices outside Task 2.
 
-Recommended first-pass deployment:
+## Browser acceptance
 
-- Run one app per Pi/display where practical.
-- Use `npm run dev` first for validation.
-- Open Chromium in kiosk mode to the local app URL.
-- Keep the relay reachable at `ws://<relay-pi-ip>:8765`.
+Serve generated `dist/` folders from ordinary static HTTP servers, not `file://` URLs. Reject uncaught errors, unexpected console errors, failed required requests, broken interaction or media, empty content, document overflow, or viewport mismatch.
 
-OLED 2, OLED 4, and Screen 6 use `VITE_EXHIBIT_RELAY_WS_URL` at build/dev-server time. It defaults to `ws://localhost:8765` for one-box development. When the relay is on another host, start or build each front app with the same full URL, for example:
+The complete front simulation contract is run from the parent `techmania-control` checkout:
 
 ```bash
-VITE_EXHIBIT_RELAY_WS_URL=ws://relay.local:8765 npm run build
+npm --prefix browser_acceptance run version-8-task-4
+npm --prefix browser_acceptance run version-8-task-5
+npm --prefix browser_acceptance run version-8
 ```
 
-The value is baked into production bundles, so all three front apps must be rebuilt when the relay URL changes.
+These tests start fake Control App hardware, the Integration Adapter, Exhibit Relay, and all three front apps. They prove game, request/result, reset, reconnect, and failure behavior but do not claim real-hardware or deployment acceptance.
 
-Validate on each display:
-
-- correct resolution and orientation
-- touch input maps to the visible screen
-- videos/images/fonts load
-- audio can autoplay where needed
-- browser does not show permission or crash restore prompts
-- relay `/status` shows connected clients after pages open
-
-## Open Questions For Client/Supplier
-
-- Is the exhibit folder name `TepelniElektrarna` the canonical technical name even though some docs/files use `TepelnaElektrarna`?
-- Should start be sent as numeric id `1` or string id `START`?
-- Is `ENERGY_SEND` part of the official message contract?
-- Should `screen_oled2/bridge.js` forward hardware-origin events to the master relay?
-- Are documented LED/MOTOR messages future requirements or stale documentation?
+See [DISPLAY_APP_RELEASE_AUDIT.md](DISPLAY_APP_RELEASE_AUDIT.md) for the latest recorded result.

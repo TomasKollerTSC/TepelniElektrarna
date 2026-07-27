@@ -125,10 +125,13 @@ Status: Version 8 Tasks 2–7 are complete. A 2026-07-27 parent-repository audit
 - `screen_6` uses `ENERGY_SEND`, which is not fully aligned with the Tepelni API section.
 - Documented LED/MOTOR messages are not implemented in inspected source.
 - `screen_oled2/bridge.js` forwards serial input only locally and is therefore excluded from production. OLED 2, OLED 4, and Screen 6 now use one `VITE_EXHIBIT_RELAY_WS_URL`, retaining localhost only as the development default.
-- Existing `node_modules` can be stale or missing platform optional packages; run `npm install` in each app folder on the target machine.
-- Some Vite shims may need executable permission restored after copy/install.
+- Existing `node_modules` trees are not release artifacts. Run locked `npm ci` and the production builds on the development machine; never copy desktop dependencies or install Vite as the normal display-Pi runtime.
 
 Production adapter enablement requires a new validated Tepelni production Integration Profile, but that profile is a separate later commissioning package and does not block Version 8 closure. Its Control App and relay URLs, service layout, final production mappings, and commissioned scene-controller transport/program references must be supplied rather than copied from simulation or represented by placeholders.
+
+## Version 9 Task 2 display release record
+
+The eight included Vite Display Apps passed locked installation, production build, static-bundle browser, assigned-viewport, complete front simulation/integration, and full rear-kiosk interaction/media/language/inactivity acceptance on 2026-07-27. The release audit fixed empty 2R/4R initial media frames and missing favicon requests without replacing accepted supplier artwork. `screen_9` remains excluded. See `DISPLAY_APP_RELEASE_AUDIT.md` and `RUNBOOK.md`; adapter, calibration, deployment, and later Version 9 work remain separate.
 
 The implemented Tepelni closure change replaces the hard-coded relay URL in OLED 2, OLED 4, and Screen 6 with one shared build-time `VITE_EXHIBIT_RELAY_WS_URL` whose development default remains `ws://localhost:8765`. It changes no state, guard, event, request, retry, or reconnect behavior. The parent repository's Version 8 launcher builds all three production front apps with a non-local URL and reruns the focused and complete Tepelni Chromium suites. Its unmodified first run after the two audit corrections passed end to end without a manual bypass or suite rerun, closing Version 8.
 
