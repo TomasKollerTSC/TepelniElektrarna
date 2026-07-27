@@ -88,7 +88,7 @@ Approved boundary:
 - typed Tepelni input translation and profile-owned target mappings;
 - no hardware protocol, scene composition, game-state inference, or relay modification in the adapter.
 
-Status: Tasks 2–7 product changes are implemented and their intended individual checks are locally green. A 2026-07-27 parent-repository audit reopened Version 8; both the browser-install defect and Task 4 adapter-startup readiness race are corrected and regression-covered. Only the final unmodified closure rerun and result record remain.
+Status: Version 8 Tasks 2–7 are complete. A 2026-07-27 parent-repository audit reopened Version 8; both the browser-install defect and Task 4 adapter-startup readiness race were corrected and regression-covered. The unmodified parent closure command then passed on its first run after both corrections, including all six front-app builds, the three configured Tepelni relay-bundle checks, Task 4 (`1 passed`), Task 5 (`4 passed`), complete Tepelni Chromium (`2 passed`), and complete Jaderna Chromium (`1 passed`).
 
 ### Version 8 Task 3 implementation boundary
 
@@ -130,7 +130,7 @@ Status: Tasks 2–7 product changes are implemented and their intended individua
 
 Production adapter enablement requires a new validated Tepelni production Integration Profile, but that profile is a separate later commissioning package and does not block Version 8 closure. Its Control App and relay URLs, service layout, final production mappings, and commissioned scene-controller transport/program references must be supplied rather than copied from simulation or represented by placeholders.
 
-The implemented Tepelni closure change replaces the hard-coded relay URL in OLED 2, OLED 4, and Screen 6 with one shared build-time `VITE_EXHIBIT_RELAY_WS_URL` whose development default remains `ws://localhost:8765`. It changes no state, guard, event, request, retry, or reconnect behavior. The parent repository's Version 8 launcher is intended to build all three production front apps with a non-local URL and rerun the focused and complete Tepelni Chromium suites; Version 8 remains open until that launcher passes end to end without a manual bypass or rerun.
+The implemented Tepelni closure change replaces the hard-coded relay URL in OLED 2, OLED 4, and Screen 6 with one shared build-time `VITE_EXHIBIT_RELAY_WS_URL` whose development default remains `ws://localhost:8765`. It changes no state, guard, event, request, retry, or reconnect behavior. The parent repository's Version 8 launcher builds all three production front apps with a non-local URL and reruns the focused and complete Tepelni Chromium suites. Its unmodified first run after the two audit corrections passed end to end without a manual bypass or suite rerun, closing Version 8.
 
 ## Version 8 Task 1 Approved Decisions
 
