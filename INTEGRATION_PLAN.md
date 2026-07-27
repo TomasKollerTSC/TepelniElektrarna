@@ -88,7 +88,7 @@ Approved boundary:
 - typed Tepelni input translation and profile-owned target mappings;
 - no hardware protocol, scene composition, game-state inference, or relay modification in the adapter.
 
-Status: Tasks 2–7 are implemented and locally verified. Version 8 is complete.
+Status: Tasks 2–7 product changes are implemented and their intended individual checks are locally green, but a 2026-07-27 parent-repository audit reopened Version 8 because the required single closure command blocks during browser installation and Task 4 has an adapter-startup readiness race.
 
 ### Version 8 Task 3 implementation boundary
 
@@ -130,7 +130,7 @@ Status: Tasks 2–7 are implemented and locally verified. Version 8 is complete.
 
 Production adapter enablement requires a new validated Tepelni production Integration Profile, but that profile is a separate later commissioning package and does not block Version 8 closure. Its Control App and relay URLs, service layout, final production mappings, and commissioned scene-controller transport/program references must be supplied rather than copied from simulation or represented by placeholders.
 
-The completed Tepelni closure change replaces the hard-coded relay URL in OLED 2, OLED 4, and Screen 6 with one shared build-time `VITE_EXHIBIT_RELAY_WS_URL` whose development default remains `ws://localhost:8765`. It changes no state, guard, event, request, retry, or reconnect behavior. The repository-level Version 8 closure launcher builds all three production front apps with a non-local URL and reruns the focused and complete Tepelni Chromium suites.
+The implemented Tepelni closure change replaces the hard-coded relay URL in OLED 2, OLED 4, and Screen 6 with one shared build-time `VITE_EXHIBIT_RELAY_WS_URL` whose development default remains `ws://localhost:8765`. It changes no state, guard, event, request, retry, or reconnect behavior. The parent repository's Version 8 launcher is intended to build all three production front apps with a non-local URL and rerun the focused and complete Tepelni Chromium suites; Version 8 remains open until that launcher passes end to end without a manual bypass or rerun.
 
 ## Version 8 Task 1 Approved Decisions
 
