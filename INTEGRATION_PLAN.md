@@ -88,7 +88,7 @@ Approved boundary:
 - typed Tepelni input translation and profile-owned target mappings;
 - no hardware protocol, scene composition, game-state inference, or relay modification in the adapter.
 
-Status: Tasks 2–7 product changes are implemented and their intended individual checks are locally green. A 2026-07-27 parent-repository audit reopened Version 8; its browser-install defect is now corrected and regression-covered, while Task 4's adapter-startup readiness race and the final clean closure rerun remain.
+Status: Tasks 2–7 product changes are implemented and their intended individual checks are locally green. A 2026-07-27 parent-repository audit reopened Version 8; both the browser-install defect and Task 4 adapter-startup readiness race are corrected and regression-covered. Only the final unmodified closure rerun and result record remain.
 
 ### Version 8 Task 3 implementation boundary
 

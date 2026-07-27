@@ -350,7 +350,7 @@ The complete button-backlight matrix is separate from scenes. The Exhibit Lifecy
 
 ### Task 3 implementation boundary
 
-Status: Tasks 3–6 and Task 7's Tepelni product changes are complete on 2026-07-27. A later parent-repository closure audit reopened Task 7; the shared launcher's browser-install behavior is now corrected, while its adapter-readiness race and final clean rerun remain. No Tepelni game-contract decision or product transition is open.
+Status: Tasks 3–6 and Task 7's Tepelni product changes are complete on 2026-07-27. A later parent-repository closure audit reopened Task 7; both shared launcher defects are now corrected and regression-covered. Only the final unmodified closure rerun and result record remain. No Tepelni game-contract decision or product transition is open.
 
 The approved scene contract requires Task 3 to implement the complete reusable fake-backed `scene_controller` capability and its validated adapter mapping: Control App configuration and Device Type, Device State, runtime, public API v1 Command, injectable Driver seam, reusable fake Driver, strict request/result specialization, target validation, resolver, and simulation-only Tepelni mappings. Task 3 also implements continuous-motor startup/reconnect quick-stop verification without a duration limit. It does not add Display App request emission and does not choose or implement controller transport, program ids, artistic parameters, production scene-controller configuration, or hardware protocol behavior. Tasks 4–5 consume these foundations at the approved guarded Display App transitions.
 
