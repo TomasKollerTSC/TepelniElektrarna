@@ -1,6 +1,6 @@
 # TepelniElektrarna Display App Runbook
 
-This runbook covers local installation, development, production builds, static-bundle checks, and browser verification for the eight included Tepelni Display Apps. It does not define Raspberry Pi deployment, kiosk services, touch calibration, or production Integration Adapter configuration.
+This runbook covers local installation, development, production builds, static-bundle checks, and browser verification for the eight included Tepelni Display Apps. The parent repository now owns Raspberry Pi packaging and services in `docs/display-app-deployment.md`; touch calibration and production Integration Adapter configuration remain separate contracts.
 
 ## Inventory and development ports
 
@@ -38,7 +38,14 @@ do
 done
 ```
 
-Confirm that the configured URL is present in each built asset tree. The immutable release/build and Raspberry Pi serving procedure belongs to Version 9 Task 7; do not use a Vite development server as the production kiosk baseline.
+Confirm that the configured URL is present in each built asset tree. For role metadata, source maps, immutable releases, and Raspberry Pi deployment, run the parent repository command, for example:
+
+```bash
+deploy/display/manage_display.sh build --role tepelni-screen_6 --release-id <release-id>
+deploy/display/manage_display.sh deploy --role tepelni-screen_6 --host <display-pi> --release-dir output/display-releases/<release-id>
+```
+
+The parent tool bakes `ws://192.168.55.20:8765` into front roles and records this repository's exact commit. Do not use a Vite development server as the production kiosk baseline or copy this repository's `node_modules` to a Pi.
 
 ## Local development
 
@@ -88,6 +95,8 @@ Keyboard shortcuts are a development fallback: number keys open tabs and `L` cyc
 | `screen_10` | 1920×1080 |
 
 Portrait compositor direction (`90` or `270`) and physical touch calibration are field choices outside Task 2.
+
+The deployed kiosk validates and applies only the saved four-field `techmania.display-profile.v1` before Chromium starts. It never reuses a calibration record or matrix from another panel. See the parent `docs/touch-calibration.md` and `docs/display-app-deployment.md` before installing a touch role.
 
 ## Browser acceptance
 
