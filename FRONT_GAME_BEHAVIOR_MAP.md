@@ -348,11 +348,13 @@ The complete button-backlight matrix is separate from scenes. The Exhibit Lifecy
 
 ### Task 3 implementation boundary
 
-Status: contract complete on 2026-07-27; implementation has not started.
+Status: complete on 2026-07-27; Task 4 is ready.
 
 The approved scene contract requires Task 3 to implement the complete reusable fake-backed `scene_controller` capability and its validated adapter mapping: Control App configuration and Device Type, Device State, runtime, public API v1 Command, injectable Driver seam, reusable fake Driver, strict request/result specialization, target validation, resolver, and simulation-only Tepelni mappings. Task 3 also implements continuous-motor startup/reconnect quick-stop verification without a duration limit. It does not add Display App request emission and does not choose or implement controller transport, program ids, artistic parameters, production scene-controller configuration, or hardware protocol behavior. Tasks 4–5 consume these foundations at the approved guarded Display App transitions.
 
 The reusable fake is deterministic injected test/simulation support rather than a production transport. It records ordered send attempts and program references and supports local dispatch success, definite no-send rejection, ambiguous local timeout, sender fault/recovery, and blocked concurrency. It never simulates remote acknowledgment, pixels, colors, brightness, animation, scene completion, S-Play, DMX, or artistic fidelity. Task 3 runs the full Control App and Integration Adapter suites with focused coverage of every state, mapping, permission, availability, idempotency/outbox, startup-stop, and independent-failure branch; Display App/Chromium and hardware/protocol checks remain later gates.
+
+Task 3 now provides that contract through the busless fake-backed Control App capability, exact 11-scene Tepelni mapping, five independent simulated Quido backlights, one continuous-axis target, and startup/reconnect quick-stop verification. Initial and reconstructed lighting state remains unknown until a direct public-API `sleep`. No Display App source, production configuration, controller transport, protocol, or Task 4 transition was added.
 
 Task 1 is complete. The source/event matrix, exact control transitions, sender/value permissions, API specialization, topology, reconnect, reset, partial-failure, availability, and safety boundaries are approved. No product decision remains for Task 2 implementation.
 
