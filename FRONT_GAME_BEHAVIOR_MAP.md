@@ -4,7 +4,7 @@ This document is the source-backed behavior and contract record for Version 8 Ta
 
 The approved event and control matrices below remain the implementation contract; completion notes identify which increments now exist in source.
 
-Version 8 Tasks 2–6 are complete. The typed adapter implements the approved input/control mappings, all approved OLED 2, OLED 4, and Screen 6 request transitions exist at their source guards, and the complete shared-relay Chromium matrix is green. Task 7 documentation finalization remains.
+Version 8 Tasks 2–6 are complete. The typed adapter implements the approved input/control mappings, all approved OLED 2, OLED 4, and Screen 6 request transitions exist at their source guards, and the complete shared-relay Chromium matrix is green. The post-Task-6 audit reopened closure work because all three production front Display Apps still hard-code localhost despite the approved shared-relay topology. Task 7 must correct that deployment drift and finish the remaining stabilization contract before Version 8 closes.
 
 ## Evidence And Authority
 
@@ -133,6 +133,8 @@ Consequences:
 ### Approved production topology
 
 One shared Exhibit Relay is the bidirectional WebSocket hub for OLED 2, OLED 4, Screen 6, and the Integration Adapter. Every client uses one configurable relay WebSocket URL; `ws://localhost:8765` is only the local-development default. There are no per-display relay proxies.
+
+Closure decision, 2026-07-27: implement this already-approved topology in all three front Display Apps. The configuration change must preserve their current event names, payloads, guards, state machines, request ownership, and reconnect behavior. The current hard-coded URLs in the actor inventory above remain source evidence until that implementation is complete.
 
 The adapter consumes Control App hardware state through `/ws/state`, publishes translated inputs through the relay WebSocket, receives explicit Display App control requests through that relay, calls only the public Control App HTTP command API, and publishes correlated results back through the relay WebSocket. Display Apps do not connect directly to Control App, and Control App does not consume the exhibit game protocol.
 
@@ -348,7 +350,7 @@ The complete button-backlight matrix is separate from scenes. The Exhibit Lifecy
 
 ### Task 3 implementation boundary
 
-Status: Tasks 3–6 complete on 2026-07-27; Task 7 documentation finalization remains.
+Status: Tasks 3–6 complete on 2026-07-27; Task 7 post-audit stabilization and documentation remain.
 
 The approved scene contract requires Task 3 to implement the complete reusable fake-backed `scene_controller` capability and its validated adapter mapping: Control App configuration and Device Type, Device State, runtime, public API v1 Command, injectable Driver seam, reusable fake Driver, strict request/result specialization, target validation, resolver, and simulation-only Tepelni mappings. Task 3 also implements continuous-motor startup/reconnect quick-stop verification without a duration limit. It does not add Display App request emission and does not choose or implement controller transport, program ids, artistic parameters, production scene-controller configuration, or hardware protocol behavior. Tasks 4–5 consume these foundations at the approved guarded Display App transitions.
 
