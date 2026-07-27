@@ -4,7 +4,7 @@ This document is the source-backed behavior and contract record for Version 8 Ta
 
 Production code is outside this task. The approved event and control matrices will be completed here and in `../../docs/control-app-plan-version-8.md` as the decision interview proceeds.
 
-Version 8 Task 2 was completed on 2026-07-25. The typed adapter now implements only the approved input matrix: five buttons, four independent absolute wheels, and per-source runtime recovery. Control mappings and Display App changes remain later tasks.
+Version 8 Tasks 2–4 are complete. The typed adapter implements the approved input and control mappings, and OLED 2 now implements the approved two-request first-wheel tracer. Remaining Display App transitions belong to Task 5.
 
 ## Evidence And Authority
 
@@ -348,7 +348,7 @@ The complete button-backlight matrix is separate from scenes. The Exhibit Lifecy
 
 ### Task 3 implementation boundary
 
-Status: complete on 2026-07-27; Task 4 is ready.
+Status: Tasks 3–4 complete on 2026-07-27; Task 5 is ready.
 
 The approved scene contract requires Task 3 to implement the complete reusable fake-backed `scene_controller` capability and its validated adapter mapping: Control App configuration and Device Type, Device State, runtime, public API v1 Command, injectable Driver seam, reusable fake Driver, strict request/result specialization, target validation, resolver, and simulation-only Tepelni mappings. Task 3 also implements continuous-motor startup/reconnect quick-stop verification without a duration limit. It does not add Display App request emission and does not choose or implement controller transport, program ids, artistic parameters, production scene-controller configuration, or hardware protocol behavior. Tasks 4–5 consume these foundations at the approved guarded Display App transitions.
 
@@ -359,6 +359,8 @@ Task 3 now provides that contract through the busless fake-backed Control App ca
 Task 1 is complete. The source/event matrix, exact control transitions, sender/value permissions, API specialization, topology, reconnect, reset, partial-failure, availability, and safety boundaries are approved. No product decision remains for Task 2 implementation.
 
 Task 4's approved tracer is the existing first combustion-wheel movement that changes OLED 2 from `sleep` to fuel selection (`home`). At that one unchanged guard OLED 2 adds two independent requests with distinct UUIDs: `tepelni_lighting activate_scene phase1_ready` and `start_button_lamp set_state true`. Acceptance proves both public API paths, fake effects, correlated results, per-target partial failure, rendered fuel-selection UI, and no page-load/reconnect replay; neither request waits for, retries, rolls back, or compensates the other.
+
+Task 4 now implements that exact tracer without changing the state machine. Its focused Chromium slice proves explicit orchestrator-style `sleep` initialization, two unique request ids and correlated immediate results, fake scene and Quido effects, duplicate result reuse without execution, definite rejection and ambiguous failure with independent lamp success, subsequent lighting-target unavailability, rendered `home` UI, and no page-load/reconnect replay. No remaining Task 5 transition was added.
 
 The tested physical Control App baseline is recorded in `ControlApp/config/tepelni-elektrarna.yaml` and `docs/tepelni-elektrarna-commissioning.md`: the Quido and its I/O shape, shared encoder bus and addresses, separate turbine-motor bus, Device Instance ids, motor address, direction, speed range/default, and JOG ramp are known; no maximum continuous runtime is required. The remaining unknowns are commissioning facts rather than product decisions: encoder direction/zero; actual UDP-versus-OSC variant, destination, and message schema; production scene-controller Device Instance and strictly typed Driver connection settings; real program references; visual tuning and Phase 3 duration; lifecycle scripts/service names; and exact External Exhibit App initialization messages. Simulation mappings must not overwrite or masquerade as that production baseline.
 

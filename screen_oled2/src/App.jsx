@@ -5,6 +5,26 @@ import { createSoundManager } from './soundManager';
 const WS_URL = 'ws://localhost:8765';
 const STEPS_TO_SWITCH = 18;
 
+const sendExhibitControl = (socket, target, action, value) => {
+  if (socket?.readyState !== WebSocket.OPEN) {
+    console.error(`[screen_oled2] EXHIBIT_CONTROL not sent: relay unavailable (${target}/${action})`);
+    return null;
+  }
+  const requestId = crypto.randomUUID();
+  const request = {
+    type: 'request',
+    name: 'EXHIBIT_CONTROL',
+    request_id: requestId,
+    sender: 'screen_oled2',
+    target,
+    action,
+    value,
+  };
+  socket.send(JSON.stringify(request));
+  console.info(`[screen_oled2] EXHIBIT_CONTROL request ${requestId}`, { target, action, value });
+  return requestId;
+};
+
 const sm = createSoundManager({
   AUDIO_1: { src: '/a/AUDIO_1.mp3', loop: true,  channel: 'left',  volume: 0.3 },
   AUDIO_2: { src: '/a/AUDIO_2.mp3', loop: false, channel: 'left',  volume: 0.8 },
@@ -316,6 +336,14 @@ export default function App() {
 
   // ── MESSAGE HANDLER ──
   const handleMessage = useCallback((msg) => {
+    if (msg.type === 'result' && msg.name === 'EXHIBIT_CONTROL') {
+      if (msg.recipient === 'screen_oled2') {
+        const method = msg.status === 'rejected' || msg.status === 'failed' ? 'error' : 'info';
+        console[method](`[screen_oled2] EXHIBIT_CONTROL result ${msg.request_id}`, msg);
+      }
+      return;
+    }
+
     if (msg.type !== 'trigger') return;
 
     // Reset all screens to initial state
@@ -362,6 +390,8 @@ export default function App() {
 
       if (screenRef.current === 'sleep') {
         prevAngles.current[idx] = angle;
+        sendExhibitControl(ws.current, 'tepelni_lighting', 'activate_scene', 'phase1_ready');
+        sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', true);
         setScreen('home');
         return;
       }
