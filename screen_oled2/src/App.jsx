@@ -274,11 +274,11 @@ export default function App() {
     return () => clearInterval(id);
   }, [screen, goHome]);
 
-  // ── VIDEO MANAGEMENT (blob cache + dual-video swap) ──
-  // Cache all 6 videos for active fuel when game starts; free on leave
+  // ── VIDEO MANAGEMENT (streamed URLs + dual-video swap) ──
+  // Keep direct same-origin URLs so Chromium can range-stream the active videos
+  // without buffering all six large files into renderer-owned Blobs.
   useEffect(() => {
     if (screen !== 'game' && screen !== 'success') {
-      Object.values(videoCache.current).forEach(URL.revokeObjectURL);
       videoCache.current = {};
       currentVideoState.current = null;
       activeSlot.current = 'A';
@@ -294,33 +294,20 @@ export default function App() {
     if (screen !== 'game') return;
 
     const fuel = fuelIdxRef.current;
-    let cancelled = false;
-
-    Promise.all(
-      [3, 4, 5, 6, 7, 8].map(s =>
-        fetch(videoPath(fuel, s))
-          .then(r => r.blob())
-          .then(blob => [s, URL.createObjectURL(blob)])
-      )
-    ).then(entries => {
-      if (cancelled) {
-        entries.forEach(([, url]) => URL.revokeObjectURL(url));
-        return;
-      }
-      videoCache.current = Object.fromEntries(entries);
-      const initState = getVideoState(gaugesRef.current);
-      currentVideoState.current = initState;
-      const el = videoARef.current;
-      if (el && videoCache.current[initState]) {
-        el.src = videoCache.current[initState];
-        el.style.zIndex = '2';
-        el.play().catch(() => {});
-      }
-      if (videoBRef.current) videoBRef.current.style.zIndex = '1';
-    });
+    videoCache.current = Object.fromEntries(
+      [3, 4, 5, 6, 7, 8].map(state => [state, videoPath(fuel, state)]),
+    );
+    const initState = getVideoState(gaugesRef.current);
+    currentVideoState.current = initState;
+    const el = videoARef.current;
+    if (el && videoCache.current[initState]) {
+      el.src = videoCache.current[initState];
+      el.style.zIndex = '2';
+      el.play().catch(() => {});
+    }
+    if (videoBRef.current) videoBRef.current.style.zIndex = '1';
 
     return () => {
-      cancelled = true;
       clearTimeout(videoSwitchTimer.current);
     };
   }, [screen]);
