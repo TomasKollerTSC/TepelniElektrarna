@@ -42,3 +42,9 @@ No content or supplier blocker remains for the eight included Tepelni Display Ap
 ## Scope boundary
 
 This audit did not add or alter adapter profiles, hardware mappings, calibration, Raspberry Pi services, build/deployment tooling, production network configuration, or `screen_9`.
+
+## Task 8 deployed follow-up
+
+All eight included apps subsequently passed the 2026-07-28 Raspberry Pi immutable-production-bundle rehearsal recorded by the parent repository. Task 8 fixed OLED 2's renderer-heavy six-video Blob preload: direct same-origin media URLs now use the production server's byte-range responses and completed the full coal path without console, request, or media failures. The fix is regression-covered at source commit `0bd01ab5438eb465cbe9d954419aab6fe1273a99`.
+
+The deployed follow-up also proved manifests/checksums/source maps, loaded-entry freshness, front request/result and reset ownership, rear multilingual interaction, per-role restart, and no unexpected browser failures. Transient viewport/endpoint mapping makes this software rehearsal evidence, not physical acceptance for non-native panels, audio, production networking, or exhibit hardware. `screen_9` remained excluded.

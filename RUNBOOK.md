@@ -113,3 +113,11 @@ npm --prefix browser_acceptance run version-8
 These tests start fake Control App hardware, the Integration Adapter, Exhibit Relay, and all three front apps. They prove game, request/result, reset, reconnect, and failure behavior but do not claim real-hardware or deployment acceptance.
 
 See [DISPLAY_APP_RELEASE_AUDIT.md](DISPLAY_APP_RELEASE_AUDIT.md) for the latest recorded result.
+
+## Version 9 Task 8 deployed rehearsal
+
+On 2026-07-28 all eight included roles passed sequential immutable-release rehearsal on `en-display-rehearsal` against the simulation backend at `192.168.1.114`. The three front roles passed the coal/gas-qualified phase flows, exact scenes/motor/backlights, request/result correlation, reconnect/no-replay, reset ownership, duplicate suppression, and deliberate rejection. All five rear roles passed every card in Czech/English/German, image decoding, click and keyboard navigation, Escape, home, exact 120-second inactivity, and assigned-viewport overflow checks. Parent evidence is `output/task8-rehearsal/tepelni-*.json`.
+
+Task 8 found that OLED 2's six parallel fetch-to-Blob video loads could fail on the Pi. Commit `0bd01ab5438eb465cbe9d954419aab6fe1273a99` streams direct same-origin video URLs so Chromium can use HTTP ranges. Generated `node_modules` trees are also intentionally untracked and guarded by a repository-hygiene test.
+
+This does not accept real production relay reachability, motors/Quidos/lighting, audio hardware, portrait direction, 1366×768/4K output, or another panel's touch calibration; those remain field checks.
