@@ -2,6 +2,19 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createSoundManager } from './soundManager';
 
 const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
+const DEFAULT_ENERGY_SEND_RESET_DELAY_MS = 10000;
+const configuredResetDelayRaw = import.meta.env.VITE_ENERGY_SEND_RESET_DELAY_MS;
+const configuredResetDelay = Number(configuredResetDelayRaw);
+const hasValidConfiguredResetDelay = Number.isInteger(configuredResetDelay) && configuredResetDelay > 0;
+const ENERGY_SEND_RESET_DELAY_MS = hasValidConfiguredResetDelay
+  ? configuredResetDelay
+  : DEFAULT_ENERGY_SEND_RESET_DELAY_MS;
+
+if (configuredResetDelayRaw !== undefined && !hasValidConfiguredResetDelay) {
+  console.warn(
+    `[screen_6] Invalid VITE_ENERGY_SEND_RESET_DELAY_MS; using ${DEFAULT_ENERGY_SEND_RESET_DELAY_MS}`,
+  );
+}
 
 const sendExhibitControl = (socket, target, action, value) => {
   if (socket?.readyState !== WebSocket.OPEN) {
@@ -21,6 +34,21 @@ const sendExhibitControl = (socket, target, action, value) => {
   socket.send(JSON.stringify(request));
   console.info(`[screen_6] EXHIBIT_CONTROL request ${requestId}`, { target, action, value });
   return requestId;
+};
+
+const publishReset = (socket) => {
+  if (socket?.readyState !== WebSocket.OPEN) {
+    console.error('[screen_6] GAME_STATE RESET not published: relay unavailable');
+    return false;
+  }
+  socket.send(JSON.stringify({
+    type: 'trigger',
+    name: 'GAME_STATE',
+    id: 1,
+    data: { state: 'RESET' },
+  }));
+  console.info('[screen_6] GAME_STATE RESET published');
+  return true;
 };
 
 const sm = createSoundManager({
@@ -45,6 +73,9 @@ export default function App() {
   const [language, setLanguage] = useState('cz');
   const ws = useRef(null);
   const wsTimer = useRef(null);
+  const resetTimer = useRef(null);
+  const screenRef = useRef('sleep');
+  const energySendSequence = useRef('idle'); // idle | pending | published
 
   const handleMessage = useCallback((msg) => {
     if (msg.type === 'result' && msg.name === 'EXHIBIT_CONTROL') {
@@ -63,22 +94,51 @@ export default function App() {
       if (msg.id === 'LANG_EN') setLanguage('en');
       if (msg.id === 'LANG_DE') setLanguage('de');
       if (msg.id === 'ENERGY_SEND') {
+        console.info('[screen_6] ENERGY_SEND received', {
+          screen: screenRef.current,
+          sequence: energySendSequence.current,
+        });
+        if (screenRef.current !== 'active' || energySendSequence.current !== 'idle') {
+          console.info('[screen_6] ENERGY_SEND ignored', {
+            screen: screenRef.current,
+            sequence: energySendSequence.current,
+          });
+          return;
+        }
+        energySendSequence.current = 'pending';
+        console.info('[screen_6] ENERGY_SEND accepted', {
+          resetDelayMs: ENERGY_SEND_RESET_DELAY_MS,
+        });
         sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', false);
         sendExhibitControl(ws.current, 'turbine_generator_axis', 'stop');
         sendExhibitControl(ws.current, 'tepelni_lighting', 'activate_scene', 'sleep');
         sm.unlock();
         sm.play('AUDIO_7');
+        resetTimer.current = setTimeout(() => {
+          resetTimer.current = null;
+          if (energySendSequence.current !== 'pending' || screenRef.current !== 'active') return;
+          energySendSequence.current = 'published';
+          console.info('[screen_6] ENERGY_SEND end-state complete', {
+            resetDelayMs: ENERGY_SEND_RESET_DELAY_MS,
+          });
+          publishReset(ws.current);
+        }, ENERGY_SEND_RESET_DELAY_MS);
       }
     }
 
     // Wake when OLED4 valve game completes
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'VALVE_COMPLETE') {
       sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', true);
+      screenRef.current = 'active';
       setScreen('active');
     }
 
     // Reset to sleep
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
+      clearTimeout(resetTimer.current);
+      resetTimer.current = null;
+      energySendSequence.current = 'idle';
+      screenRef.current = 'sleep';
       sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', false);
       setScreen('sleep');
     }
@@ -114,6 +174,9 @@ export default function App() {
       disposed = true;
       socket?.close();
       clearTimeout(wsTimer.current);
+      clearTimeout(resetTimer.current);
+      resetTimer.current = null;
+      energySendSequence.current = 'idle';
     };
   }, [handleMessage]);
 
