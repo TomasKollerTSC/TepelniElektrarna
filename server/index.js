@@ -8,7 +8,7 @@ const clients = new Map();
 const httpServer = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url === '/status') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    res.end(JSON.stringify({ connected: clients.size, clients: [...clients.keys()] }));
+    res.end(JSON.stringify({ connected: clients.size, clients: [...clients.values()] }));
   } else {
     res.writeHead(404);
     res.end();
@@ -22,7 +22,7 @@ httpServer.listen(config.PORT, () =>
 
 wss.on('connection', (ws, req) => {
   const id = req.headers['x-client-id'] || `client-${Date.now()}`;
-  clients.set(id, ws);
+  clients.set(ws, id);
   console.log(`[+] ${id} connected (${clients.size} total)`);
 
   ws.on('message', (raw) => {
@@ -37,7 +37,7 @@ wss.on('connection', (ws, req) => {
     console.log(`[${id}]`, JSON.stringify(msg));
 
     // Relay to all clients (including sender)
-    for (const [, client] of clients) {
+    for (const [client] of clients) {
       if (client.readyState === 1) {
         client.send(JSON.stringify(msg));
       }
@@ -45,8 +45,7 @@ wss.on('connection', (ws, req) => {
   });
 
   ws.on('close', () => {
-    clients.delete(id);
+    clients.delete(ws);
     console.log(`[-] ${id} disconnected (${clients.size} total)`);
   });
 });
-
