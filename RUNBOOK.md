@@ -121,3 +121,11 @@ On 2026-07-28 all eight included roles passed sequential immutable-release rehea
 Task 8 found that OLED 2's six parallel fetch-to-Blob video loads could fail on the Pi. Commit `0bd01ab5438eb465cbe9d954419aab6fe1273a99` streams direct same-origin video URLs so Chromium can use HTTP ranges. Generated `node_modules` trees are also intentionally untracked and guarded by a repository-hygiene test.
 
 This does not accept real production relay reachability, motors/Quidos/lighting, audio hardware, portrait direction, 1366×768/4K output, or another panel's touch calibration; those remain field checks.
+
+## Version 9 Task 9 field-release freeze
+
+The field release is built only by the parent repository's `deploy/display/build_release.py`; do not rebuild an app directly during field deployment. The authoritative source commit, eight immutable release ids, manifest SHA-256 values, and per-file checksums are frozen in the parent `docs/version-9-field-release.json`. Verify that this repository is at that exact commit and clean before using the retained `output/display-releases/` directories.
+
+Task 9's final gate found and fixed an Exhibit Relay reconnect collision: connections are now tracked by socket identity, so concurrent sockets with the same client label cannot overwrite or delete one another. The focused network regression and the original three-display reconnect/no-replay browser scenario are release gates.
+
+Tomorrow's installation order, DHCP reservations, per-role host/profile/calibration procedure, health checks, diagnostics, and rollback commands are in the parent `docs/version-9-field-runbook.md`. Task 9 performs no Pi deployment or physical-hardware action.
