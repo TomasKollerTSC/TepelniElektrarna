@@ -4,6 +4,7 @@ import { createSoundManager } from './soundManager';
 
 const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
 const STEPS_TO_SWITCH = 18;
+const FUEL_SELECTION_MIN_DELTA_DEGREES = 0.1;
 
 const sendExhibitControl = (socket, target, action, value) => {
   if (socket?.readyState !== WebSocket.OPEN) {
@@ -434,7 +435,7 @@ export default function App() {
         } else {
           const delta = angleDelta(prevAngles.current[0], angle);
           prevAngles.current[0] = angle;
-          if (Math.abs(delta) < 5) return;
+          if (Math.abs(delta) < FUEL_SELECTION_MIN_DELTA_DEGREES) return;
           fuelSteps.current += delta > 0 ? 1 : -1;
         }
         if (fuelSteps.current >= STEPS_TO_SWITCH) {
