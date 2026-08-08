@@ -3,7 +3,8 @@ import { T, FUEL_LABELS } from './Texts';
 import { createSoundManager } from './soundManager';
 
 const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
-const STEPS_TO_SWITCH = 18;
+const ACCUMULATED_ANGLE_TO_SWITCH = 90;
+const FUEL_SELECTION_MIN_DELTA_DEGREES = 0.1;
 
 const sendExhibitControl = (socket, target, action, value) => {
   if (socket?.readyState !== WebSocket.OPEN) {
@@ -29,7 +30,7 @@ const sm = createSoundManager({
   AUDIO_1: { src: '/a/AUDIO_1.mp3', loop: true,  channel: 'left',  volume: 0.3 },
   AUDIO_2: { src: '/a/AUDIO_2.mp3', loop: false, channel: 'left',  volume: 0.8 },
   AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 0.8 },
-});
+}, 'screen_oled2');
 const FLAME_VOL = { 3: 0.3, 4: 0.3, 5: 0.6, 6: 0.6, 7: 1.0, 8: 1.0 };
 
 const FUELS = ['coal', 'gas', 'biomass'];
@@ -112,7 +113,7 @@ export default function App() {
   const videoSwitchTimer = useRef(null);
   const simAngles = useRef([180, 180, 180]);
   const sleepImgRef = useRef(null);
-  const fuelSteps = useRef(0);
+  const fuelAccumulatedAngle = useRef(0);
   const anyWheelTouched = useRef(false);
 
   useEffect(() => { screenRef.current = screen; }, [screen]);
@@ -195,7 +196,7 @@ export default function App() {
     overloadStart.current = null;
     dangerStart.current = [null, null, null];
     prevAngles.current = [null, null, null];
-    fuelSteps.current = 0;
+    fuelAccumulatedAngle.current = 0;
     anyWheelTouched.current = false;
   }, [stopDecay]);
 
@@ -374,7 +375,7 @@ export default function App() {
       overloadStart.current = null;
       dangerStart.current = [null, null, null];
       prevAngles.current = [null, null, null];
-      fuelSteps.current = 0;
+      fuelAccumulatedAngle.current = 0;
       anyWheelTouched.current = false;
       return;
     }
@@ -428,24 +429,19 @@ export default function App() {
       }
 
       if (screenRef.current === 'home' && idx === 0) {
-        const step = msg.data?.step;
-        if (step !== undefined) {
-          fuelSteps.current += step > 0 ? 1 : -1;
-        } else {
-          const delta = angleDelta(prevAngles.current[0], angle);
-          prevAngles.current[0] = angle;
-          if (Math.abs(delta) < 5) return;
-          fuelSteps.current += delta > 0 ? 1 : -1;
-        }
-        if (fuelSteps.current >= STEPS_TO_SWITCH) {
-          fuelSteps.current = 0;
+        const delta = angleDelta(prevAngles.current[0], angle);
+        prevAngles.current[0] = angle;
+        if (Math.abs(delta) < FUEL_SELECTION_MIN_DELTA_DEGREES) return;
+        fuelAccumulatedAngle.current += delta;
+        if (fuelAccumulatedAngle.current >= ACCUMULATED_ANGLE_TO_SWITCH) {
+          fuelAccumulatedAngle.current = 0;
           setFuelIdx(prev => {
             const next = (prev + 1) % 3;
             fuelIdxRef.current = next;
             return next;
           });
-        } else if (fuelSteps.current <= -STEPS_TO_SWITCH) {
-          fuelSteps.current = 0;
+        } else if (fuelAccumulatedAngle.current <= -ACCUMULATED_ANGLE_TO_SWITCH) {
+          fuelAccumulatedAngle.current = 0;
           setFuelIdx(prev => {
             const next = (prev + 2) % 3;
             fuelIdxRef.current = next;
@@ -503,11 +499,11 @@ export default function App() {
     const send = (msg) => ws.current?.send(JSON.stringify(msg));
     const wheel = (id, idx) => {
       simAngles.current[idx] = (simAngles.current[idx] + STEP + 360) % 360;
-      send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx], step: 1 } });
+      send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx] } });
     };
     const wheelBack = (id, idx) => {
       simAngles.current[idx] = (simAngles.current[idx] - STEP + 360) % 360;
-      send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx], step: -1 } });
+      send({ type: 'trigger', name: 'WHEEL', id, data: { angle: simAngles.current[idx] } });
     };
     const onKey = (e) => {
       sm.unlock();

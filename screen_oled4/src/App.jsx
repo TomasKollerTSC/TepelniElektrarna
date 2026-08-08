@@ -32,7 +32,7 @@ const sm = createSoundManager({
   AUDIO_4: { src: '/a/AUDIO_4.mp3', loop: true,  channel: 'right', volume: 1.0 },
   AUDIO_5: { src: '/a/AUDIO_5.mp3', loop: true,  channel: 'right', volume: 1.0 },
   AUDIO_6: { src: '/a/AUDIO_6.mp3', loop: true,  channel: 'right', volume: 0.5 },
-});
+}, 'screen_oled4');
 
 function angleDelta(prev, curr) {
   if (prev === null) return 0;

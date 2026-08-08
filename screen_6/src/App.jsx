@@ -54,7 +54,7 @@ const publishReset = (socket) => {
 const sm = createSoundManager({
   AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 0.8 },
   AUDIO_7: { src: '/a/AUDIO_7.mp3', loop: false, channel: 'right', volume: 1.0 },
-});
+}, 'screen_6');
 
 const T = {
   cz: {

@@ -66,6 +66,10 @@ The relay exposes `GET /status` on port `8765`. Front apps use `VITE_EXHIBIT_REL
 
 `screen_oled2/bridge.js` is legacy hardware-specific material and is not part of the included Display App runtime or the production integration boundary.
 
+## Playback diagnostics
+
+The three front apps report rejected audio playback and `AudioContext.resume` unlocks in the browser console as errors prefixed with the stable display id (`[screen_oled2]`, `[screen_oled4]`, or `[screen_6]`). Playback errors identify the `play` operation, cue id, source path, and rejection name/message; unlock errors identify `AudioContext.resume` and the rejection name/message. Successful playback and unlocks are not logged at error level.
+
 ## Rear-kiosk behavior contract
 
 All five rear kiosks must:
