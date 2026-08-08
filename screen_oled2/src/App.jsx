@@ -29,7 +29,7 @@ const sm = createSoundManager({
   AUDIO_1: { src: '/a/AUDIO_1.mp3', loop: true,  channel: 'left',  volume: 0.3 },
   AUDIO_2: { src: '/a/AUDIO_2.mp3', loop: false, channel: 'left',  volume: 0.8 },
   AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 0.8 },
-});
+}, 'screen_oled2');
 const FLAME_VOL = { 3: 0.3, 4: 0.3, 5: 0.6, 6: 0.6, 7: 1.0, 8: 1.0 };
 
 const FUELS = ['coal', 'gas', 'biomass'];
