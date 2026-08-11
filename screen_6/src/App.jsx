@@ -74,8 +74,13 @@ export default function App() {
   const ws = useRef(null);
   const wsTimer = useRef(null);
   const resetTimer = useRef(null);
+  const chargeTimers = useRef([]);
   const screenRef = useRef('sleep');
   const energySendSequence = useRef('idle'); // idle | pending | published
+  const cancelChargeTimers = useCallback(() => {
+    chargeTimers.current.forEach(clearTimeout);
+    chargeTimers.current = [];
+  }, []);
 
   const handleMessage = useCallback((msg) => {
     if (msg.type === 'result' && msg.name === 'EXHIBIT_CONTROL') {
@@ -111,7 +116,11 @@ export default function App() {
         });
         sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', false);
         sendExhibitControl(ws.current, 'turbine_generator_axis', 'stop');
-        sendExhibitControl(ws.current, 'tepelni_lighting', 'activate_scene', 'sleep');
+        cancelChargeTimers();
+        sendExhibitControl(ws.current, 'lightbox_3', 'set_intensity', { intensity: 0 });
+        sendExhibitControl(ws.current, 'lightbox_4', 'set_intensity', { intensity: 0 });
+        sendExhibitControl(ws.current, 'energy_progress', 'trigger', 'send');
+        sendExhibitControl(ws.current, 'steam_strip', 'stop');
         sm.unlock();
         sm.play('AUDIO_7');
         resetTimer.current = setTimeout(() => {
@@ -128,6 +137,14 @@ export default function App() {
 
     // Wake when OLED4 valve game completes
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'VALVE_COMPLETE') {
+      sendExhibitControl(ws.current, 'lightbox_3', 'set_intensity', { intensity: 100 });
+      sendExhibitControl(ws.current, 'lightbox_4', 'set_intensity', { intensity: 100 });
+      sendExhibitControl(ws.current, 'game_progress', 'trigger', 'game3');
+      const chargeTimer = setTimeout(() => {
+        chargeTimers.current = chargeTimers.current.filter(timer => timer !== chargeTimer);
+        sendExhibitControl(ws.current, 'energy_progress', 'trigger', 'charge');
+      }, 3000);
+      chargeTimers.current.push(chargeTimer);
       sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', true);
       screenRef.current = 'active';
       setScreen('active');
@@ -136,10 +153,15 @@ export default function App() {
     // Reset to sleep
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
       clearTimeout(resetTimer.current);
+      cancelChargeTimers();
       resetTimer.current = null;
       energySendSequence.current = 'idle';
       screenRef.current = 'sleep';
       sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', false);
+      sendExhibitControl(ws.current, 'lightbox_3', 'set_intensity', { intensity: 0 });
+      sendExhibitControl(ws.current, 'lightbox_4', 'set_intensity', { intensity: 0 });
+      sendExhibitControl(ws.current, 'game_progress', 'stop');
+      sendExhibitControl(ws.current, 'energy_progress', 'stop');
       setScreen('sleep');
     }
   }, []);
@@ -163,6 +185,7 @@ export default function App() {
       socket.onopen = () => console.log('WS connected');
       socket.onmessage = (e) => { try { handleMessage(JSON.parse(e.data)); } catch {} };
       socket.onclose = () => {
+        cancelChargeTimers();
         if (disposed) return;
         clearTimeout(wsTimer.current);
         wsTimer.current = setTimeout(connect, 2000);
@@ -175,10 +198,11 @@ export default function App() {
       socket?.close();
       clearTimeout(wsTimer.current);
       clearTimeout(resetTimer.current);
+      cancelChargeTimers();
       resetTimer.current = null;
       energySendSequence.current = 'idle';
     };
-  }, [handleMessage]);
+  }, [cancelChargeTimers, handleMessage]);
 
   // ── KEYBOARD SIMULATOR ────────────────────────────────
   useEffect(() => {

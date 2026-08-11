@@ -378,3 +378,7 @@ The tested physical Control App baseline is recorded in `ControlApp/config/tepel
 - Fake scene-controller tests cover API/state shape, unknown initial state, explicit `sleep` initialization, commanded-scene recording, unknown-state recovery requiring another explicit `sleep`, timeout/error state, and absence of implicit lifecycle scenes, terminal scene results, or exhibit game events.
 - Fake motor tests cover the one coupled target, existing Phase 2 start guard, Screen 6/reset-origin stop guards, startup/reconnect quick-stop verification, failed-verification unavailability, and no auto-resume.
 - Chromium acceptance runs OLED 2, OLED 4, and Screen 6 together through the shared relay, proves the complete source progression/reset paths and exact requests, and excludes Screen 9 and the OLED 2 serial bridge.
+
+## Dynamic lighting contract (2026-08-11)
+
+The former Tepelni symbolic scenes are replaced incompatibly by lightbox controls and named programs. OLED2 emits its specified RGBW/RGB fuel values and steam play; OLED4 controls Nika 2 and game progress; Screen 6 controls Nika 3/4, game/energy progress, and cancels every pending duplicate charge timer on send, reset, disconnect, or unmount. Display Apps do not replay values/triggers after reconnect and duplicate source events are intentionally not suppressed.

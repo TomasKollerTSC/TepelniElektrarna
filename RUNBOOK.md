@@ -133,3 +133,5 @@ The field release is built only by the parent repository's `deploy/display/build
 Task 9's final gate found and fixed an Exhibit Relay reconnect collision: connections are now tracked by socket identity, so concurrent sockets with the same client label cannot overwrite or delete one another. The focused network regression and the original three-display reconnect/no-replay browser scenario are release gates.
 
 Tomorrow's installation order, DHCP reservations, per-role host/profile/calibration procedure, health checks, diagnostics, and rollback commands are in the parent `docs/version-9-field-runbook.md`. Task 9 performs no Pi deployment or physical-hardware action.
+
+Dynamic lighting has no reconnect restoration or retry. A reload or missed Relay event may leave the last physical command active; the responsible Display App programmer must issue a later explicit request or operator must run Exhibit Startup.

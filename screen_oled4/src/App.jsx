@@ -95,16 +95,6 @@ export default function App() {
       setVideoPhase('open');
       const id = setTimeout(() => {
         sendExhibitControl(ws.current, 'turbine_generator_axis', 'start');
-        if (fuelRef.current) {
-          sendExhibitControl(
-            ws.current,
-            'tepelni_lighting',
-            'activate_scene',
-            `generation_active_${fuelRef.current}`,
-          );
-        } else {
-          console.error('[screen_oled4] tepelni_lighting request not sent: missing canonical fuel context');
-        }
         ws.current?.send(JSON.stringify({
           type: 'trigger', name: 'GAME_STATE', id: 1,
           data: { state: 'VALVE_COMPLETE' },
@@ -120,7 +110,9 @@ export default function App() {
     const id = setInterval(() => {
       if (Date.now() - lastActivity.current > INACTIVITY_MS) {
         sendExhibitControl(ws.current, 'turbine_generator_axis', 'stop');
-        sendExhibitControl(ws.current, 'tepelni_lighting', 'activate_scene', 'sleep');
+        sendExhibitControl(ws.current, 'lightbox_2', 'set_intensity', { intensity: 0 });
+        sendExhibitControl(ws.current, 'game_progress', 'stop');
+        sendExhibitControl(ws.current, 'steam_strip', 'stop');
         setScreen('sleep');
         setStep(0);
         setShowTurbineMsg(false);
@@ -154,6 +146,8 @@ export default function App() {
 
     // Wake when OLED2 combustion game completes
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'COMBUSTION_COMPLETE') {
+      sendExhibitControl(ws.current, 'lightbox_2', 'set_intensity', { intensity: 100 });
+      sendExhibitControl(ws.current, 'game_progress', 'trigger', 'game1');
       fuelRef.current = FUELS.has(msg.data?.fuel) ? msg.data.fuel : null;
       setScreen('active');
       setStep(0);
@@ -165,6 +159,9 @@ export default function App() {
 
     // Reset all screens to initial state
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
+      sendExhibitControl(ws.current, 'lightbox_2', 'set_intensity', { intensity: 0 });
+      sendExhibitControl(ws.current, 'game_progress', 'stop');
+      sendExhibitControl(ws.current, 'steam_strip', 'stop');
       fuelRef.current = null;
       setScreen('sleep');
       setStep(0);
@@ -186,6 +183,7 @@ export default function App() {
           if (next === MAX_STEPS && prev < MAX_STEPS) {
             setTimeout(() => setShowTurbineMsg(true), 3000);
           }
+          if (next === MAX_STEPS) sendExhibitControl(ws.current, 'game_progress', 'trigger', 'game2');
           return next;
         });
       }

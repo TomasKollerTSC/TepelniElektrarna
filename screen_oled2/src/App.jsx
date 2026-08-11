@@ -185,7 +185,8 @@ export default function App() {
 
   const goHome = useCallback(() => {
     stopDecay();
-    sendExhibitControl(ws.current, 'tepelni_lighting', 'activate_scene', 'phase1_ready');
+    sendExhibitControl(ws.current, 'lightbox_1', 'set_rgbw', { red: 0, green: 0, blue: 0, white: 100 });
+    sendExhibitControl(ws.current, 'lightbox_1_reactor', 'set_rgb', { red: 0, green: 0, blue: 0 });
     sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', true);
     setScreen('home');
     setGauges([0, 0, 0]);
@@ -214,12 +215,7 @@ export default function App() {
         else if (now - greenStart.current >= 5000) {
           stopDecay();
           const fuel = FUELS[fuelIdxRef.current];
-          sendExhibitControl(
-            ws.current,
-            'tepelni_lighting',
-            'activate_scene',
-            `combustion_complete_${fuel}`,
-          );
+          sendExhibitControl(ws.current, 'steam_strip', 'trigger', 'play');
           setLanguageLamps(ws.current, null);
           setScreen('success');
           ws.current?.send(JSON.stringify({
@@ -361,6 +357,9 @@ export default function App() {
     // Reset all screens to initial state
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
       stopDecay();
+      sendExhibitControl(ws.current, 'lightbox_1', 'set_rgbw', { red: 0, green: 0, blue: 0, white: 0 });
+      sendExhibitControl(ws.current, 'lightbox_1_reactor', 'set_rgb', { red: 0, green: 0, blue: 0 });
+      sendExhibitControl(ws.current, 'steam_strip', 'stop');
       sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', false);
       setLanguageLamps(ws.current, languageRef.current);
       setScreen('sleep');
@@ -395,12 +394,13 @@ export default function App() {
       }
       if (msg.id === 1 && screenRef.current === 'home') {
         const fuel = FUELS[fuelIdxRef.current];
-        sendExhibitControl(
-          ws.current,
-          'tepelni_lighting',
-          'activate_scene',
-          `combustion_${fuel}`,
-        );
+        const combustionLighting = {
+          coal: [{ red: 100, green: 50, blue: 0, white: 0 }, { red: 100, green: 0, blue: 0 }],
+          gas: [{ red: 0, green: 0, blue: 100, white: 0 }, { red: 100, green: 50, blue: 0 }],
+          biomass: [{ red: 100, green: 100, blue: 0, white: 0 }, { red: 100, green: 50, blue: 0 }],
+        }[fuel];
+        sendExhibitControl(ws.current, 'lightbox_1', 'set_rgbw', combustionLighting[0]);
+        sendExhibitControl(ws.current, 'lightbox_1_reactor', 'set_rgb', combustionLighting[1]);
         sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', false);
         setScreen('game');
         setShowIntro(true);
@@ -422,7 +422,8 @@ export default function App() {
 
       if (screenRef.current === 'sleep') {
         prevAngles.current[idx] = angle;
-        sendExhibitControl(ws.current, 'tepelni_lighting', 'activate_scene', 'phase1_ready');
+        sendExhibitControl(ws.current, 'lightbox_1', 'set_rgbw', { red: 0, green: 0, blue: 0, white: 100 });
+        sendExhibitControl(ws.current, 'lightbox_1_reactor', 'set_rgb', { red: 0, green: 0, blue: 0 });
         sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', true);
         setScreen('home');
         return;
