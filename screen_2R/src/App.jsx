@@ -67,8 +67,8 @@ export default function App() {
   return (
     <div className="screen active" onClick={resetTimer}>
       <UpperPart
-        photo={activeTab ? TAB_PHOTOS[activeTab] : null}
-        source={activeTab ? PHOTO_SOURCES[language][activeTab] : null}
+        photo={TAB_PHOTOS[activeTab ?? 'what']}
+        source={PHOTO_SOURCES[language][activeTab ?? 'what']}
       />
       <MiddlePart
         language={language}

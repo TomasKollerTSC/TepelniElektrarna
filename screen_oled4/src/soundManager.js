@@ -2,8 +2,10 @@ const AC = window.AudioContext || window.webkitAudioContext;
 const ctx = new AC();
 
 class Cue {
-  constructor(name, { src, loop = false, channel = 'center', volume = 1 }) {
+  constructor(name, { src, loop = false, channel = 'center', volume = 1 }, appId) {
     this.name = name;
+    this.src = src;
+    this.appId = appId;
     this.audio = new Audio(src);
     this.audio.loop = loop;
     this.audio.preload = 'auto';
@@ -30,7 +32,11 @@ class Cue {
     this._wire();
     this.audio.currentTime = 0;
     const p = this.audio.play();
-    if (p && p.catch) p.catch(() => {});
+    if (p && p.catch) {
+      p.catch((err) => {
+        console.error(`[${this.appId}] play failed for ${this.name} (${this.src}): ${err?.name ?? 'Error'}: ${err?.message ?? String(err)}`);
+      });
+    }
     this.playing = true;
     if (!this.loop) this.audio.onended = () => { this.playing = false; };
   }
@@ -60,16 +66,26 @@ class Cue {
   }
 }
 
-export function createSoundManager(cueDefs) {
+export function createSoundManager(cueDefs, appId) {
   const cues = Object.fromEntries(
-    Object.entries(cueDefs).map(([n, d]) => [n, new Cue(n, d)])
+    Object.entries(cueDefs).map(([n, d]) => [n, new Cue(n, d, appId)])
   );
+  const unlock = () => {
+    if (ctx.state !== 'suspended') return false;
+    const p = ctx.resume();
+    if (p && p.catch) {
+      p.catch((err) => {
+        console.error(`[${appId}] AudioContext.resume failed: ${err?.name ?? 'Error'}: ${err?.message ?? String(err)}`);
+      });
+    }
+    return p;
+  };
   return {
     play:    (n)    => cues[n]?.play(),
     stop:    (n, o) => cues[n]?.stop(o),
     stopAll: (o)    => Object.values(cues).forEach(c => c.stop(o)),
     volume:  (n, v) => cues[n]?.setVolume(v),
     isPlaying: (n)  => !!cues[n]?.playing,
-    unlock:  ()     => ctx.state === 'suspended' && ctx.resume(),
+    unlock,
   };
 }

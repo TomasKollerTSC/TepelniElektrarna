@@ -2,16 +2,37 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { T } from './Texts';
 import { createSoundManager } from './soundManager';
 
-const WS_URL = 'ws://localhost:8765';
+const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
 const MAX_STEPS = 15;
 const INACTIVITY_MS = 20000;
+const FUELS = new Set(['coal', 'gas', 'biomass']);
+
+const sendExhibitControl = (socket, target, action, value) => {
+  if (socket?.readyState !== WebSocket.OPEN) {
+    console.error(`[screen_oled4] EXHIBIT_CONTROL not sent: relay unavailable (${target}/${action})`);
+    return null;
+  }
+  const requestId = crypto.randomUUID();
+  const request = {
+    type: 'request',
+    name: 'EXHIBIT_CONTROL',
+    request_id: requestId,
+    sender: 'screen_oled4',
+    target,
+    action,
+    ...(value === undefined ? {} : { value }),
+  };
+  socket.send(JSON.stringify(request));
+  console.info(`[screen_oled4] EXHIBIT_CONTROL request ${requestId}`, { target, action, value });
+  return requestId;
+};
 
 const sm = createSoundManager({
   AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 0.8 },
   AUDIO_4: { src: '/a/AUDIO_4.mp3', loop: true,  channel: 'right', volume: 1.0 },
   AUDIO_5: { src: '/a/AUDIO_5.mp3', loop: true,  channel: 'right', volume: 1.0 },
   AUDIO_6: { src: '/a/AUDIO_6.mp3', loop: true,  channel: 'right', volume: 0.5 },
-});
+}, 'screen_oled4');
 
 function angleDelta(prev, curr) {
   if (prev === null) return 0;
@@ -34,6 +55,7 @@ export default function App() {
   const lastActivity = useRef(Date.now());
   const screenRef = useRef(screen);
   const stepRef = useRef(step);
+  const fuelRef = useRef(null);
   const videoARef = useRef(null);
   const videoBRef = useRef(null);
   const activeSlot = useRef('A');
@@ -72,6 +94,7 @@ export default function App() {
     if (step === MAX_STEPS) {
       setVideoPhase('open');
       const id = setTimeout(() => {
+        sendExhibitControl(ws.current, 'turbine_generator_axis', 'start');
         ws.current?.send(JSON.stringify({
           type: 'trigger', name: 'GAME_STATE', id: 1,
           data: { state: 'VALVE_COMPLETE' },
@@ -86,6 +109,10 @@ export default function App() {
     if (screen !== 'active' || step >= MAX_STEPS) return;
     const id = setInterval(() => {
       if (Date.now() - lastActivity.current > INACTIVITY_MS) {
+        sendExhibitControl(ws.current, 'turbine_generator_axis', 'stop');
+        sendExhibitControl(ws.current, 'lightbox_2', 'set_intensity', { intensity: 0 });
+        sendExhibitControl(ws.current, 'game_progress', 'stop');
+        sendExhibitControl(ws.current, 'steam_strip', 'stop');
         setScreen('sleep');
         setStep(0);
         setShowTurbineMsg(false);
@@ -101,6 +128,14 @@ export default function App() {
   }, [screen, step]);
 
   const handleMessage = useCallback((msg) => {
+    if (msg.type === 'result' && msg.name === 'EXHIBIT_CONTROL') {
+      if (msg.recipient === 'screen_oled4') {
+        const method = msg.status === 'rejected' || msg.status === 'failed' ? 'error' : 'info';
+        console[method](`[screen_oled4] EXHIBIT_CONTROL result ${msg.request_id}`, msg);
+      }
+      return;
+    }
+
     if (msg.type !== 'trigger') return;
 
     if (msg.name === 'BUTTON' && msg.data?.pressed) {
@@ -111,6 +146,9 @@ export default function App() {
 
     // Wake when OLED2 combustion game completes
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'COMBUSTION_COMPLETE') {
+      sendExhibitControl(ws.current, 'lightbox_2', 'set_intensity', { intensity: 100 });
+      sendExhibitControl(ws.current, 'game_progress', 'trigger', 'game1');
+      fuelRef.current = FUELS.has(msg.data?.fuel) ? msg.data.fuel : null;
       setScreen('active');
       setStep(0);
       setShowTurbineMsg(false);
@@ -121,6 +159,10 @@ export default function App() {
 
     // Reset all screens to initial state
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
+      sendExhibitControl(ws.current, 'lightbox_2', 'set_intensity', { intensity: 0 });
+      sendExhibitControl(ws.current, 'game_progress', 'stop');
+      sendExhibitControl(ws.current, 'steam_strip', 'stop');
+      fuelRef.current = null;
       setScreen('sleep');
       setStep(0);
       setShowTurbineMsg(false);
@@ -141,27 +183,34 @@ export default function App() {
           if (next === MAX_STEPS && prev < MAX_STEPS) {
             setTimeout(() => setShowTurbineMsg(true), 3000);
           }
+          if (next === MAX_STEPS) sendExhibitControl(ws.current, 'game_progress', 'trigger', 'game2');
           return next;
         });
       }
     }
   }, []);
 
-  const connect = useCallback(() => {
-    const socket = new WebSocket(WS_URL);
-    socket.onopen = () => console.log('WS connected');
-    socket.onmessage = (e) => { try { handleMessage(JSON.parse(e.data)); } catch {} };
-    socket.onclose = () => {
-      clearTimeout(wsTimer.current);
-      wsTimer.current = setTimeout(connect, 2000);
-    };
-    ws.current = socket;
-  }, [handleMessage]);
-
   useEffect(() => {
+    let disposed = false;
+    let socket = null;
+    const connect = () => {
+      socket = new WebSocket(WS_URL);
+      socket.onopen = () => console.log('WS connected');
+      socket.onmessage = (e) => { try { handleMessage(JSON.parse(e.data)); } catch {} };
+      socket.onclose = () => {
+        if (disposed) return;
+        clearTimeout(wsTimer.current);
+        wsTimer.current = setTimeout(connect, 2000);
+      };
+      ws.current = socket;
+    };
     connect();
-    return () => { ws.current?.close(); clearTimeout(wsTimer.current); };
-  }, [connect]);
+    return () => {
+      disposed = true;
+      socket?.close();
+      clearTimeout(wsTimer.current);
+    };
+  }, [handleMessage]);
 
   // ── KEYBOARD SIMULATOR (all input goes through WS) ──
   useEffect(() => {
@@ -176,7 +225,7 @@ export default function App() {
           break;
         case ' ': case 'Enter':
           e.preventDefault();
-          send({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'COMBUSTION_COMPLETE' } });
+          send({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'COMBUSTION_COMPLETE', fuel: 'coal' } });
           break;
         case '1': send({ type: 'trigger', name: 'BUTTON', id: 'LANG_CZ', data: { pressed: true } }); break;
         case '2': send({ type: 'trigger', name: 'BUTTON', id: 'LANG_EN', data: { pressed: true } }); break;
