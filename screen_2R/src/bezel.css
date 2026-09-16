@@ -1,0 +1,59 @@
+/*
+ * Bezel calibration -- screen_2R
+ * Source: Tepel_back.pdf (26ZK008-S00-J), 1:10, mm.
+ * Panel 680.4 x 1209.6 mm (1920x1080, portrait); cut opening 600 x 960 mm, corner radius 80 mm.
+ *
+ * The TV sits inset behind a frame whose opening is neither centred on the
+ * panel nor the same size as it. This scales the app into that opening so
+ * nothing is hidden, and rounds the corners to match the cut.
+ *
+ * The app still lays out at full panel size -- only the final paint is
+ * transformed. That matters because the layouts use fixed pixel sizes
+ * (card.css: height 568px, padding 0 50px) which would break if the box were
+ * merely resized, and it keeps the clientWidth/clientHeight reads in
+ * MiddlePart.jsx correct, since those see unscaled coordinates.
+ *
+ * Values are in MILLIMETRES and converted to ratios, so they are resolution
+ * independent -- the same numbers hold at any output resolution.
+ *
+ * The radius percentages are deliberately asymmetric: the corner is circular
+ * in the real world, but scaleX != scaleY, so it must be an ellipse before the
+ * transform to come out round after it. Each is 80mm / that axis of the opening.
+ */
+
+:root {
+  /* Lit area of the panel, in mm. */
+  --panel-w: 680.4;
+  --panel-h: 1209.6;
+
+  /* How far the frame covers the picture on each side, in mm. */
+  --bezel-l: 50;
+  --bezel-r: 30.4;
+  --bezel-t: 96;
+  --bezel-b: 153.6;
+
+  /* Derived -- do not edit. */
+  --bezel-x: calc(var(--bezel-l) / var(--panel-w) * 100vw);
+  --bezel-y: calc(var(--bezel-t) / var(--panel-h) * 100vh);
+  --bezel-sx: calc((var(--panel-w) - var(--bezel-l) - var(--bezel-r)) / var(--panel-w));
+  --bezel-sy: calc((var(--panel-h) - var(--bezel-t) - var(--bezel-b)) / var(--panel-h));
+}
+
+html,
+body {
+  background: #000;
+  overflow: hidden;
+}
+
+#root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  border-radius: 13.3333% / 8.3333%;
+  transform-origin: 0 0;
+  transform: translate(var(--bezel-x), var(--bezel-y))
+             scale(var(--bezel-sx), var(--bezel-sy));
+}
