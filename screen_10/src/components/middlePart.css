@@ -1,23 +1,30 @@
 .middle {
+  position: relative;
   flex: 0 0 67vh;
   overflow: hidden;
-  padding: 20px 50px 0px;
+  /* Inset clears the 80mm frame-cut corner arc: the opening is only 268mm
+     tall here, so its corner radius is 29.9% of the height. */
+  padding: 84px 110px 0px;
   display: flex;
   flex-direction: column;
 }
 
-/* ── Top bar: flags left, home button right ── */
+/* ── Top bar: home button only, pinned level with the image top ── */
 .top-bar {
+  position: absolute;
+  top: 84px;
+  right: 110px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1vh;
+  justify-content: flex-end;
+  align-items: flex-start;
 }
 
 /* ── Language flags ── */
+/* Now the first row of .text-area, so it lines up with the top of the image. */
 .lang-flags {
   display: flex;
   gap: 0.6rem;
+  margin-bottom: 1vh;
 }
 
 .home-btn {
@@ -162,7 +169,7 @@
 
 .media-frame {
   position: relative;
-  width: 50vw;
+  width: 100%;
   height: 100%;
   border-radius: 4px;
   overflow: hidden;

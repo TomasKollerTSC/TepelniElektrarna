@@ -58,21 +58,6 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, photo, photoS
   return (
     <section className="middle">
       <div className="top-bar">
-        <div className="lang-flags">
-          {LANGUAGES.map(l => (
-            <button
-              key={l}
-              className={`flag-btn${language === l ? ' flag-active' : ''}`}
-              onClick={switchLang(l)}
-            >
-              <img
-                src={`./g/${l}-flag.png`}
-                alt={FLAG_ALTS[l]}
-                className="flag-img"
-              />
-            </button>
-          ))}
-        </div>
         {goHome && (
           <button className="home-btn" onClick={goHome}>
             <img src="./g/homeimage.png" alt="Home" className="home-img" />
@@ -81,6 +66,21 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, photo, photoS
       </div>
       <div className="content-row">
         <div className="text-area">
+          <div className="lang-flags">
+            {LANGUAGES.map(l => (
+              <button
+                key={l}
+                className={`flag-btn${language === l ? ' flag-active' : ''}`}
+                onClick={switchLang(l)}
+              >
+                <img
+                  src={`./g/${l}-flag.png`}
+                  alt={FLAG_ALTS[l]}
+                  className="flag-img"
+                />
+              </button>
+            ))}
+          </div>
           <h1 className="headline">{headline}</h1>
           <div className="helper-text" ref={scrollRef}>
             <div className="helper-text-inner" ref={innerRef}>
