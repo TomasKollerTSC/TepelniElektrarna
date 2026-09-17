@@ -58,11 +58,51 @@ pull the frame off (or look from the side), and measure the white.
 
 ### Front game screens
 
-| Screen | W (lit width) | H (lit height) | L | R | T | B |
-|---|---|---|---|---|---|---|
-| `screen_oled2` | | | | | | |
-| `screen_oled4` | | | | | | |
-| `screen_6` | | | | | | |
+Read off `Tepel_front.pdf` (26ZK008-S00-J, 1:10), same sheet family as the back.
+
+| Screen | W (lit width) | H (lit height) | L | R | T | B | Resolution |
+|---|---|---|---|---|---|---|---|
+| `screen_oled2` | 680,4 | 1209,6 | 16 | 64,4 | 190,5 | 59,1 | 1920x1080 portrait |
+| `screen_oled4` | 375,3 | 666,1 | 12,65 | 12,65 | 33,05 | 33,05 | 1366x768 portrait |
+| `screen_6` | -- | -- | -- | -- | -- | -- | not inset |
+
+`screen_6` needs no calibration: it is not inset behind a frame, it sits inside
+an opening.
+
+**Corner radius: 80 mm**, same as the back openings. The front sheet does not
+carry the arcs the back one did (the back drawing had exactly 20 arcs of R80,
+i.e. 5 openings x 4 corners), so this comes from the exhibit team rather than
+the drawing: `screen_oled2` takes 2R's radius and `screen_oled4` takes 4R's.
+
+That works out exactly, because each front opening is the same size as its back
+counterpart, so 80 mm gives identical percentages:
+
+| Screen | Opening | border-radius | Same as |
+|---|---|---|---|
+| `screen_oled2` | 600 x 960 | `13.3333% / 8.3333%` | `screen_2R` |
+| `screen_oled4` | 350 x 600 | `22.8571% / 13.3333%` | `screen_4R` |
+
+The percentages are elliptical on purpose: the corner is circular in reality,
+but scaleX != scaleY, so it must be an ellipse before the transform to come out
+round after it.
+
+### Why these are right
+
+Both openings come out round, which is the same check that validated the back
+sheet:
+
+| Screen | Opening |
+|---|---|
+| `screen_oled2` | 600 x 960 |
+| `screen_oled4` | 350 x 600 |
+
+The alternative L/R pairing for `screen_oled2` gives 605,3, which is not round.
+Panel aspect confirms the identification independently: 680,4 / 1209,6 =
+0,5625 exactly = 1080/1920, and 375,3 / 666,1 = 0,5634 which is 768/1366.
+
+`screen_oled4` is **identical to `screen_4R`** -- same panel, same symmetric
+cut. `screen_oled2` shares 2R's panel and opening size (600 x 960) but the
+opening sits lower and further left.
 
 ### Back screens
 

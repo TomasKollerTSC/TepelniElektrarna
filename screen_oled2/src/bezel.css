@@ -1,0 +1,65 @@
+/*
+ * Bezel calibration -- screen_oled2
+ * Source: Tepel_front.pdf (26ZK008-S00-J), 1:10, mm.
+ * Panel 680.4 x 1209.6 mm (1920x1080, portrait); cut opening 600 x 960 mm.
+ *
+ * Shares 2R's panel and opening size, but the opening sits much
+ * lower and further left: 2R is L50/R30,4/T96/B153,6.
+ *
+ * The TV is inset behind a frame whose cut opening is neither centred on the
+ * panel nor the same size as it. This scales the app into that opening so
+ * nothing is hidden behind the frame.
+ *
+ * The app still lays out at full panel size -- only the final paint is
+ * transformed. That keeps the window.innerWidth / clientWidth reads in App.jsx
+ * correct, since those see unscaled coordinates, and avoids breaking layouts
+ * that mix fixed pixel sizes with rem/vw.
+ *
+ * Values are in MILLIMETRES and converted to ratios, so they are resolution
+ * independent -- the same numbers hold at any output resolution.
+ *
+ * Corners are rounded to the 80 mm cut radius, same as screen_2R. The front
+ * sheet does not carry the arcs the back one did, but the opening here is
+ * exactly the size of screen_2R's, so 80 mm gives the identical percentages.
+ *
+ * The radius percentages are deliberately asymmetric: the corner is circular
+ * in the real world, but scaleX != scaleY, so it must be an ellipse before the
+ * transform to come out round after it. Each is 80mm / that axis of the opening.
+ */
+
+:root {
+  /* Lit area of the panel, in mm. */
+  --panel-w: 680.4;
+  --panel-h: 1209.6;
+
+  /* How far the frame covers the picture on each side, in mm. */
+  --bezel-l: 16;
+  --bezel-r: 64.4;
+  --bezel-t: 190.5;
+  --bezel-b: 59.1;
+
+  /* Derived -- do not edit. */
+  --bezel-x: calc(var(--bezel-l) / var(--panel-w) * 100vw);
+  --bezel-y: calc(var(--bezel-t) / var(--panel-h) * 100vh);
+  --bezel-sx: calc((var(--panel-w) - var(--bezel-l) - var(--bezel-r)) / var(--panel-w));
+  --bezel-sy: calc((var(--panel-h) - var(--bezel-t) - var(--bezel-b)) / var(--panel-h));
+}
+
+html,
+body {
+  background: #000;
+  overflow: hidden;
+}
+
+#root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  border-radius: 13.3333% / 8.3333%;
+  transform-origin: 0 0;
+  transform: translate(var(--bezel-x), var(--bezel-y))
+             scale(var(--bezel-sx), var(--bezel-sy));
+}
