@@ -94,7 +94,7 @@ export default function App() {
     if (step === MAX_STEPS) {
       setVideoPhase('open');
       const id = setTimeout(() => {
-        sendExhibitControl(ws.current, 'turbine_generator_axis', 'start');
+        sendExhibitControl(ws.current, 'turbine_generator_axis', 'start', { direction: 'ccw', rpm: 60 });
         ws.current?.send(JSON.stringify({
           type: 'trigger', name: 'GAME_STATE', id: 1,
           data: { state: 'VALVE_COMPLETE' },
