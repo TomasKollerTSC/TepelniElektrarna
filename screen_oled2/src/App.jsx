@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createLightingSequence } from '../../shared/lightingSequence';
+import { startCombustion } from '../../shared/gameLighting';
 import { T, FUEL_LABELS } from './Texts';
 import { createSoundManager } from './soundManager';
 
@@ -95,6 +97,20 @@ export default function App() {
   const [stoppedMsg, setStoppedMsg] = useState(false);
   const ws = useRef(null);
   const wsTimer = useRef(null);
+  const lighting = useRef(null);
+  if (!lighting.current) lighting.current = createLightingSequence((target, action, value) => sendExhibitControl(ws.current, target, action, value));
+  const cleanupPending = useRef(false);
+  const resetRunning = useRef(false);
+  const roundActive = useRef(false);
+  const overloadTimer = useRef(null);
+  const phaseComplete = useRef(false);
+  const publishReset = useCallback(() => {
+    if (ws.current?.readyState !== WebSocket.OPEN) return;
+    lighting.current.cancel();
+    clearTimeout(overloadTimer.current);
+    cleanupPending.current = true;
+    ws.current.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'RESET' } }));
+  }, []);
   const prevAngles = useRef([null, null, null]);
   const dangerStart = useRef([null, null, null]);
   const overloadStart = useRef(null);
@@ -183,28 +199,11 @@ export default function App() {
     }, 2000);
   }, [stopDecay]);
 
-  const goHome = useCallback(() => {
-    stopDecay();
-    sendExhibitControl(ws.current, 'lightbox_1', 'set_rgbw', { red: 0, green: 0, blue: 0, white: 100 });
-    sendExhibitControl(ws.current, 'lightbox_1_reactor', 'set_rgb', { red: 0, green: 0, blue: 0 });
-    sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', true);
-    setScreen('home');
-    setGauges([0, 0, 0]);
-    setWarnActive([false, false, false]);
-    setOverloadActive(false);
-    setStoppedMsg(false);
-    greenStart.current = null;
-    overloadStart.current = null;
-    dangerStart.current = [null, null, null];
-    prevAngles.current = [null, null, null];
-    fuelAccumulatedAngle.current = 0;
-    anyWheelTouched.current = false;
-  }, [stopDecay]);
-
   // ── ZONE TIMING (warnings + win) ──
   useEffect(() => {
     if (screen !== 'game') return;
     const id = setInterval(() => {
+      if (phaseComplete.current || cleanupPending.current || overloadTimer.current) return;
       const now = Date.now();
       const g = gaugesRef.current;
       const zones = g.map(getZone);
@@ -215,13 +214,15 @@ export default function App() {
         else if (now - greenStart.current >= 5000) {
           stopDecay();
           const fuel = FUELS[fuelIdxRef.current];
-          sendExhibitControl(ws.current, 'steam_strip', 'trigger', 'play');
+          phaseComplete.current = true;
           setLanguageLamps(ws.current, null);
           setScreen('success');
-          ws.current?.send(JSON.stringify({
-            type: 'trigger', name: 'GAME_STATE', id: 1,
-            data: { state: 'COMBUSTION_COMPLETE', fuel },
-          }));
+          lighting.current.run(async ({ play, check }) => {
+            await play('game_1_final');
+            check();
+            ws.current?.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1,
+              data: { state: 'COMBUSTION_COMPLETE', fuel } }));
+          });
           return;
         }
       } else {
@@ -250,7 +251,7 @@ export default function App() {
           stopDecay();
           setStoppedMsg(true);
           setGauges([0, 0, 0]);
-          setTimeout(() => goHome(), 3000);
+          overloadTimer.current = setTimeout(publishReset, 3000);
         } else if (elapsed >= 5000) {
           setOverloadActive(true);
         }
@@ -260,16 +261,16 @@ export default function App() {
       }
     }, 500);
     return () => clearInterval(id);
-  }, [screen, stopDecay, goHome]);
+  }, [screen, stopDecay, publishReset]);
 
   // ── INACTIVITY TIMEOUT (30s) ──
   useEffect(() => {
     if (screen !== 'game') return;
     const id = setInterval(() => {
-      if (Date.now() - lastActivity.current > 30000) goHome();
+      if (Date.now() - lastActivity.current > 30000 && !cleanupPending.current) publishReset();
     }, 5000);
     return () => clearInterval(id);
-  }, [screen, goHome]);
+  }, [screen, publishReset]);
 
   // ── VIDEO MANAGEMENT (streamed URLs + dual-video swap) ──
   // Keep direct same-origin URLs so Chromium can range-stream the active videos
@@ -344,6 +345,7 @@ export default function App() {
 
   // ── MESSAGE HANDLER ──
   const handleMessage = useCallback((msg) => {
+    lighting.current.result(msg);
     if (msg.type === 'result' && msg.name === 'EXHIBIT_CONTROL') {
       if (msg.recipient === 'screen_oled2') {
         const method = msg.status === 'rejected' || msg.status === 'failed' ? 'error' : 'info';
@@ -357,9 +359,19 @@ export default function App() {
     // Reset all screens to initial state
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
       stopDecay();
-      sendExhibitControl(ws.current, 'lightbox_1', 'set_rgbw', { red: 0, green: 0, blue: 0, white: 0 });
-      sendExhibitControl(ws.current, 'lightbox_1_reactor', 'set_rgb', { red: 0, green: 0, blue: 0 });
-      sendExhibitControl(ws.current, 'steam_strip', 'stop');
+      clearTimeout(overloadTimer.current);
+      overloadTimer.current = null;
+      roundActive.current = false;
+      phaseComplete.current = false;
+      screenRef.current = 'sleep';
+      cleanupPending.current = true;
+      if (!resetRunning.current) {
+        resetRunning.current = true;
+        lighting.current.run(async ({ request }) => { await request('lighting_reset', 'reset'); }).then(ok => {
+          resetRunning.current = false;
+          cleanupPending.current = !ok;
+        });
+      }
       sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', false);
       setLanguageLamps(ws.current, languageRef.current);
       setScreen('sleep');
@@ -392,15 +404,12 @@ export default function App() {
           setLanguageLamps(ws.current, selectedLanguage);
         }
       }
-      if (msg.id === 1 && screenRef.current === 'home') {
+      if (msg.id === 1 && screenRef.current === 'home' && !cleanupPending.current && !roundActive.current) {
         const fuel = FUELS[fuelIdxRef.current];
-        const combustionLighting = {
-          coal: [{ red: 100, green: 50, blue: 0, white: 0 }, { red: 100, green: 0, blue: 0 }],
-          gas: [{ red: 0, green: 0, blue: 100, white: 0 }, { red: 100, green: 50, blue: 0 }],
-          biomass: [{ red: 100, green: 100, blue: 0, white: 0 }, { red: 100, green: 50, blue: 0 }],
-        }[fuel];
-        sendExhibitControl(ws.current, 'lightbox_1', 'set_rgbw', combustionLighting[0]);
-        sendExhibitControl(ws.current, 'lightbox_1_reactor', 'set_rgb', combustionLighting[1]);
+        roundActive.current = true;
+        phaseComplete.current = false;
+        screenRef.current = 'game';
+        lighting.current.run(sequence => startCombustion(sequence, fuel));
         sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', false);
         setScreen('game');
         setShowIntro(true);
@@ -420,10 +429,11 @@ export default function App() {
       const idx = msg.id - 1;
       if (idx < 0 || idx > 2) return;
 
+      if (cleanupPending.current) return;
       if (screenRef.current === 'sleep') {
         prevAngles.current[idx] = angle;
-        sendExhibitControl(ws.current, 'lightbox_1', 'set_rgbw', { red: 0, green: 0, blue: 0, white: 100 });
-        sendExhibitControl(ws.current, 'lightbox_1_reactor', 'set_rgb', { red: 0, green: 0, blue: 0 });
+        screenRef.current = 'home';
+        sendExhibitControl(ws.current, 'lightbox_1', 'set_intensity', { intensity: 100 });
         sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', true);
         setScreen('home');
         return;
@@ -479,6 +489,11 @@ export default function App() {
       socket.onopen = () => console.log('WS connected');
       socket.onmessage = (e) => { try { handleMessage(JSON.parse(e.data)); } catch {} };
       socket.onclose = () => {
+        lighting.current.cancel();
+        clearTimeout(overloadTimer.current);
+        overloadTimer.current = null;
+        stopDecay();
+        if (roundActive.current) cleanupPending.current = true;
         if (disposed) return;
         clearTimeout(wsTimer.current);
         wsTimer.current = setTimeout(connect, 2000);
@@ -488,6 +503,9 @@ export default function App() {
     connect();
     return () => {
       disposed = true;
+      lighting.current.cancel();
+      clearTimeout(overloadTimer.current);
+      stopDecay();
       socket?.close();
       clearTimeout(wsTimer.current);
       stopDecay();

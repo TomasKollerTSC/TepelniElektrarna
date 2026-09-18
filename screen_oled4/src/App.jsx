@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createLightingSequence } from '../../shared/lightingSequence';
+import { startValve, completeValve } from '../../shared/gameLighting';
 import { T } from './Texts';
 import { createSoundManager } from './soundManager';
 
@@ -51,6 +53,9 @@ export default function App() {
 
   const ws = useRef(null);
   const wsTimer = useRef(null);
+  const lighting = useRef(null);
+  if (!lighting.current) lighting.current = createLightingSequence((target, action, value) => sendExhibitControl(ws.current, target, action, value));
+  const valveReady = useRef(false);
   const prevAngle = useRef(null);
   const lastActivity = useRef(Date.now());
   const screenRef = useRef(screen);
@@ -89,30 +94,14 @@ export default function App() {
     prevStep.current = step;
   }, [step, screen]);
 
-  // Notify other screens when valve is fully open (after 3s turbine message delay)
-  useEffect(() => {
-    if (step === MAX_STEPS) {
-      setVideoPhase('open');
-      const id = setTimeout(() => {
-        sendExhibitControl(ws.current, 'turbine_generator_axis', 'start', { direction: 'ccw', rpm: 60 });
-        ws.current?.send(JSON.stringify({
-          type: 'trigger', name: 'GAME_STATE', id: 1,
-          data: { state: 'VALVE_COMPLETE' },
-        }));
-      }, 3000);
-      return () => clearTimeout(id);
-    }
-  }, [step]);
-
   // Inactivity → sleep (20s) + reset all screens (disabled when game complete)
   useEffect(() => {
     if (screen !== 'active' || step >= MAX_STEPS) return;
     const id = setInterval(() => {
       if (Date.now() - lastActivity.current > INACTIVITY_MS) {
-        sendExhibitControl(ws.current, 'turbine_generator_axis', 'stop');
-        sendExhibitControl(ws.current, 'lightbox_2', 'set_intensity', { intensity: 0 });
-        sendExhibitControl(ws.current, 'game_progress', 'stop');
-        sendExhibitControl(ws.current, 'steam_strip', 'stop');
+        lighting.current.cancel();
+        valveReady.current = false;
+        screenRef.current = 'sleep';
         setScreen('sleep');
         setStep(0);
         setShowTurbineMsg(false);
@@ -128,6 +117,7 @@ export default function App() {
   }, [screen, step]);
 
   const handleMessage = useCallback((msg) => {
+    lighting.current.result(msg);
     if (msg.type === 'result' && msg.name === 'EXHIBIT_CONTROL') {
       if (msg.recipient === 'screen_oled4') {
         const method = msg.status === 'rejected' || msg.status === 'failed' ? 'error' : 'info';
@@ -145,9 +135,11 @@ export default function App() {
     }
 
     // Wake when OLED2 combustion game completes
-    if (msg.name === 'GAME_STATE' && msg.data?.state === 'COMBUSTION_COMPLETE') {
-      sendExhibitControl(ws.current, 'lightbox_2', 'set_intensity', { intensity: 100 });
-      sendExhibitControl(ws.current, 'game_progress', 'trigger', 'game1');
+    if (msg.name === 'GAME_STATE' && msg.data?.state === 'COMBUSTION_COMPLETE' && screenRef.current === 'sleep') {
+      screenRef.current = 'active';
+      stepRef.current = 0;
+      valveReady.current = false;
+      lighting.current.run(startValve).then(ok => { valveReady.current = ok; });
       fuelRef.current = FUELS.has(msg.data?.fuel) ? msg.data.fuel : null;
       setScreen('active');
       setStep(0);
@@ -159,9 +151,11 @@ export default function App() {
 
     // Reset all screens to initial state
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
-      sendExhibitControl(ws.current, 'lightbox_2', 'set_intensity', { intensity: 0 });
-      sendExhibitControl(ws.current, 'game_progress', 'stop');
-      sendExhibitControl(ws.current, 'steam_strip', 'stop');
+      lighting.current.cancel();
+      valveReady.current = false;
+      screenRef.current = 'sleep';
+      stepRef.current = 0;
+      sendExhibitControl(ws.current, 'turbine_generator_axis', 'stop');
       fuelRef.current = null;
       setScreen('sleep');
       setStep(0);
@@ -173,19 +167,23 @@ export default function App() {
     // Wheel 4 — open valve
     if (msg.name === 'WHEEL' && msg.id === 4) {
       lastActivity.current = Date.now();
-      if (screenRef.current !== 'active') return;
+      if (screenRef.current !== 'active' || !valveReady.current || stepRef.current >= MAX_STEPS) return;
       const angle = msg.data?.angle ?? 0;
       const delta = angleDelta(prevAngle.current, angle);
       prevAngle.current = angle;
       if (delta > 5) {
-        setStep(prev => {
-          const next = Math.min(MAX_STEPS, prev + 1);
-          if (next === MAX_STEPS && prev < MAX_STEPS) {
-            setTimeout(() => setShowTurbineMsg(true), 3000);
-          }
-          if (next === MAX_STEPS) sendExhibitControl(ws.current, 'game_progress', 'trigger', 'game2');
-          return next;
-        });
+        const next = Math.min(MAX_STEPS, stepRef.current + 1);
+        stepRef.current = next;
+        setStep(next);
+        if (next === MAX_STEPS) {
+          valveReady.current = false;
+          setVideoPhase('open');
+          lighting.current.run(sequence => completeValve(sequence, () => {
+            setShowTurbineMsg(true);
+            ws.current?.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1,
+              data: { state: 'VALVE_COMPLETE' } }));
+          }));
+        }
       }
     }
   }, []);
@@ -198,6 +196,8 @@ export default function App() {
       socket.onopen = () => console.log('WS connected');
       socket.onmessage = (e) => { try { handleMessage(JSON.parse(e.data)); } catch {} };
       socket.onclose = () => {
+        lighting.current.cancel();
+        valveReady.current = false;
         if (disposed) return;
         clearTimeout(wsTimer.current);
         wsTimer.current = setTimeout(connect, 2000);
@@ -207,6 +207,7 @@ export default function App() {
     connect();
     return () => {
       disposed = true;
+      lighting.current.cancel();
       socket?.close();
       clearTimeout(wsTimer.current);
     };

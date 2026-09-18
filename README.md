@@ -91,3 +91,22 @@ For open source projects, say how it is licensed.
 
 ## Project status
 If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+
+## Lighting contract 3
+
+Front OLED 2, OLED 4 and Screen 6 require the matching Adapter profile with
+`lighting_contract_version: 3`. Deploy these front applications together with
+the backend mapping. The white lightbox stays lit from fuel selection until
+reset. START plays `fuel_coal`, `fuel_gas` or `fuel_biomass`; Display Apps no
+longer write the RGB bottom. Phase playlists accumulate until the common reset.
+
+OLED 2 owns the acknowledged lighting reset and blocks new rounds until it
+succeeds. OLED 4 stops the turbine on RESET. Third-phase timing is 3/1/2 seconds;
+energy send retains all exhibit lighting and the turbine for 6 seconds, then
+publishes RESET. `VITE_ENERGY_SEND_RESET_DELAY_MS` optionally overrides this last
+delay at build time; the deployment role also defaults to 6000.
+
+`shared/lightingSequence.js` cancels pending steps on reset/disconnect and
+correlates dispatch acknowledgements. Reconnect alone does not replay commands.
+An interrupted round requires an explicit RESET before continuing.
+Run sequence regression tests with `node --test tests/lighting-sequence.test.mjs`.
