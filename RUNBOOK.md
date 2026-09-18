@@ -34,7 +34,7 @@ Every app produces its own ignored `dist/` directory. The three front bundles re
 ```bash
 for app in screen_oled2 screen_oled4 screen_6
 do
-  VITE_EXHIBIT_RELAY_WS_URL=ws://10.42.133.20:8765 npm run build --prefix "$app"
+  VITE_EXHIBIT_RELAY_WS_URL=ws://10.42.133.10:8765 npm run build --prefix "$app"
 done
 ```
 
@@ -45,7 +45,7 @@ deploy/display/manage_display.sh build --role tepelni-screen_6 --release-id <rel
 deploy/display/manage_display.sh deploy --role tepelni-screen_6 --host <display-pi> --release-dir output/display-releases/<release-id>
 ```
 
-The parent tool bakes `ws://10.42.133.20:8765` into front roles and records this repository's exact commit. Do not use a Vite development server as the production kiosk baseline or copy this repository's `node_modules` to a Pi.
+The parent tool bakes `ws://10.42.133.10:8765` into front roles and records this repository's exact commit. Do not use a Vite development server as the production kiosk baseline or copy this repository's `node_modules` to a Pi.
 
 ## Local development
 
