@@ -2,7 +2,9 @@
   flex: 1 1 auto;
   border-top: 1px solid #1a1a1a;
   background: #0a0a0a;
-  padding: 0 100px;
+  /* 60px bottom inset so the first card clears the 80mm corner arc:
+     at x=100 the arc allows y<=3741 and the card ended at 3759. */
+  padding: 0 100px 60px;
   display: flex;
   align-items: center;
   overflow: hidden;

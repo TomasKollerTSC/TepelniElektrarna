@@ -341,11 +341,19 @@ export default function App() {
 
       {/* Scale bar at very bottom */}
       <div className="scale-area">
-        <span className="lock-icon">🔒</span>
+        <span className="lock-icon" role="img" aria-label="zamceno">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 1.5A5.5 5.5 0 0 0 6.5 7v2.5H6A2.5 2.5 0 0 0 3.5 12v8A2.5 2.5 0 0 0 6 22.5h12a2.5 2.5 0 0 0 2.5-2.5v-8A2.5 2.5 0 0 0 18 9.5h-.5V7A5.5 5.5 0 0 0 12 1.5Zm0 2A3.5 3.5 0 0 1 15.5 7v2.5h-7V7A3.5 3.5 0 0 1 12 3.5Z"/>
+          </svg>
+        </span>
         <div className="scale-bar">
           <div className="scale-marker" style={{ left: `${pct}%` }} />
         </div>
-        <span className="lock-icon open">🔓</span>
+        <span className="lock-icon open" role="img" aria-label="odemceno">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 1.5A5.5 5.5 0 0 0 6.5 7v2.5H6A2.5 2.5 0 0 0 3.5 12v8A2.5 2.5 0 0 0 6 22.5h12a2.5 2.5 0 0 0 2.5-2.5v-8A2.5 2.5 0 0 0 18 9.5H8.5V7a3.5 3.5 0 0 1 6.86-1l1.94-.52A5.5 5.5 0 0 0 12 1.5Z"/>
+          </svg>
+        </span>
       </div>
     </div>
   );

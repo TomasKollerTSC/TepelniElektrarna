@@ -198,6 +198,16 @@ body {
 }
 .lock-icon.open { opacity: 1; }
 
+/* Inline SVG rather than an emoji: no font on the display Pis covers
+   U+1F512/U+1F513, so the glyphs rendered blank and the flex row lost
+   its end caps. 1em keeps the footprint the font-size already set. */
+.lock-icon svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+  fill: currentColor;
+}
+
 .scale-bar {
   flex: 1;
   height: clamp(28px, 4vh, 44px);
