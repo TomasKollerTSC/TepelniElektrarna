@@ -17,13 +17,11 @@
  * Values are in MILLIMETRES and converted to ratios, so they are resolution
  * independent -- the same numbers hold at any output resolution.
  *
- * Corners are rounded to the 80 mm cut radius, same as screen_4R. The front
- * sheet does not carry the arcs the back one did, but the opening here is
- * exactly the size of screen_4R's, so 80 mm gives the identical percentages.
- *
- * The radius percentages are deliberately asymmetric: the corner is circular
- * in the real world, but scaleX != scaleY, so it must be an ellipse before the
- * transform to come out round after it. Each is 80mm / that axis of the opening.
+ * NO border-radius here, deliberately. The cut radius really is 80 mm (as
+ * screen_4R uses), but simulating it in the app clipped a UI element that
+ * is visible on the real panel -- the frame's corner does not fall where the
+ * rounded #root box does. The measurements and the fit below are unchanged;
+ * only the corner rounding is dropped.
  */
 
 :root {
@@ -57,7 +55,6 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  border-radius: 22.8571% / 13.3333%;
   transform-origin: 0 0;
   transform: translate(var(--bezel-x), var(--bezel-y))
              scale(var(--bezel-sx), var(--bezel-sy));
