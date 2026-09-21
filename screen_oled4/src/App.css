@@ -189,6 +189,10 @@ body {
   align-items: center;
   gap: 0.8rem;
   padding: 0 1.5rem 1.2rem;
+  /* Lift the lock/indicator bar 4 cm off the glass. 92px in untransformed
+     #root coords: 20mm x (1366px / 666.1mm) / 0.900766 bezel scale. Offset
+     only -- the element shifts, the layout flow does not. */
+  bottom: 92px;
 }
 
 .lock-icon {
