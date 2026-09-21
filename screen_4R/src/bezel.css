@@ -1,7 +1,7 @@
 /*
  * Bezel calibration -- screen_4R
  * Source: Tepel_back.pdf (26ZK008-S00-J), 1:10, mm.
- * Panel 375.3 x 666.1 mm (1366x768, portrait); cut opening 340 x 590 mm (corner radius is 80 mm but is not simulated, see below).
+ * Panel 375.3 x 666.1 mm (1366x768, portrait); cut opening 340 x 583 mm (corner radius is 80 mm but is not simulated, see below).
  *
  * The TV sits inset behind a frame whose opening is neither centred on the
  * panel nor the same size as it. This scales the app into that opening so
@@ -31,8 +31,8 @@
   /* How far the frame covers the picture on each side, in mm. */
   --bezel-l: 17.65;
   --bezel-r: 17.65;
-  --bezel-t: 38.05;
-  --bezel-b: 38.05;
+  --bezel-t: 40.05;
+  --bezel-b: 43.05;
 
   /* Derived -- do not edit. */
   --bezel-x: calc(var(--bezel-l) / var(--panel-w) * 100vw);
