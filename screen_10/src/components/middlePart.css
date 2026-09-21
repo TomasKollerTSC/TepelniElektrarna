@@ -1,6 +1,6 @@
 .middle {
   position: relative;
-  flex: 0 0 67vh;
+  flex: 0 0 62vh;
   overflow: hidden;
   /* Inset clears the 80mm frame-cut corner arc: the opening is only 268mm
      tall here, so its corner radius is 29.9% of the height. */
