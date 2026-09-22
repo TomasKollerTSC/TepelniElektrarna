@@ -29,11 +29,11 @@ const sendExhibitControl = (socket, target, action, value) => {
 };
 
 const sm = createSoundManager({
-  AUDIO_1: { src: '/a/AUDIO_1.mp3', loop: true,  channel: 'left',  volume: 0.3 },
-  AUDIO_2: { src: '/a/AUDIO_2.mp3', loop: false, channel: 'left',  volume: 0.8 },
-  AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 0.8 },
+  AUDIO_1: { src: '/a/AUDIO_1.mp3', loop: true,  channel: 'left',  volume: 1.0 },
+  AUDIO_2: { src: '/a/AUDIO_2.mp3', loop: false, channel: 'left',  volume: 1.0 },
+  AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 1.0 },
 }, 'screen_oled2');
-const FLAME_VOL = { 3: 0.3, 4: 0.3, 5: 0.6, 6: 0.6, 7: 1.0, 8: 1.0 };
+const FLAME_VOL = { 3: 1.0, 4: 1.0, 5: 1.0, 6: 1.0, 7: 1.0, 8: 1.0 };
 
 const FUELS = ['coal', 'gas', 'biomass'];
 const FUEL_IMAGES = ['/g/uhlí.png', '/g/plyn.png', '/g/biomasa.png'];
@@ -144,7 +144,7 @@ export default function App() {
     if (screen === 'game' || screen === 'success') {
       sm.unlock();
       sm.play('AUDIO_1');
-      if (screen === 'success') sm.volume('AUDIO_1', 0.6);
+      if (screen === 'success') sm.volume('AUDIO_1', 1.0);
       if (screen === 'success' && prevScreen.current !== 'success') sm.play('AUDIO_3');
     } else {
       sm.stopAll({ fadeMs: 200 });
