@@ -366,3 +366,38 @@ body {
   margin-bottom: 0.5rem;
   
 }
+
+
+/* ── Kiosk input hardening ─────────────────────────────────────────────────
+   Visitors must not see a mouse pointer, zoom, or select anything.
+
+   cursor: these Pis have no physical mouse. The pointer that appears comes
+   from kiosk-cursor-nudge.service, which creates a *virtual* mouse -- on
+   en-tepelna-el-6-rpi04 it is the only entry in /proc/bus/input/devices with
+   a mouse handler. Disabling that service is the real fix; this rule is the
+   belt-and-braces half, so a stray USB mouse or a leftover pointer can never
+   draw a cursor over the exhibit. It needs !important because individual
+   elements set cursor: pointer.
+
+   touch-action: pan-x pan-y removes pinch-zoom and double-tap-to-zoom while
+   leaving scrolling intact. Do NOT use `none` here -- that kills scrolling
+   too, and some screens rely on it.
+
+   Chromium should additionally start with --disable-pinch and
+   --overscroll-history-navigation=0 (both confirmed supported by the
+   Chromium 150 build on the Pis). See PENDING_WORK.md. */
+html,
+body {
+  touch-action: pan-x pan-y;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+*,
+*::before,
+*::after {
+  cursor: none !important;
+}

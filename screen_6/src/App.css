@@ -40,6 +40,10 @@ body {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  /* Matches the 1 cm shift applied to the diagram video below, so the sleep
+     and active screens stay registered with each other. The artwork ends at
+     x=1590 with 329 px of clearance, so nothing is clipped. */
+  transform: translateX(37px);
 }
 
 /* ── ACTIVE ── */
@@ -81,14 +85,49 @@ body {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  /* Shifted 1 cm to the right. The panel is a Beetronics 1920x1080 whose EDID
+     reports an active area of 523 x 294 mm, so 10 mm = 10 x 1920/523 = 36.7,
+     rounded to 37 px. screen_6 sits in an opening rather than behind a frame,
+     so there is no bezel scale to undo and layout px are device px.
+     transform is paint-only, so the layout is untouched. */
+  transform: translateX(37px);
 }
 
-/* Overlay text — positioned per the design photo at 1920x1080 */
+/* The diagram's grey ground runs the full width of the video (x 28..1890 at
+   1920x1080, y 985..1063). Shifting the video right leaves that strip bare on
+   the left, so repaint it here and keep the ground reaching its original left
+   edge. Colour sampled from the decoded video: rgb(76, 79, 76). */
+.diagram-area::before {
+  content: '';
+  position: absolute;
+  left: 28px;
+  top: 985px;
+  width: 38px;   /* the 37 px gap plus 1 px overlap so no seam shows */
+  height: 79px;
+  background: rgb(76, 79, 76);
+  z-index: 1;
+}
+
+/* Overlay text. Originally pinned per the design photo at 1920x1080
+   (top 140.8, left 471.3). It now moves with the video's 1 cm shift so the
+   36 px gap to the red riser is preserved: 471.3 + 37 = 508.3, rounded to 509.
+
+   Instead of a fixed top it spans the clear area between the top of the frame
+   (y 16) and the red horizontal pipe (y 458) and centres the copy inside it.
+   That way Tepelna's 8 lines and Jaderna's 9 are both balanced in the same
+   box and neither runs across the pipe, which the old fixed top did.
+
+   Measured clearances at 1920x1080: riser ends x 473, box starts x 509;
+   box ends x 908, tower starts x 1069. The box is otherwise empty. */
 .diagram-text {
   position: absolute;
-  top: 140.8px;
-  left: 471.3px;
+  top: 16px;
+  left: 509px;
   width: 398.8px;
+  height: 441px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   font-family: 'DINPro', 'Arial Narrow', 'Arial', sans-serif;
   font-weight: 400;
   font-size: 24.02pt;
@@ -97,4 +136,39 @@ body {
   color: #fff;
   margin: 0;
   z-index: 2;
+}
+
+
+/* ── Kiosk input hardening ─────────────────────────────────────────────────
+   Visitors must not see a mouse pointer, zoom, or select anything.
+
+   cursor: these Pis have no physical mouse. The pointer that appears comes
+   from kiosk-cursor-nudge.service, which creates a *virtual* mouse -- on
+   en-tepelna-el-6-rpi04 it is the only entry in /proc/bus/input/devices with
+   a mouse handler. Disabling that service is the real fix; this rule is the
+   belt-and-braces half, so a stray USB mouse or a leftover pointer can never
+   draw a cursor over the exhibit. It needs !important because individual
+   elements set cursor: pointer.
+
+   touch-action: pan-x pan-y removes pinch-zoom and double-tap-to-zoom while
+   leaving scrolling intact. Do NOT use `none` here -- that kills scrolling
+   too, and some screens rely on it.
+
+   Chromium should additionally start with --disable-pinch and
+   --overscroll-history-navigation=0 (both confirmed supported by the
+   Chromium 150 build on the Pis). See PENDING_WORK.md. */
+html,
+body {
+  touch-action: pan-x pan-y;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+*,
+*::before,
+*::after {
+  cursor: none !important;
 }

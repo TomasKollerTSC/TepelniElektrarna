@@ -2,7 +2,9 @@
   flex: 1 1 auto;
   border-top: 1px solid #1a1a1a;
   background: #0a0a0a;
-  padding: 0 20px;
+  /* Matches the 12px taken off .middle. Without this the section would just
+     grow around its centred content and the cards would not actually move. */
+  padding: 0 20px 12px;
   display: flex;
   align-items: center;
   overflow: hidden;

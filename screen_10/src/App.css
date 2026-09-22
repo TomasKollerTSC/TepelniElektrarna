@@ -57,6 +57,22 @@ body {
   font-size: 8rem;
   animation: bounce 2s ease-in-out infinite;
 }
+
+/* The hand is sized so that it comes out the same physical size on every
+   panel: 95 x 100 mm. touch-hint.png is 386x405 px and carried no size rule,
+   so it rendered at those intrinsic pixels on every screen -- which is a
+   different physical size on each one (89 mm tall on 7R, 214 mm on 2R).
+
+     height = 100 mm x (viewport_h / panel_h) / bezel_sy
+     width  = height x (386/405) x (bezel_sy / bezel_sx)
+
+   The sy/sx term cancels the bezel's non-uniform scale, which would otherwise
+   stretch the hand (by 11% on 2R). Panel and bezel values are in bezel.css.
+   Here: 365px / 403px -> screen_10 */
+.touch-hint img {
+  width: 365px;
+  height: 403px;
+}
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-20px); }
@@ -64,3 +80,38 @@ body {
 
 /* ── ACTIVE ── */
 .active { background: #000; }
+
+
+/* ── Kiosk input hardening ─────────────────────────────────────────────────
+   Visitors must not see a mouse pointer, zoom, or select anything.
+
+   cursor: these Pis have no physical mouse. The pointer that appears comes
+   from kiosk-cursor-nudge.service, which creates a *virtual* mouse -- on
+   en-tepelna-el-6-rpi04 it is the only entry in /proc/bus/input/devices with
+   a mouse handler. Disabling that service is the real fix; this rule is the
+   belt-and-braces half, so a stray USB mouse or a leftover pointer can never
+   draw a cursor over the exhibit. It needs !important because individual
+   elements set cursor: pointer.
+
+   touch-action: pan-x pan-y removes pinch-zoom and double-tap-to-zoom while
+   leaving scrolling intact. Do NOT use `none` here -- that kills scrolling
+   too, and some screens rely on it.
+
+   Chromium should additionally start with --disable-pinch and
+   --overscroll-history-navigation=0 (both confirmed supported by the
+   Chromium 150 build on the Pis). See PENDING_WORK.md. */
+html,
+body {
+  touch-action: pan-x pan-y;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+*,
+*::before,
+*::after {
+  cursor: none !important;
+}
