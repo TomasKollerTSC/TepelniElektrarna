@@ -29,9 +29,9 @@ const sendExhibitControl = (socket, target, action, value) => {
 };
 
 const sm = createSoundManager({
-  AUDIO_1: { src: '/a/AUDIO_1.mp3', loop: true,  channel: 'left',  volume: 1.0 },
-  AUDIO_2: { src: '/a/AUDIO_2.mp3', loop: false, channel: 'left',  volume: 1.0 },
-  AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'right', volume: 1.0 },
+  AUDIO_1: { src: '/a/AUDIO_1.mp3', loop: true,  channel: 'center', volume: 1.0 },
+  AUDIO_2: { src: '/a/AUDIO_2.mp3', loop: false, channel: 'center', volume: 1.0 },
+  AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'center', volume: 1.0 },
 }, 'screen_oled2');
 const FLAME_VOL = { 3: 1.0, 4: 1.0, 5: 1.0, 6: 1.0, 7: 1.0, 8: 1.0 };
 
