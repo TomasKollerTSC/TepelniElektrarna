@@ -320,14 +320,17 @@ body {
   transition: top 0.15s ease;
   border-radius: 2px;
 }
+/* Same green as the scale's optimal band, so the tick reads as "this
+   parameter is in the green zone" rather than as a neutral marker. */
 .gauge-check {
   position: absolute;
-  left: 80px;;
+  left: 80px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 3rem;
-  color: #fff;
+  color: #84C800;
   font-weight: 900;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
 }
 .gauge-label {
   padding: 10px;
