@@ -645,7 +645,7 @@ export default function App() {
                   style={{ bottom: `${(val / 180) * 100}%` }}
                 />
                 {zones[i] === 'green' && (
-                  <div className="gauge-check">✓</div>
+                  <div className={`gauge-check${screen === 'success' ? ' is-locked' : ''}`}>✓</div>
                 )}
               </div>
               <div className="gauge-label">{lang.params[i]}</div>

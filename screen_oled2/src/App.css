@@ -320,17 +320,22 @@ body {
   transition: top 0.15s ease;
   border-radius: 2px;
 }
-/* Same green as the scale's optimal band, so the tick reads as "this
-   parameter is in the green zone" rather than as a neutral marker. */
+/* White while the parameter merely sits in the green band, green once the
+   round locks in. #84C800 is the scale's own optimal band. */
 .gauge-check {
   position: absolute;
   left: 80px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 3rem;
-  color: #84C800;
+  color: #fff;
   font-weight: 900;
   text-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+  transition: color 0.25s ease;
+}
+
+.gauge-check.is-locked {
+  color: #84C800;
 }
 .gauge-label {
   padding: 10px;
