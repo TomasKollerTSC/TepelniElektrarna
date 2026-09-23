@@ -54,7 +54,6 @@ body {
   cursor: pointer;
 }
 .touch-hint {
-  font-size: 8rem;
   animation: bounce 2s ease-in-out infinite;
 }
 
