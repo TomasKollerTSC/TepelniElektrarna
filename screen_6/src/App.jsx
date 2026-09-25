@@ -79,8 +79,14 @@ export default function App() {
   if (!lighting.current) lighting.current = createLightingSequence((target, action, value) => sendExhibitControl(ws.current, target, action, value));
   const screenRef = useRef('sleep');
   const energyReady = useRef(false);
+  const chargeRun = useRef(0);
   const energySendSequence = useRef('idle');
   const lastActivity = useRef(Date.now());
+  // A RESET that could not be sent is owed and goes out on reconnect.
+  const resetOwed = useRef(false);
+  const requestReset = useCallback(() => {
+    resetOwed.current = !publishReset(ws.current);
+  }, []);
   useEffect(() => {
     if (screen !== 'active') return;
     const id = setInterval(() => {
@@ -88,11 +94,11 @@ export default function App() {
         lighting.current.cancel();
         energyReady.current = false;
         energySendSequence.current = 'published';
-        publishReset(ws.current);
+        requestReset();
       }
     }, 1000);
     return () => clearInterval(id);
-  }, [screen]);
+  }, [screen, requestReset]);
 
   const handleMessage = useCallback((msg) => {
     lighting.current.result(msg);
@@ -130,10 +136,15 @@ export default function App() {
         energyReady.current = false;
         sm.unlock();
         sm.play('AUDIO_7');
-        lighting.current.run(sequence => sendEnergy(sequence, () => {
+        const finish = () => {
+          if (energySendSequence.current !== 'pending') return;
           energySendSequence.current = 'published';
-          publishReset(ws.current);
-        }, ENERGY_SEND_RESET_DELAY_MS));
+          requestReset();
+        };
+        // A failed or cut-off send still ends the round, after the same hold.
+        lighting.current.run(sequence => sendEnergy(sequence, finish, ENERGY_SEND_RESET_DELAY_MS)).then(ok => {
+          if (!ok) setTimeout(finish, ENERGY_SEND_RESET_DELAY_MS);
+        });
       }
     }
 
@@ -144,7 +155,13 @@ export default function App() {
       energyReady.current = false;
       lastActivity.current = Date.now();
       setScreen('active');
-      lighting.current.run(sequence => chargeEnergy(sequence, () => { energyReady.current = true; }));
+      // The send button opens once the charge ends, even if a lighting step failed.
+      const run = ++chargeRun.current;
+      lighting.current.run(sequence => chargeEnergy(sequence, () => { energyReady.current = true; })).then(ok => {
+        if (ok || run !== chargeRun.current || screenRef.current !== 'active' || energySendSequence.current !== 'idle') return;
+        sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', true);
+        energyReady.current = true;
+      });
     }
 
     // Reset to sleep
@@ -152,11 +169,12 @@ export default function App() {
       lighting.current.cancel();
       energyReady.current = false;
       energySendSequence.current = 'idle';
+      resetOwed.current = false;
       screenRef.current = 'sleep';
       sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', false);
       setScreen('sleep');
     }
-  }, []);
+  }, [requestReset]);
 
   // ── AUDIO ──
   const prevScreen = useRef(screen);
@@ -174,8 +192,13 @@ export default function App() {
     let socket = null;
     const connect = () => {
       socket = new WebSocket(WS_URL);
-      socket.onopen = () => console.log('WS connected');
-      socket.onmessage = (e) => { try { handleMessage(JSON.parse(e.data)); } catch {} };
+      socket.onopen = () => {
+        console.log('WS connected');
+        if (resetOwed.current) requestReset();
+      };
+      socket.onmessage = (e) => {
+        try { handleMessage(JSON.parse(e.data)); } catch (error) { console.error('[screen_6] relay message failed', error); }
+      };
       socket.onclose = () => {
         lighting.current.cancel();
         energyReady.current = false;
@@ -193,7 +216,7 @@ export default function App() {
       lighting.current.cancel();
       energyReady.current = false;
     };
-  }, [handleMessage]);
+  }, [handleMessage, requestReset]);
 
   // ── KEYBOARD SIMULATOR ────────────────────────────────
   useEffect(() => {

@@ -7,6 +7,8 @@ import { createSoundManager } from './soundManager';
 const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
 const MAX_STEPS = 15;
 const INACTIVITY_MS = 20000;
+// Safety net once the valve is open: screen_6 normally resets well before this.
+const DONE_MAX_MS = 3 * 60 * 1000;
 const FUELS = new Set(['coal', 'gas', 'biomass']);
 
 const sendExhibitControl = (socket, target, action, value) => {
@@ -56,6 +58,7 @@ export default function App() {
   const lighting = useRef(null);
   if (!lighting.current) lighting.current = createLightingSequence((target, action, value) => sendExhibitControl(ws.current, target, action, value));
   const valveReady = useRef(false);
+  const introRun = useRef(0);
   const prevAngle = useRef(null);
   const lastActivity = useRef(Date.now());
   const screenRef = useRef(screen);
@@ -67,6 +70,20 @@ export default function App() {
 
   useEffect(() => { screenRef.current = screen; }, [screen]);
   useEffect(() => { stepRef.current = step; }, [step]);
+
+  // A RESET or VALVE_COMPLETE that could not be sent is owed and goes out
+  // when the relay connection comes back.
+  const resetOwed = useRef(false);
+  const valveCompleteOwed = useRef(false);
+  const publishReset = useCallback(() => {
+    resetOwed.current = ws.current?.readyState !== WebSocket.OPEN;
+    if (!resetOwed.current) ws.current.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'RESET' } }));
+  }, []);
+  const sendValveComplete = useCallback(() => {
+    if (!valveCompleteOwed.current || ws.current?.readyState !== WebSocket.OPEN) return;
+    valveCompleteOwed.current = false;
+    ws.current.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'VALVE_COMPLETE' } }));
+  }, []);
 
   // ── AUDIO ──
   const prevStep = useRef(0);
@@ -94,11 +111,13 @@ export default function App() {
     prevStep.current = step;
   }, [step, screen]);
 
-  // Inactivity → sleep (20s) + reset all screens (disabled when game complete)
+  // Inactivity → sleep (20s) + reset all screens; once the valve is open
+  // screen_6 owns the reset and this is only the safety net.
   useEffect(() => {
-    if (screen !== 'active' || step >= MAX_STEPS) return;
+    if (screen !== 'active') return;
+    const limit = step >= MAX_STEPS ? DONE_MAX_MS : INACTIVITY_MS;
     const id = setInterval(() => {
-      if (Date.now() - lastActivity.current > INACTIVITY_MS) {
+      if (Date.now() - lastActivity.current > limit) {
         lighting.current.cancel();
         valveReady.current = false;
         screenRef.current = 'sleep';
@@ -107,14 +126,11 @@ export default function App() {
         setShowTurbineMsg(false);
         setVideoPhase('intro');
         prevAngle.current = null;
-        ws.current?.send(JSON.stringify({
-          type: 'trigger', name: 'GAME_STATE', id: 1,
-          data: { state: 'RESET' },
-        }));
+        publishReset();
       }
     }, 3000);
     return () => clearInterval(id);
-  }, [screen, step]);
+  }, [screen, step, publishReset]);
 
   const handleMessage = useCallback((msg) => {
     lighting.current.result(msg);
@@ -139,7 +155,11 @@ export default function App() {
       screenRef.current = 'active';
       stepRef.current = 0;
       valveReady.current = false;
-      lighting.current.run(startValve).then(ok => { valveReady.current = ok; });
+      // The valve opens once the intro ends, even if a lighting step failed.
+      const run = ++introRun.current;
+      lighting.current.run(startValve).then(() => {
+        if (run === introRun.current && screenRef.current === 'active') valveReady.current = true;
+      });
       fuelRef.current = FUELS.has(msg.data?.fuel) ? msg.data.fuel : null;
       setScreen('active');
       setStep(0);
@@ -153,6 +173,8 @@ export default function App() {
     if (msg.name === 'GAME_STATE' && msg.data?.state === 'RESET') {
       lighting.current.cancel();
       valveReady.current = false;
+      resetOwed.current = false;
+      valveCompleteOwed.current = false;
       screenRef.current = 'sleep';
       stepRef.current = 0;
       sendExhibitControl(ws.current, 'turbine_generator_axis', 'stop');
@@ -177,24 +199,31 @@ export default function App() {
         setStep(next);
         if (next === MAX_STEPS) {
           valveReady.current = false;
+          valveCompleteOwed.current = true;
           setVideoPhase('open');
-          lighting.current.run(sequence => completeValve(sequence, () => {
-            setShowTurbineMsg(true);
-            ws.current?.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1,
-              data: { state: 'VALVE_COMPLETE' } }));
-          }));
+          const publishComplete = () => { setShowTurbineMsg(true); sendValveComplete(); };
+          // Normally sent mid-sequence; if a step fails screen_6 is woken anyway.
+          lighting.current.run(sequence => completeValve(sequence, publishComplete)).then(() => {
+            if (screenRef.current === 'active') publishComplete();
+          });
         }
       }
     }
-  }, []);
+  }, [sendValveComplete]);
 
   useEffect(() => {
     let disposed = false;
     let socket = null;
     const connect = () => {
       socket = new WebSocket(WS_URL);
-      socket.onopen = () => console.log('WS connected');
-      socket.onmessage = (e) => { try { handleMessage(JSON.parse(e.data)); } catch {} };
+      socket.onopen = () => {
+        console.log('WS connected');
+        if (resetOwed.current) publishReset();
+        else sendValveComplete();
+      };
+      socket.onmessage = (e) => {
+        try { handleMessage(JSON.parse(e.data)); } catch (error) { console.error('[screen_oled4] relay message failed', error); }
+      };
       socket.onclose = () => {
         lighting.current.cancel();
         valveReady.current = false;
@@ -211,7 +240,7 @@ export default function App() {
       socket?.close();
       clearTimeout(wsTimer.current);
     };
-  }, [handleMessage]);
+  }, [handleMessage, publishReset, sendValveComplete]);
 
   // ── KEYBOARD SIMULATOR (all input goes through WS) ──
   useEffect(() => {

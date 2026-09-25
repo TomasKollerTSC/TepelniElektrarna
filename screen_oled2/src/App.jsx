@@ -7,6 +7,9 @@ import { createSoundManager } from './soundManager';
 const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
 const ACCUMULATED_ANGLE_TO_SWITCH = 90;
 const FUEL_SELECTION_MIN_DELTA_DEGREES = 0.1;
+const INACTIVITY_MS = 30000;
+// Safety net: success waits for oled4 and screen_6 to finish and reset.
+const SUCCESS_MAX_MS = 5 * 60 * 1000;
 
 const sendExhibitControl = (socket, target, action, value) => {
   if (socket?.readyState !== WebSocket.OPEN) {
@@ -104,12 +107,23 @@ export default function App() {
   const roundActive = useRef(false);
   const overloadTimer = useRef(null);
   const phaseComplete = useRef(false);
+  // A RESET or COMBUSTION_COMPLETE that could not be sent is owed and goes
+  // out when the relay connection comes back.
+  const resetOwed = useRef(false);
+  const completionOwed = useRef(null);
   const publishReset = useCallback(() => {
-    if (ws.current?.readyState !== WebSocket.OPEN) return;
+    resetOwed.current = ws.current?.readyState !== WebSocket.OPEN;
+    if (resetOwed.current) return;
     lighting.current.cancel();
     clearTimeout(overloadTimer.current);
     cleanupPending.current = true;
     ws.current.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1, data: { state: 'RESET' } }));
+  }, []);
+  const sendCompletion = useCallback(() => {
+    if (!completionOwed.current || ws.current?.readyState !== WebSocket.OPEN) return;
+    ws.current.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1,
+      data: { state: 'COMBUSTION_COMPLETE', fuel: completionOwed.current } }));
+    completionOwed.current = null;
   }, []);
   const prevAngles = useRef([null, null, null]);
   const dangerStart = useRef([null, null, null]);
@@ -215,13 +229,14 @@ export default function App() {
           stopDecay();
           const fuel = FUELS[fuelIdxRef.current];
           phaseComplete.current = true;
+          screenRef.current = 'success';
           setLanguageLamps(ws.current, null);
           setScreen('success');
-          lighting.current.run(async ({ play, check }) => {
-            await play('game_1_final');
-            check();
-            ws.current?.send(JSON.stringify({ type: 'trigger', name: 'GAME_STATE', id: 1,
-              data: { state: 'COMBUSTION_COMPLETE', fuel } }));
+          // oled4 is woken after game_1_final, or without it if that fails.
+          lighting.current.run(({ play }) => play('game_1_final')).then(() => {
+            if (screenRef.current !== 'success') return;
+            completionOwed.current = fuel;
+            sendCompletion();
           });
           return;
         }
@@ -229,19 +244,20 @@ export default function App() {
         greenStart.current = null;
       }
 
+      let warn = [false, false, false];
       if (!anyWheelTouched.current) {
-        setWarnActive([false, false, false]);
         dangerStart.current = [null, null, null];
       } else {
-        setWarnActive(zones.map((zone, i) => {
+        warn = zones.map((zone, i) => {
           if (zone !== 'green') {
             if (!dangerStart.current[i]) dangerStart.current[i] = now;
             return (now - dangerStart.current[i]) >= 3000;
           }
           dangerStart.current[i] = null;
           return false;
-        }));
+        });
       }
+      setWarnActive(prev => (prev.every((w, i) => w === warn[i]) ? prev : warn));
 
       const anyRed = zones.some(z => z === 'red');
       if (anyRed) {
@@ -261,13 +277,17 @@ export default function App() {
       }
     }, 500);
     return () => clearInterval(id);
-  }, [screen, stopDecay, publishReset]);
+  }, [screen, stopDecay, publishReset, sendCompletion]);
 
-  // ── INACTIVITY TIMEOUT (30s) ──
+  // ── INACTIVITY TIMEOUT (30s in home and game) + SUCCESS SAFETY NET ──
   useEffect(() => {
-    if (screen !== 'game') return;
+    if (screen === 'success') {
+      const t = setTimeout(publishReset, SUCCESS_MAX_MS);
+      return () => clearTimeout(t);
+    }
+    if (screen !== 'game' && screen !== 'home') return;
     const id = setInterval(() => {
-      if (Date.now() - lastActivity.current > 30000 && !cleanupPending.current) publishReset();
+      if (Date.now() - lastActivity.current > INACTIVITY_MS && !cleanupPending.current) publishReset();
     }, 5000);
     return () => clearInterval(id);
   }, [screen, publishReset]);
@@ -363,6 +383,8 @@ export default function App() {
       overloadTimer.current = null;
       roundActive.current = false;
       phaseComplete.current = false;
+      resetOwed.current = false;
+      completionOwed.current = null;
       screenRef.current = 'sleep';
       cleanupPending.current = true;
       if (!resetRunning.current) {
@@ -400,7 +422,7 @@ export default function App() {
       if (selectedLanguage) {
         languageRef.current = selectedLanguage;
         setLanguage(selectedLanguage);
-        if (screenRef.current === 'sleep' || screenRef.current === 'home') {
+        if (screenRef.current !== 'success') {
           setLanguageLamps(ws.current, selectedLanguage);
         }
       }
@@ -429,9 +451,14 @@ export default function App() {
       const idx = msg.id - 1;
       if (idx < 0 || idx > 2) return;
 
-      if (cleanupPending.current) return;
+      // A failed cleanup keeps the screen asleep; the next touch retries it.
+      if (cleanupPending.current) {
+        if (screenRef.current === 'sleep' && !resetRunning.current) publishReset();
+        return;
+      }
       if (screenRef.current === 'sleep') {
         prevAngles.current[idx] = angle;
+        lastActivity.current = Date.now();
         screenRef.current = 'home';
         sendExhibitControl(ws.current, 'lightbox_1', 'set_intensity', { intensity: 100 });
         sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', true);
@@ -439,6 +466,7 @@ export default function App() {
         return;
       }
 
+      if (screenRef.current === 'home') lastActivity.current = Date.now();
       if (screenRef.current === 'home' && idx === 0) {
         const delta = angleDelta(prevAngles.current[0], angle);
         prevAngles.current[0] = angle;
@@ -478,7 +506,7 @@ export default function App() {
         });
       }
     }
-  }, [startDecay, stopDecay]);
+  }, [startDecay, stopDecay, publishReset]);
 
   // ── WEBSOCKET ──
   useEffect(() => {
@@ -486,8 +514,19 @@ export default function App() {
     let socket = null;
     const connect = () => {
       socket = new WebSocket(WS_URL);
-      socket.onopen = () => console.log('WS connected');
-      socket.onmessage = (e) => { try { handleMessage(JSON.parse(e.data)); } catch {} };
+      socket.onopen = () => {
+        console.log('WS connected');
+        // A round cut off here, or a failed cleanup while asleep, resets the
+        // exhibit. In success the visitor may be on oled4, so only the owed
+        // completion is sent.
+        const stranded = cleanupPending.current && !resetRunning.current
+          && (screenRef.current === 'game' || screenRef.current === 'sleep');
+        if (resetOwed.current || stranded) publishReset();
+        else if (screenRef.current === 'success') sendCompletion();
+      };
+      socket.onmessage = (e) => {
+        try { handleMessage(JSON.parse(e.data)); } catch (error) { console.error('[screen_oled2] relay message failed', error); }
+      };
       socket.onclose = () => {
         lighting.current.cancel();
         clearTimeout(overloadTimer.current);
@@ -508,9 +547,8 @@ export default function App() {
       stopDecay();
       socket?.close();
       clearTimeout(wsTimer.current);
-      stopDecay();
     };
-  }, [handleMessage, stopDecay]);
+  }, [handleMessage, stopDecay, publishReset, sendCompletion]);
 
   // ── KEYBOARD SIMULATOR ──
   useEffect(() => {
