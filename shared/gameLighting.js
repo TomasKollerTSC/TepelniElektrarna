@@ -30,7 +30,7 @@ export async function chargeEnergy({ request, play, delay, check }, ready) {
   await play('game_3_final');
   await delay(1000);
   await play('energy_progress');
-  await delay(2000);
+  await delay(10000); // the green button lights 10 s into the progress bar
   await request('energy_send_button_lamp', 'set_state', true);
   check();
   ready();

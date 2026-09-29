@@ -60,12 +60,12 @@ test('valve waits for motor acceptance before publishing completion and steam', 
   await h.advance(1); assert.equal(h.sent.at(-1).target, 'steam_strip'); await h.ack();
   assert.equal(await run, true);
 });
-test('real charging sequence enables button only after 3+1+2 seconds and acknowledgement', async () => {
+test('real charging sequence enables button only after 3+1+10 seconds and acknowledgement', async () => {
   const h = harness(); let ready = false;
   const run = h.sequence.run(sequence => chargeEnergy(sequence, () => { ready = true; }));
   for (let i = 0; i < 4; i++) await h.ack();
   await h.advance(3000); await h.ack(); await h.advance(1000); await h.ack();
-  await h.advance(1999); assert.equal(ready, false);
+  await h.advance(9999); assert.equal(ready, false);
   await h.advance(1); assert.equal(ready, false); await h.ack();
   assert.equal(await run, true); assert.equal(ready, true);
   assert.deepEqual(h.sent.filter(x => x.action === 'trigger').map(x => [x.target, x.at]),
