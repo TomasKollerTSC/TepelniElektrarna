@@ -16,9 +16,14 @@
  * Values are in MILLIMETRES and converted to ratios, so they are resolution
  * independent -- the same numbers hold at any output resolution.
  *
- * The radius percentages are deliberately asymmetric: the corner is circular
- * in the real world, but scaleX != scaleY, so it must be an ellipse before the
- * transform to come out round after it. Each is 80mm / that axis of the opening.
+ * The opening is wider for its height than the panel, so scaling each axis
+ * separately to fill it drew everything about 11% wide. The scale is now the
+ * same on both axes (--bezel-s) and the page lays out that much wider
+ * (--app-w), so it still fills the opening. Sizes that meant a share of the
+ * page use --vw, one hundredth of that width.
+ *
+ * The radius percentages come out as the same length on both axes of the
+ * wider page (80 mm each), so the corners stay round.
  */
 
 :root {
@@ -37,6 +42,9 @@
   --bezel-y: calc(var(--bezel-t) / var(--panel-h) * 100vh);
   --bezel-sx: calc((var(--panel-w) - var(--bezel-l) - var(--bezel-r)) / var(--panel-w));
   --bezel-sy: calc((var(--panel-h) - var(--bezel-t) - var(--bezel-b)) / var(--panel-h));
+  --bezel-s: var(--bezel-sy);
+  --app-w: calc(100vw * var(--bezel-sx) / var(--bezel-sy));
+  --vw: calc(var(--app-w) / 100);
 }
 
 html,
@@ -49,11 +57,10 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: var(--app-w);
   height: 100vh;
   overflow: hidden;
   border-radius: 13.3333% / 8.3333%;
   transform-origin: 0 0;
-  transform: translate(var(--bezel-x), var(--bezel-y))
-             scale(var(--bezel-sx), var(--bezel-sy));
+  transform: translate(var(--bezel-x), var(--bezel-y)) scale(var(--bezel-s));
 }
