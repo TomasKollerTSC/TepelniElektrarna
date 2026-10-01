@@ -39,6 +39,16 @@
   --bezel-y: calc(var(--bezel-t) / var(--panel-h) * 100vh);
   --bezel-sx: calc((var(--panel-w) - var(--bezel-l) - var(--bezel-r)) / var(--panel-w));
   --bezel-sy: calc((var(--panel-h) - var(--bezel-t) - var(--bezel-b)) / var(--panel-h));
+
+  /* One scale for both axes -- the smaller one -- and the page laid out
+     larger in the other direction so it still fills the opening. Scaling the
+     axes separately drew everything a few percent wide (or tall). Sizes that
+     meant a share of the page use --vw / --vh. */
+  --bezel-s: min(var(--bezel-sx), var(--bezel-sy));
+  --app-w: calc(100vw * var(--bezel-sx) / var(--bezel-s));
+  --app-h: calc(100vh * var(--bezel-sy) / var(--bezel-s));
+  --vw: calc(var(--app-w) / 100);
+  --vh: calc(var(--app-h) / 100);
 }
 
 html,
@@ -51,10 +61,9 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: var(--app-w);
+  height: var(--app-h);
   overflow: hidden;
   transform-origin: 0 0;
-  transform: translate(var(--bezel-x), var(--bezel-y))
-             scale(var(--bezel-sx), var(--bezel-sy));
+  transform: translate(var(--bezel-x), var(--bezel-y)) scale(var(--bezel-s));
 }

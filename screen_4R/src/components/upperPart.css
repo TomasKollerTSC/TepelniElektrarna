@@ -1,5 +1,5 @@
 .upper {
-  flex: 0 0 40vh;
+  flex: 0 0 calc(40 * var(--vh, 1vh));
   position: relative;
   display: flex;
   align-items: center;
@@ -10,7 +10,7 @@
 
 .photo-frame {
   width: 100%;
-  height: calc(100% - 10vh);
+  height: calc(100% - calc(10 * var(--vh, 1vh)));
   overflow: hidden;
   border-radius: 4px;
 }
@@ -25,9 +25,9 @@
 
 .photo-source {
   position: absolute;
-  bottom: 4vh;
+  bottom: calc(4 * var(--vh, 1vh));
   left: 20px;
-  font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+  font-size: clamp(0.65rem, calc(1.2 * var(--vw, 1vw)), 0.8rem);
   font-weight: 400;
   color: #666;
   letter-spacing: 0.03em;

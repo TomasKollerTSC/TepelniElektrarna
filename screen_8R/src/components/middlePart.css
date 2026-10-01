@@ -1,6 +1,6 @@
 .middle {
   position: relative;
-  flex: 0 0 62vh;
+  flex: 0 0 calc(62 * var(--vh, 1vh));
   overflow: hidden;
   /* Inset clears the 80mm frame-cut corner arc: the opening is only 268mm
      tall here, so its corner radius is 29.9% of the height. */
@@ -24,7 +24,7 @@
 .lang-flags {
   display: flex;
   gap: 0.6rem;
-  margin-bottom: 1vh;
+  margin-bottom: calc(1 * var(--vh, 1vh));
 }
 
 .home-btn {
@@ -80,11 +80,11 @@
 
 /* ── Text hierarchy ── */
 .headline {
-  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-size: clamp(1.8rem, calc(3.2 * var(--vw, 1vw)), 2.6rem);
   font-weight: 900;
   color: #fff;
   letter-spacing: 0.02em;
-  margin-bottom: 0.6vh;
+  margin-bottom: calc(0.6 * var(--vh, 1vh));
   line-height: 1.15;
 }
 
@@ -92,7 +92,7 @@
 .content-row {
   flex: 1 1 0;
   display: flex;
-  gap: 3vw;
+  gap: calc(3 * var(--vw, 1vw));
   min-height: 0;
   overflow: hidden;
 }
@@ -106,7 +106,7 @@
 }
 
 .main-text {
-  font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+  font-size: clamp(1.1rem, calc(1.6 * var(--vw, 1vw)), 1.35rem);
   font-weight: 700;
   color: #fff;
   line-height: 1.6;
@@ -131,13 +131,13 @@
 
 .helper-text-inner {
   height: 100%;
-  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  font-size: clamp(1rem, calc(1.3 * var(--vw, 1vw)), 1.15rem);
   font-weight: 400;
   color: #fff;
   line-height: 1.6;
   opacity: 0.85;
   column-count: 2;
-  column-gap: 2vw;
+  column-gap: calc(2 * var(--vw, 1vw));
   column-fill: auto;
 }
 
@@ -147,7 +147,7 @@
 }
 
 .section-heading {
-  font-size: clamp(1.1rem, 1.4vw, 1.25rem);
+  font-size: clamp(1.1rem, calc(1.4 * var(--vw, 1vw)), 1.25rem);
   font-weight: 700;
   margin-bottom: 0.2em;
 }
@@ -197,7 +197,7 @@
   background: #000;
   color: #fff;
   padding: 6px 14px;
-  font-size: clamp(0.75rem, 0.9vw, 1rem);
+  font-size: clamp(0.75rem, calc(0.9 * var(--vw, 1vw)), 1rem);
   font-weight: 400;
   letter-spacing: 0.03em;
 }
