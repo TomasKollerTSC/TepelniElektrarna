@@ -136,6 +136,7 @@ export default function App() {
         energyReady.current = false;
         sm.unlock();
         sm.play('AUDIO_7');
+        sendExhibitControl(ws.current, 'high_voltage_wires', 'trigger', 'play');
         const finish = () => {
           if (energySendSequence.current !== 'pending') return;
           energySendSequence.current = 'published';
