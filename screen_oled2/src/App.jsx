@@ -460,7 +460,7 @@ export default function App() {
         prevAngles.current[idx] = angle;
         lastActivity.current = Date.now();
         screenRef.current = 'home';
-        sendExhibitControl(ws.current, 'lightbox_1', 'set_intensity', { intensity: 100 });
+        sendExhibitControl(ws.current, 'lightbox_1', 'set_intensity', { intensity: 80 });
         sendExhibitControl(ws.current, 'start_button_lamp', 'set_state', true);
         setScreen('home');
         return;
