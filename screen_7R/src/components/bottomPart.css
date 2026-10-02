@@ -12,13 +12,13 @@
 
 .card-slider {
   display: flex;
-  gap: 2vw;
+  gap: calc(2 * var(--vw, 1vw));
   overflow-x: auto;
   overflow-y: hidden;
   width: 100%;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  padding: 1vh 0;
+  padding: calc(1 * var(--vh, 1vh)) 0;
 }
 
 .card-slider::-webkit-scrollbar { height: 6px; }
@@ -29,7 +29,7 @@
 
 /* Scale Card component to fit the bottom section */
 .card-slider .card {
-  height: calc(25vh - 4vh);
+  height: calc(calc(25 * var(--vh, 1vh)) - calc(4 * var(--vh, 1vh)));
   aspect-ratio: 2 / 3;
   margin-top: 0;
   margin-bottom: 0;

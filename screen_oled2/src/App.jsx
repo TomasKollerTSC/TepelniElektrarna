@@ -182,8 +182,8 @@ export default function App() {
       const img = sleepImgRef.current;
       if (!img) return;
       x += vx; y += vy;
-      const mX = window.innerWidth - img.offsetWidth;
-      const mY = window.innerHeight - img.offsetHeight;
+      const mX = img.parentElement.clientWidth - img.offsetWidth;
+      const mY = img.parentElement.clientHeight - img.offsetHeight;
       if (x <= 0)  { x = 0;  vx =  Math.abs(vx); }
       if (x >= mX) { x = mX; vx = -Math.abs(vx); }
       if (y <= 0)  { y = 0;  vy =  Math.abs(vy); }
@@ -195,8 +195,8 @@ export default function App() {
     const t = setTimeout(() => {
       const img = sleepImgRef.current;
       if (!img) return;
-      x = Math.random() * (window.innerWidth - img.offsetWidth);
-      y = Math.random() * (window.innerHeight - img.offsetHeight);
+      x = Math.random() * (img.parentElement.clientWidth - img.offsetWidth);
+      y = Math.random() * (img.parentElement.clientHeight - img.offsetHeight);
       rafId = requestAnimationFrame(tick);
     }, 50);
 

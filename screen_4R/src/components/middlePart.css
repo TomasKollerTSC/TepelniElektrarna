@@ -1,7 +1,7 @@
 .middle {
   /* 12px squeezed out of the text area so the card row can rise by the same
      amount: 5mm x (1366px / 666.1mm) / 0.875244 bezel scale. */
-  flex: 0 0 calc(35vh - 12px);
+  flex: 0 0 calc(calc(35 * var(--vh, 1vh)) - 12px);
   overflow: hidden;
   padding: 0px 20px;
   display: flex;
@@ -17,7 +17,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1vh;
+  margin-bottom: calc(1 * var(--vh, 1vh));
 }
 
 /* ── Language flags ── */
@@ -79,20 +79,20 @@
 
 /* ── Text hierarchy ── */
 .headline {
-  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  font-size: clamp(1.4rem, calc(3.5 * var(--vw, 1vw)), 2rem);
   font-weight: 900;
   color: #fff;
   letter-spacing: 0.02em;
-  margin-bottom: 0.8vh;
+  margin-bottom: calc(0.8 * var(--vh, 1vh));
   line-height: 1.15;
 }
 
 .main-text {
-  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+  font-size: clamp(0.95rem, calc(1.8 * var(--vw, 1vw)), 1.15rem);
   font-weight: 700;
   color: #fff;
   line-height: 1.5;
-  margin-bottom: 0.8vh;
+  margin-bottom: calc(0.8 * var(--vh, 1vh));
   white-space: pre-line;
 }
 
@@ -112,13 +112,13 @@
 
 .helper-text-inner {
   height: 100%;
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  font-size: clamp(0.85rem, calc(1.5 * var(--vw, 1vw)), 1rem);
   font-weight: 400;
   color: #fff;
   line-height: 1.5;
   opacity: 0.85;
   column-count: 2;
-  column-gap: 3vw;
+  column-gap: calc(3 * var(--vw, 1vw));
   column-fill: auto;
 }
 
@@ -128,7 +128,7 @@
 }
 
 .section-heading {
-  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+  font-size: clamp(0.95rem, calc(1.6 * var(--vw, 1vw)), 1.1rem);
   font-weight: 700;
   margin-bottom: 0.15em;
 }

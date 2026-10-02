@@ -10,7 +10,7 @@
 
 .card-slider {
   display: flex;
-  gap: 2vw;
+  gap: calc(2 * var(--vw, 1vw));
   overflow-x: auto;
   overflow-y: hidden;
   width: 100%;

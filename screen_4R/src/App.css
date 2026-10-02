@@ -39,8 +39,8 @@ body {
 }
 
 .screen {
-  width: 100vw;
-  height: 100vh;
+  width: calc(100 * var(--vw, 1vw));
+  height: calc(100 * var(--vh, 1vh));
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -62,14 +62,14 @@ body {
    so it rendered at those intrinsic pixels on every screen -- which is a
    different physical size on each one (89 mm tall on 7R, 214 mm on 2R).
 
-     height = 100 mm x (viewport_h / panel_h) / bezel_sy
-     width  = height x (386/405) x (bezel_sy / bezel_sx)
+     height = 100 mm x (viewport_h / panel_h) / bezel_s
+     width  = height x (386/405)
 
-   The sy/sx term cancels the bezel's non-uniform scale, which would otherwise
-   stretch the hand (by 11% on 2R). Panel and bezel values are in bezel.css.
-   Here: 216px / 234px -> screen_4R */
+   bezel.css scales both axes the same, so the image keeps its own aspect.
+   Panel and bezel values are in bezel.css.
+   Here: 223px / 234px -> screen_4R */
 .touch-hint img {
-  width: 216px;
+  width: 223px;
   height: 234px;
 }
 @keyframes bounce {
