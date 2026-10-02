@@ -25,10 +25,8 @@ export async function chargeEnergy({ request, play, delay, check }, ready) {
   await request('energy_send_button_lamp', 'set_state', false);
   await request('lightbox_3', 'set_intensity', { intensity: 60 });
   await request('lightbox_4', 'set_intensity', { intensity: 60 });
-  await play('game_3_animation');
-  await delay(3000);
-  await play('game_3_final');
-  await delay(1000);
+  await play('game_3_animation'); // stays on the animation, no final
+  await delay(4000);
   await play('energy_progress');
   await delay(10000); // the green button lights 10 s into the progress bar
   await request('energy_send_button_lamp', 'set_state', true);
