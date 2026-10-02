@@ -8,7 +8,7 @@ export async function startCombustion(sequence, fuel) {
   await sequence.play('game_1_animation');
 }
 export async function startValve({ request, play }) {
-  await request('lightbox_2', 'set_intensity', { intensity: 80 });
+  await request('lightbox_2', 'set_intensity', { intensity: 60 });
   await play('game_2_animation');
 }
 export async function completeValve({ play, request, delay, check }, publishComplete) {
@@ -23,8 +23,8 @@ export async function completeValve({ play, request, delay, check }, publishComp
 }
 export async function chargeEnergy({ request, play, delay, check }, ready) {
   await request('energy_send_button_lamp', 'set_state', false);
-  await request('lightbox_3', 'set_intensity', { intensity: 80 });
-  await request('lightbox_4', 'set_intensity', { intensity: 80 });
+  await request('lightbox_3', 'set_intensity', { intensity: 60 });
+  await request('lightbox_4', 'set_intensity', { intensity: 60 });
   await play('game_3_animation');
   await delay(3000);
   await play('game_3_final');
