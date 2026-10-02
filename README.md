@@ -110,3 +110,18 @@ delay at build time; the deployment role also defaults to 6000.
 correlates dispatch acknowledgements. Reconnect alone does not replay commands.
 An interrupted round requires an explicit RESET before continuing.
 Run sequence regression tests with `node --test tests/lighting-sequence.test.mjs`.
+
+## Infostěna
+
+Infostěna (central LED info-wall, `192.168.140.16`) listens to this relay as a
+passive client at `ws://192.168.140.29:8765/` — it sends nothing and needs no
+registration. It plays a video 8 s after this frame from Screen 6:
+
+```json
+{ "type": "request", "name": "EXHIBIT_CONTROL", "sender": "screen_6",
+  "target": "energy_progress", "action": "trigger", "value": "send" }
+```
+
+It matches `type`, `name`, `sender`, `target` and `value`; the raw
+`BUTTON ENERGY_SEND` press is deliberately ignored. If this frame changes,
+update the filter in Infostěna (`/edit` → Exponáty).
