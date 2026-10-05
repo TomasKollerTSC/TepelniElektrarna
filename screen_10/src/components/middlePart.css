@@ -2,8 +2,7 @@
   position: relative;
   flex: 0 0 calc(62 * var(--vh, 1vh));
   overflow: hidden;
-  /* Inset clears the 80mm frame-cut corner arc: the opening is only 268mm
-     tall here, so its corner radius is 29.9% of the height. */
+  /* Inset clears the 80 mm corner arc of the 268 mm-tall opening. */
   padding: 84px 110px 0px;
   display: flex;
   flex-direction: column;
@@ -12,6 +11,7 @@
 /* ── Top bar: home button only, pinned level with the image top ── */
 .top-bar {
   position: absolute;
+  z-index: 2; /* above the photo, which comes later in the DOM */
   top: 84px;
   right: 110px;
   display: flex;
@@ -20,7 +20,7 @@
 }
 
 /* ── Language flags ── */
-/* Now the first row of .text-area, so it lines up with the top of the image. */
+/* First row of .text-area, so it lines up with the top of the image. */
 .lang-flags {
   display: flex;
   gap: 0.6rem;
@@ -180,13 +180,6 @@
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-.media-placeholder {
-  width: 100%;
-  height: 100%;
-  background: #111;
-  border-radius: 4px;
 }
 
 .photo-source {

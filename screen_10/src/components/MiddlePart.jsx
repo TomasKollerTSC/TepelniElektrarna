@@ -1,4 +1,5 @@
 import { useRef, useLayoutEffect } from 'react';
+import { tap } from '../tap';
 import './middlePart.css';
 
 const LANGUAGES = ['cz', 'en', 'de'];
@@ -59,7 +60,7 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, photo, photoS
     <section className="middle">
       <div className="top-bar">
         {goHome && (
-          <button className="home-btn" onClick={goHome}>
+          <button className="home-btn" {...tap(goHome)}>
             <img src="./g/homeimage.png" alt="Home" className="home-img" />
           </button>
         )}
@@ -71,7 +72,7 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, photo, photoS
               <button
                 key={l}
                 className={`flag-btn${language === l ? ' flag-active' : ''}`}
-                onClick={switchLang(l)}
+                {...tap(switchLang(l))}
               >
                 <img
                   src={`./g/${l}-flag.png`}
@@ -98,14 +99,10 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, photo, photoS
           </div>
         </div>
         <div className="media-area">
-          {photo ? (
-            <div className="media-frame">
-              <img src={photo} alt="" className="media-img" />
-              {photoSource && <span className="photo-source">{photoSource}</span>}
-            </div>
-          ) : (
-            <div className="media-placeholder" />
-          )}
+          <div className="media-frame">
+            <img src={photo} alt="" className="media-img" />
+            {photoSource && <span className="photo-source">{photoSource}</span>}
+          </div>
         </div>
       </div>
     </section>

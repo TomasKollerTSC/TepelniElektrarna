@@ -60,12 +60,15 @@ const sm = createSoundManager({
 
 const T = {
   cz: {
+    title: 'Chladící okruh',
     body: 'Pára, která prošla parní turbínou je ochlazena v kondenzátoru na kapalnou vodu. Chladící okruh doplňuje chladící věž. Voda z okruhu je v kotli opět ohřátá a přeměněná na páru.',
   },
   en: {
+    title: 'Cooling circuit',
     body: 'The steam that has passed through the steam turbine is cooled into liquid water in a condenser. A cooling tower completes the cooling circuit. The water from the circuit is reheated and converted to steam in the boiler.',
   },
   de: {
+    title: 'Kühlkreislauf',
     body: 'Der Dampf, der die Turbine durchströmt hat, wird im Kondensator wieder zu Wasser abgekühlt. Der Kühlkreislauf wird durch den Kühlturm unterstützt. Das Wasser wird im Kessel erneut erhitzt und wieder in Dampf umgewandelt.',
   },
 };
@@ -262,7 +265,10 @@ export default function App() {
           muted
           playsInline
         />
-        <p className="diagram-text">{lang.body}</p>
+        <div className="info-card">
+          <h1 className="info-title">{lang.title}</h1>
+          <p className="info-body">{lang.body}</p>
+        </div>
       </div>
     </div>
   );

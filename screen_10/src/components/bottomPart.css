@@ -2,8 +2,7 @@
   flex: 1 1 auto;
   border-top: 1px solid #1a1a1a;
   background: #0a0a0a;
-  /* 50px bottom inset: the panel sits high and the plexiglass lower lip
-     otherwise covers the bottom border of the cards. */
+  /* Bottom inset: the plexiglass lower lip would cover the cards' bottom border. */
   padding: 0 110px 50px;
   display: flex;
   align-items: center;

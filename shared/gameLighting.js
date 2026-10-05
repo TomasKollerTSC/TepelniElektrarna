@@ -1,5 +1,5 @@
-// Presentation sequences shared by the three front displays. Each await is a
-// correlated local-dispatch result; S-Play does not report physical playback.
+// Sequences shared by the three front displays. Awaits confirm local dispatch only;
+// S-Play does not report physical playback.
 export const fuelPrograms = { coal: 'fuel_coal', gas: 'fuel_gas', biomass: 'fuel_biomass' };
 export async function startCombustion(sequence, fuel) {
   const program = fuelPrograms[fuel];

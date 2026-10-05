@@ -14,7 +14,7 @@ const BottomPart = ({ tabs, tabPhoto, labels, content, language, switchTab }) =>
               text: { cz: content.cz[t].intro, en: content.en[t].intro, de: content.de[t].intro },
             }}
             language={language}
-            onClick={switchTab(t)}
+            onTap={switchTab(t)}
           />
         ))}
       </div>

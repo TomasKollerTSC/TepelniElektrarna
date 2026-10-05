@@ -41,13 +41,6 @@ export const PHOTO_SOURCES = {
   purpose: 'Foto: ČEZ (generátor elektrárny Ledvice)',
 };
 
-export const TAB_VIDEOS = {
-  what: null,
-  how: null,
-  made: null,
-  purpose: null,
-};
-
 export const CONTENT = {
   cz: {
     what: {

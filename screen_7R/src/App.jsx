@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { TABS, LABELS, TITLES, GENERAL_TEXT, TAB_PHOTOS, PHOTO_SOURCES, CONTENT, OVERVIEW_PHOTO, OVERVIEW_SOURCE } from './Texts';
 import { SLEEP_TIMEOUT_MS } from './config';
+import { tap } from './tap';
 import UpperPart from './components/UpperPart';
 import MiddlePart from './components/MiddlePart';
 import BottomPart from './components/BottomPart';
@@ -56,7 +57,7 @@ export default function App() {
 
   if (screen === 'sleep') {
     return (
-      <div className="screen sleep" onClick={wake}>
+      <div className="screen sleep" {...tap(wake)}>
         <div className="touch-hint"><img src="./g/touch-hint.png" alt="Touch hint" /></div>
       </div>
     );
@@ -65,7 +66,7 @@ export default function App() {
   const content = activeTab ? CONTENT[language][activeTab] : null;
 
   return (
-    <div className="screen active" onClick={resetTimer}>
+    <div className="screen active" {...tap(resetTimer)}>
       <UpperPart
         photo={activeTab ? TAB_PHOTOS[activeTab] : OVERVIEW_PHOTO}
         source={activeTab ? PHOTO_SOURCES[language][activeTab] : OVERVIEW_SOURCE[language]}

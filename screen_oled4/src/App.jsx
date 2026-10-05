@@ -9,7 +9,6 @@ const MAX_STEPS = 15;
 const INACTIVITY_MS = 20000;
 // Safety net once the valve is open: screen_6 normally resets well before this.
 const DONE_MAX_MS = 3 * 60 * 1000;
-const FUELS = new Set(['coal', 'gas', 'biomass']);
 
 const sendExhibitControl = (socket, target, action, value) => {
   if (socket?.readyState !== WebSocket.OPEN) {
@@ -63,7 +62,6 @@ export default function App() {
   const lastActivity = useRef(Date.now());
   const screenRef = useRef(screen);
   const stepRef = useRef(step);
-  const fuelRef = useRef(null);
   const videoARef = useRef(null);
   const videoBRef = useRef(null);
   const activeSlot = useRef('A');
@@ -71,8 +69,7 @@ export default function App() {
   useEffect(() => { screenRef.current = screen; }, [screen]);
   useEffect(() => { stepRef.current = step; }, [step]);
 
-  // A RESET or VALVE_COMPLETE that could not be sent is owed and goes out
-  // when the relay connection comes back.
+  // A RESET or VALVE_COMPLETE that could not be sent is owed and goes out on reconnect.
   const resetOwed = useRef(false);
   const valveCompleteOwed = useRef(false);
   const publishReset = useCallback(() => {
@@ -111,8 +108,7 @@ export default function App() {
     prevStep.current = step;
   }, [step, screen]);
 
-  // Inactivity → sleep (20s) + reset all screens; once the valve is open
-  // screen_6 owns the reset and this is only the safety net.
+  // Inactivity resets all screens; once the valve is open screen_6 owns the reset.
   useEffect(() => {
     if (screen !== 'active') return;
     const limit = step >= MAX_STEPS ? DONE_MAX_MS : INACTIVITY_MS;
@@ -160,7 +156,6 @@ export default function App() {
       lighting.current.run(startValve).then(() => {
         if (run === introRun.current && screenRef.current === 'active') valveReady.current = true;
       });
-      fuelRef.current = FUELS.has(msg.data?.fuel) ? msg.data.fuel : null;
       setScreen('active');
       setStep(0);
       setShowTurbineMsg(false);
@@ -178,7 +173,6 @@ export default function App() {
       screenRef.current = 'sleep';
       stepRef.current = 0;
       sendExhibitControl(ws.current, 'turbine_generator_axis', 'stop');
-      fuelRef.current = null;
       setScreen('sleep');
       setStep(0);
       setShowTurbineMsg(false);

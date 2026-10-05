@@ -3,21 +3,8 @@
  * Source: Tepel_back.pdf (26ZK008-S00-J), 1:10, mm.
  * Panel 528.04 x 297.46 mm (1920x1080, landscape); cut opening 500 x 268 mm, corner radius 80 mm.
  *
- * The TV sits inset behind a frame whose opening is neither centred on the
- * panel nor the same size as it. This scales the app into that opening so
- * nothing is hidden, and rounds the corners to match the cut.
- *
- * The app still lays out at full panel size -- only the final paint is
- * transformed. That matters because the layouts use fixed pixel sizes
- * (card.css: height 568px, padding 0 50px) which would break if the box were
- * merely resized, and it keeps the clientWidth/clientHeight reads in
- * MiddlePart.jsx correct, since those see unscaled coordinates.
- *
- * Values are in MILLIMETRES and converted to ratios, so they are resolution
- * independent -- the same numbers hold at any output resolution.
- *
- * The radius percentages are deliberately asymmetric: each is the 80 mm corner
- * over that axis of the opening, which stays right under the single scale. Each is 80mm / that axis of the opening.
+ * Only the final paint is transformed: layout px and clientWidth/clientHeight reads stay unscaled.
+ * Radius % = 80 mm over each axis of the opening.
  */
 
 :root {
@@ -37,10 +24,8 @@
   --bezel-sx: calc((var(--panel-w) - var(--bezel-l) - var(--bezel-r)) / var(--panel-w));
   --bezel-sy: calc((var(--panel-h) - var(--bezel-t) - var(--bezel-b)) / var(--panel-h));
 
-  /* One scale for both axes -- the smaller one -- and the page laid out
-     larger in the other direction so it still fills the opening. Scaling the
-     axes separately drew everything a few percent wide (or tall). Sizes that
-     meant a share of the page use --vw / --vh. */
+  /* One scale for both axes (the smaller); the page lays out larger on the
+     other axis to fill the opening. Page-relative sizes use --vw / --vh. */
   --bezel-s: min(var(--bezel-sx), var(--bezel-sy));
   --app-w: calc(100vw * var(--bezel-sx) / var(--bezel-s));
   --app-h: calc(100vh * var(--bezel-sy) / var(--bezel-s));

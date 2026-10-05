@@ -36,13 +36,6 @@ export const PHOTO_SOURCES = {
   future: 'Ilustrační obrázek: žárovka',
 };
 
-export const TAB_VIDEOS = {
-  who: null,
-  mix: null,
-  heat: null,
-  future: null,
-};
-
 export const CONTENT = {
   cz: {
     who: {

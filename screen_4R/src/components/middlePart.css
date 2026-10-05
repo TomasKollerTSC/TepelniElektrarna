@@ -1,6 +1,5 @@
 .middle {
-  /* 12px squeezed out of the text area so the card row can rise by the same
-     amount: 5mm x (1366px / 666.1mm) / 0.875244 bezel scale. */
+  /* -12 px lifts the card row 5 mm: 5 mm x (1366 px / 666.1 mm) / 0.875244 bezel scale. */
   flex: 0 0 calc(calc(35 * var(--vh, 1vh)) - 12px);
   overflow: hidden;
   padding: 0px 20px;

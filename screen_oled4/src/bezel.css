@@ -3,25 +3,8 @@
  * Source: Tepel_front.pdf (26ZK008-S00-J), 1:10, mm.
  * Panel 375.3 x 666.1 mm (1366x768, portrait); cut opening 350 x 600 mm.
  *
- * Identical to screen_4R -- same panel, same symmetric cut.
- *
- * The TV is inset behind a frame whose cut opening is neither centred on the
- * panel nor the same size as it. This scales the app into that opening so
- * nothing is hidden behind the frame.
- *
- * The app still lays out at full panel size -- only the final paint is
- * transformed. That keeps the window.innerWidth / clientWidth reads in App.jsx
- * correct, since those see unscaled coordinates, and avoids breaking layouts
- * that mix fixed pixel sizes with rem/vw.
- *
- * Values are in MILLIMETRES and converted to ratios, so they are resolution
- * independent -- the same numbers hold at any output resolution.
- *
- * NO border-radius here, deliberately. The cut radius really is 80 mm (as
- * screen_4R uses), but simulating it in the app clipped a UI element that
- * is visible on the real panel -- the frame's corner does not fall where the
- * rounded #root box does. The measurements and the fit below are unchanged;
- * only the corner rounding is dropped.
+ * Only the final paint is transformed: layout px and window.innerWidth/clientWidth reads stay unscaled.
+ * No border-radius: the modelled 80 mm arc clips UI the physical corner leaves visible.
  */
 
 :root {
@@ -41,10 +24,8 @@
   --bezel-sx: calc((var(--panel-w) - var(--bezel-l) - var(--bezel-r)) / var(--panel-w));
   --bezel-sy: calc((var(--panel-h) - var(--bezel-t) - var(--bezel-b)) / var(--panel-h));
 
-  /* One scale for both axes -- the smaller one -- and the page laid out
-     larger in the other direction so it still fills the opening. Scaling the
-     axes separately drew everything a few percent wide (or tall). Sizes that
-     meant a share of the page use --vw / --vh. */
+  /* One scale for both axes (the smaller); the page lays out larger on the
+     other axis to fill the opening. Page-relative sizes use --vw / --vh. */
   --bezel-s: min(var(--bezel-sx), var(--bezel-sy));
   --app-w: calc(100vw * var(--bezel-sx) / var(--bezel-s));
   --app-h: calc(100vh * var(--bezel-sy) / var(--bezel-s));

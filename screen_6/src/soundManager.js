@@ -85,7 +85,6 @@ export function createSoundManager(cueDefs, appId) {
     stop:    (n, o) => cues[n]?.stop(o),
     stopAll: (o)    => Object.values(cues).forEach(c => c.stop(o)),
     volume:  (n, v) => cues[n]?.setVolume(v),
-    isPlaying: (n)  => !!cues[n]?.playing,
     unlock,
   };
 }

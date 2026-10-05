@@ -100,13 +100,6 @@ body {
   letter-spacing: 0.025em;
 }
 
-.content-center{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-}
-
 .wheel-center {
   display: flex;
   justify-content: center;
@@ -178,20 +171,13 @@ body {
   margin: 0 0.15em;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 /* ── SCALE BAR ── */
 .scale-area {
   display: flex;
   align-items: center;
   gap: 0.8rem;
   padding: 0 1.5rem 1.2rem;
-  /* Lift the lock/indicator bar 4 cm off the glass. 92px in untransformed
-     #root coords: 20mm x (1366px / 666.1mm) / 0.900766 bezel scale. Offset
-     only -- the element shifts, the layout flow does not. */
+  /* 4 cm off the glass: 40 mm x (1366 px / 666.1 mm) / 0.900766 bezel scale. */
   bottom: 92px;
 }
 
@@ -202,9 +188,7 @@ body {
 }
 .lock-icon.open { opacity: 1; }
 
-/* Inline SVG rather than an emoji: no font on the display Pis covers
-   U+1F512/U+1F513, so the glyphs rendered blank and the flex row lost
-   its end caps. 1em keeps the footprint the font-size already set. */
+/* Inline SVG, not emoji: no font on the Pis covers U+1F512/U+1F513. */
 .lock-icon svg {
   width: 1em;
   height: 1em;
@@ -240,23 +224,9 @@ body {
 
 
 /* ── Kiosk input hardening ─────────────────────────────────────────────────
-   Visitors must not see a mouse pointer, zoom, or select anything.
-
-   cursor: these Pis have no physical mouse. The pointer that appears comes
-   from kiosk-cursor-nudge.service, which creates a *virtual* mouse -- on
-   en-tepelna-el-6-rpi04 it is the only entry in /proc/bus/input/devices with
-   a mouse handler. Disabling that service is the real fix; this rule is the
-   belt-and-braces half, so a stray USB mouse or a leftover pointer can never
-   draw a cursor over the exhibit. It needs !important because individual
-   elements set cursor: pointer.
-
-   touch-action: pan-x pan-y removes pinch-zoom and double-tap-to-zoom while
-   leaving scrolling intact. Do NOT use `none` here -- that kills scrolling
-   too, and some screens rely on it.
-
-   Chromium should additionally start with --disable-pinch and
-   --overscroll-history-navigation=0 (both confirmed supported by the
-   Chromium 150 build on the Pis). See PENDING_WORK.md. */
+   cursor: the pointer comes from kiosk-cursor-nudge.service's virtual mouse;
+   !important beats elements that set cursor: pointer.
+   touch-action: not `none`, which would also block scrolling some screens need. */
 html,
 body {
   touch-action: pan-x pan-y;

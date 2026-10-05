@@ -3,27 +3,8 @@
  * Source: Tepel_back.pdf (26ZK008-S00-J), 1:10, mm.
  * Panel 680.4 x 1209.6 mm (1920x1080, portrait); cut opening 600 x 960 mm, corner radius 80 mm.
  *
- * The TV sits inset behind a frame whose opening is neither centred on the
- * panel nor the same size as it. This scales the app into that opening so
- * nothing is hidden, and rounds the corners to match the cut.
- *
- * The app still lays out at full panel size -- only the final paint is
- * transformed. That matters because the layouts use fixed pixel sizes
- * (card.css: height 568px, padding 0 50px) which would break if the box were
- * merely resized, and it keeps the clientWidth/clientHeight reads in
- * MiddlePart.jsx correct, since those see unscaled coordinates.
- *
- * Values are in MILLIMETRES and converted to ratios, so they are resolution
- * independent -- the same numbers hold at any output resolution.
- *
- * The opening is wider for its height than the panel, so scaling each axis
- * separately to fill it drew everything about 11% wide. The scale is now the
- * same on both axes (--bezel-s) and the page lays out that much wider
- * (--app-w), so it still fills the opening. Sizes that meant a share of the
- * page use --vw, one hundredth of that width.
- *
- * The radius percentages come out as the same length on both axes of the
- * wider page (80 mm each), so the corners stay round.
+ * Only the final paint is transformed: layout px and clientWidth/clientHeight reads stay unscaled.
+ * Radius % = 80 mm over each axis of the opening.
  */
 
 :root {
@@ -42,6 +23,9 @@
   --bezel-y: calc(var(--bezel-t) / var(--panel-h) * 100vh);
   --bezel-sx: calc((var(--panel-w) - var(--bezel-l) - var(--bezel-r)) / var(--panel-w));
   --bezel-sy: calc((var(--panel-h) - var(--bezel-t) - var(--bezel-b)) / var(--panel-h));
+
+  /* One scale for both axes; the page lays out wider to fill the opening.
+     Page-width shares use --vw. */
   --bezel-s: var(--bezel-sy);
   --app-w: calc(100vw * var(--bezel-sx) / var(--bezel-sy));
   --vw: calc(var(--app-w) / 100);

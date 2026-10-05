@@ -107,8 +107,7 @@ export default function App() {
   const roundActive = useRef(false);
   const overloadTimer = useRef(null);
   const phaseComplete = useRef(false);
-  // A RESET or COMBUSTION_COMPLETE that could not be sent is owed and goes
-  // out when the relay connection comes back.
+  // A RESET or COMBUSTION_COMPLETE that could not be sent is owed and goes out on reconnect.
   const resetOwed = useRef(false);
   const completionOwed = useRef(null);
   const publishReset = useCallback(() => {
@@ -279,7 +278,7 @@ export default function App() {
     return () => clearInterval(id);
   }, [screen, stopDecay, publishReset, sendCompletion]);
 
-  // ── INACTIVITY TIMEOUT (30s in home and game) + SUCCESS SAFETY NET ──
+  // ── INACTIVITY TIMEOUT + SUCCESS SAFETY NET ──
   useEffect(() => {
     if (screen === 'success') {
       const t = setTimeout(publishReset, SUCCESS_MAX_MS);
@@ -293,8 +292,7 @@ export default function App() {
   }, [screen, publishReset]);
 
   // ── VIDEO MANAGEMENT (streamed URLs + dual-video swap) ──
-  // Keep direct same-origin URLs so Chromium can range-stream the active videos
-  // without buffering all six large files into renderer-owned Blobs.
+  // Same-origin URLs let Chromium range-stream instead of buffering six large files as Blobs.
   useEffect(() => {
     if (screen !== 'game' && screen !== 'success') {
       videoCache.current = {};
@@ -516,9 +514,8 @@ export default function App() {
       socket = new WebSocket(WS_URL);
       socket.onopen = () => {
         console.log('WS connected');
-        // A round cut off here, or a failed cleanup while asleep, resets the
-        // exhibit. In success the visitor may be on oled4, so only the owed
-        // completion is sent.
+        // A cut-off round or failed cleanup resets the exhibit; in success the
+        // visitor may be on oled4, so only the owed completion is sent.
         const stranded = cleanupPending.current && !resetRunning.current
           && (screenRef.current === 'game' || screenRef.current === 'sleep');
         if (resetOwed.current || stranded) publishReset();

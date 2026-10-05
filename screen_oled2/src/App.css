@@ -198,20 +198,6 @@ body {
   z-index: 3;
 }
 
-.intro-text {
-  position: absolute;
-  top: 1.5rem;
-  left: 1.5rem;
-  right: 1.5rem;
-  background: rgba(0,0,0,0.7);
-  padding: 1.2rem 1.5rem;
-}
-.intro-body {
-  font-size: clamp(0.9rem, calc(2 * var(--vw, 1vw)), 1.2rem);
-  line-height: 1.6;
-  color: #eee;
-}
-
 .stopped-overlay {
   position: absolute;
   inset: 0;
@@ -320,8 +306,7 @@ body {
   transition: top 0.15s ease;
   border-radius: 2px;
 }
-/* White while the parameter merely sits in the green band, green once the
-   round locks in. #84C800 is the scale's own optimal band. */
+/* White while in the green band, green once the round locks in. */
 .gauge-check {
   position: absolute;
   left: 80px;
@@ -377,23 +362,9 @@ body {
 
 
 /* ── Kiosk input hardening ─────────────────────────────────────────────────
-   Visitors must not see a mouse pointer, zoom, or select anything.
-
-   cursor: these Pis have no physical mouse. The pointer that appears comes
-   from kiosk-cursor-nudge.service, which creates a *virtual* mouse -- on
-   en-tepelna-el-6-rpi04 it is the only entry in /proc/bus/input/devices with
-   a mouse handler. Disabling that service is the real fix; this rule is the
-   belt-and-braces half, so a stray USB mouse or a leftover pointer can never
-   draw a cursor over the exhibit. It needs !important because individual
-   elements set cursor: pointer.
-
-   touch-action: pan-x pan-y removes pinch-zoom and double-tap-to-zoom while
-   leaving scrolling intact. Do NOT use `none` here -- that kills scrolling
-   too, and some screens rely on it.
-
-   Chromium should additionally start with --disable-pinch and
-   --overscroll-history-navigation=0 (both confirmed supported by the
-   Chromium 150 build on the Pis). See PENDING_WORK.md. */
+   cursor: the pointer comes from kiosk-cursor-nudge.service's virtual mouse;
+   !important beats elements that set cursor: pointer.
+   touch-action: not `none`, which would also block scrolling some screens need. */
 html,
 body {
   touch-action: pan-x pan-y;

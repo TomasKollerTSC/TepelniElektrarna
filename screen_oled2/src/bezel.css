@@ -3,33 +3,9 @@
  * Source: Tepel_front.pdf (26ZK008-S00-J), 1:10, mm.
  * Panel 680.4 x 1209.6 mm (1920x1080, portrait); cut opening 600 x 960 mm.
  *
- * Shares 2R's panel and opening size, but the opening sits much
- * lower and further left: 2R is L50/R30,4/T96/B153,6.
- *
- * The TV is inset behind a frame whose cut opening is neither centred on the
- * panel nor the same size as it. This scales the app into that opening so
- * nothing is hidden behind the frame.
- *
- * The app still lays out at full panel size -- only the final paint is
- * transformed. That keeps the window.innerWidth / clientWidth reads in App.jsx
- * correct, since those see unscaled coordinates, and avoids breaking layouts
- * that mix fixed pixel sizes with rem/vw.
- *
- * Values are in MILLIMETRES and converted to ratios, so they are resolution
- * independent -- the same numbers hold at any output resolution.
- *
- * Corners are rounded to the 80 mm cut radius, same as screen_2R. The front
- * sheet does not carry the arcs the back one did, but the opening here is
- * exactly the size of screen_2R's, so 80 mm gives the identical percentages.
- *
- * The opening is wider for its height than the panel, so scaling each axis
- * separately to fill it drew everything about 11% wide. The scale is now the
- * same on both axes (--bezel-s) and the page lays out that much wider
- * (--app-w), so it still fills the opening. Sizes that meant a share of the
- * page use --vw, one hundredth of that width.
- *
- * The radius percentages come out as the same length on both axes of the
- * wider page (80 mm each), so the corners stay round.
+ * Only the final paint is transformed: layout px and window.innerWidth/clientWidth reads stay unscaled.
+ * Radius % = 80 mm over each axis of the opening (as screen_2R, same opening
+ * size; the front sheet shows no arcs).
  */
 
 :root {
@@ -48,6 +24,9 @@
   --bezel-y: calc(var(--bezel-t) / var(--panel-h) * 100vh);
   --bezel-sx: calc((var(--panel-w) - var(--bezel-l) - var(--bezel-r)) / var(--panel-w));
   --bezel-sy: calc((var(--panel-h) - var(--bezel-t) - var(--bezel-b)) / var(--panel-h));
+
+  /* One scale for both axes; the page lays out wider to fill the opening.
+     Page-width shares use --vw. */
   --bezel-s: var(--bezel-sy);
   --app-w: calc(100vw * var(--bezel-sx) / var(--bezel-sy));
   --vw: calc(var(--app-w) / 100);

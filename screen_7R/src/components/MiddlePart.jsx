@@ -1,4 +1,5 @@
 import { useRef, useLayoutEffect } from 'react';
+import { tap } from '../tap';
 import './middlePart.css';
 
 const LANGUAGES = ['cz', 'en', 'de'];
@@ -63,7 +64,7 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, goHome }) => 
             <button
               key={l}
               className={`flag-btn${language === l ? ' flag-active' : ''}`}
-              onClick={switchLang(l)}
+              {...tap(switchLang(l))}
             >
               <img
                 src={`./g/${l}-flag.png`}
@@ -74,7 +75,7 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, goHome }) => 
           ))}
         </div>
         {goHome && (
-          <button className="home-btn" onClick={goHome}>
+          <button className="home-btn" {...tap(goHome)}>
             <img src="./g/homeimage.png" alt="Home" className="home-img" />
           </button>
         )}
