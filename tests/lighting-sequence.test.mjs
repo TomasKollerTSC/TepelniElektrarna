@@ -60,7 +60,7 @@ test('valve waits for motor acceptance before publishing completion and steam', 
   await h.advance(1); assert.equal(h.sent.at(-1).target, 'steam_strip'); await h.ack();
   assert.equal(await run, true);
 });
-test('real charging sequence plays the final with the green button after 4+10 seconds and acknowledgement', async () => {
+test('real charging sequence lights the green button, then plays the final, after 4+10 seconds and acknowledgement', async () => {
   const h = harness(); let ready = false;
   const run = h.sequence.run(sequence => chargeEnergy(sequence, () => { ready = true; }));
   for (let i = 0; i < 4; i++) await h.ack();
@@ -70,7 +70,7 @@ test('real charging sequence plays the final with the green button after 4+10 se
   assert.equal(await run, true); assert.equal(ready, true);
   assert.deepEqual(h.sent.filter(x => x.action === 'trigger').map(x => [x.target, x.at]),
     [['game_3_animation', 0], ['energy_progress', 4000], ['game_3_final', 14000]]);
-  assert.deepEqual(h.sent.slice(-2).map(x => [x.target, x.at]), [['game_3_final', 14000], ['energy_send_button_lamp', 14000]]);
+  assert.deepEqual(h.sent.slice(-2).map(x => [x.target, x.at]), [['energy_send_button_lamp', 14000], ['game_3_final', 14000]]);
 });
 test('energy send retains lights and motor until reset six seconds after dispatch', async () => {
   const h = harness(); let reset = false;
