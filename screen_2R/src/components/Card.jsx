@@ -1,16 +1,16 @@
 import './card.css'
 
-const Card = ({ image, data, language, onTap }) => {
+const Card = ({ image, title, text, onTap }) => {
     return (
         <div className="card" onClick={onTap}>
             <div className="card-image">
-                <img src={image} alt={data.subtitle[language]} />
+                {image && <img src={image} alt={title} />}
             </div>
             <div className="card-header">
-                <h2>{data.subtitle[language]}</h2>
+                <h2>{title}</h2>
             </div>
             <div className="card-text">
-                <p>{data.text[language]}</p>
+                <p>{text}</p>
             </div>
         </div>
     )

@@ -1,0 +1,2 @@
+# Runs on the Pi: keep LF even in Windows checkouts.
+* text eol=lf

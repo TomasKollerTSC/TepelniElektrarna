@@ -26,10 +26,11 @@
 .card-slider::-webkit-scrollbar-thumb:hover { background: #888; }
 .card-slider { scrollbar-width: thin; scrollbar-color: #555 transparent; }
 
-/* All four cards share the width, so none is cut off at the window edge. */
+/* Cards fit the window; the side inset clears its corner arcs. */
 .card-slider .card {
   height: calc(25vh - 6vh);
-  flex: 1 1 0;
+  /* Four per row; extra cards added in the editor scroll instead of squeezing. */
+  flex: 0 0 calc((100% - 3 * 24px) / 4);
   min-width: 0;
   aspect-ratio: auto;
   margin-top: 0;

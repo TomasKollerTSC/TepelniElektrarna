@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './App.css';
 import './bezel.css';
 
+const Editor = lazy(() => import('../../shared/backscreen/editor/Editor.jsx'));
+const editing = window.location.pathname.startsWith('/edit');
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    {editing ? <Suspense fallback={null}><Editor title="Tepelná elektrárna · 4R Tepelný výměník" /></Suspense> : <App />}
   </React.StrictMode>
 );

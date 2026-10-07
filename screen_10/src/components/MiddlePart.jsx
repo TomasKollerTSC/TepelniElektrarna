@@ -52,7 +52,7 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, photo, photoS
       columnGap: `${gapPx}px`,
       columnFill: 'auto',
     });
-  }, [body]);
+  }, [body, intro]);
 
   const sections = body.includes('\n\n') ? parseBody(body) : null;
 
@@ -100,7 +100,7 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, photo, photoS
         </div>
         <div className="media-area">
           <div className="media-frame">
-            <img src={photo} alt="" className="media-img" />
+            {photo && <img src={photo} alt="" className="media-img" />}
             {photoSource && <span className="photo-source">{photoSource}</span>}
           </div>
         </div>

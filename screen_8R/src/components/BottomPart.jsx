@@ -1,20 +1,19 @@
 import Card from './Card';
 import './bottomPart.css';
+import { mediaUrl } from '../../../shared/backscreen/useContent';
+import { photoFor } from '../../../shared/backscreen/schema';
 
-const BottomPart = ({ tabs, tabPhotos, labels, content, language, switchTab }) => {
+const BottomPart = ({ cards, language, switchTab }) => {
   return (
     <section className="bottom">
       <div className="card-slider">
-        {tabs.map(t => (
+        {cards.map(c => (
           <Card
-            key={t}
-            image={tabPhotos[t]}
-            data={{
-              subtitle: { cz: labels.cz[t], en: labels.en[t], de: labels.de[t] },
-              text: { cz: content.cz[t].intro, en: content.en[t].intro, de: content.de[t].intro },
-            }}
-            language={language}
-            onTap={switchTab(t)}
+            key={c.id}
+            image={mediaUrl(photoFor(c.photo, language))}
+            title={c.label[language]}
+            text={c.intro[language]}
+            onTap={switchTab(c.id)}
           />
         ))}
       </div>

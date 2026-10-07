@@ -1,0 +1,19 @@
+[Unit]
+Description=Back-screen content editor (:8081)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=techmania
+Group=techmania
+WorkingDirectory=/opt/backscreen-editor/app/server
+EnvironmentFile=/opt/backscreen-editor/.env
+Environment=BACKSCREEN_ROOT=/opt/backscreen-editor
+Environment=PORT=8081
+ExecStart=/usr/bin/node server.mjs
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

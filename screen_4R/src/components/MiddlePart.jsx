@@ -52,7 +52,7 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, goHome }) => 
       columnGap: `${gapPx}px`,
       columnFill: 'auto',
     });
-  }, [body]);
+  }, [body, intro]);
 
   const sections = body.includes('\n\n') ? parseBody(body) : null;
 

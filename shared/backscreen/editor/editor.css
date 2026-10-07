@@ -1,0 +1,71 @@
+/* The editor runs in a normal browser, so undo the kiosk's hidden cursor, fixed layout and black theme. */
+html:has(.be-root), html:has(.be-root) body, .be-root, .be-root * {
+  cursor: auto !important;
+  user-select: text;
+}
+html:has(.be-root), html:has(.be-root) body {
+  overflow: auto !important;
+  background: #f4f5f2 !important;
+  touch-action: auto;
+}
+html:has(.be-root) #root {
+  position: static !important;
+  transform: none !important;
+  width: auto !important;
+  height: auto !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+.be-root {
+  color: #1d1d1b;
+  font: 15px/1.45 system-ui, sans-serif;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+.be-root h1 { font-size: 22px; margin: 0 0 8px; }
+.be-root h2 { font-size: 18px; margin: 32px 0 12px; border-bottom: 2px solid #84c800; padding-bottom: 4px; }
+.be-top {
+  position: sticky; top: 0; z-index: 2;
+  background: #f4f5f2; padding: 8px 0 10px; border-bottom: 1px solid #d8dad4;
+}
+.be-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.be-status { margin: 8px 0 0; color: #3b5f00; }
+.be-error { color: #b3261e; margin: 6px 0 0; }
+.be-hint { color: #5f625a; margin: 0 0 8px; font-size: 13px; }
+.be-button {
+  display: inline-block; border: 1px solid #b9bcb4; background: #fff; color: #1d1d1b;
+  padding: 7px 14px; border-radius: 6px; font: inherit; cursor: pointer !important;
+}
+.be-button:disabled { opacity: 0.45; cursor: default !important; }
+.be-primary { background: #84c800; border-color: #6ea600; color: #10200a; font-weight: 600; }
+.be-danger { background: #b3261e; border-color: #b3261e; color: #fff; }
+.be-quiet { background: transparent; }
+.be-field { border: 1px solid #d8dad4; border-radius: 8px; background: #fff; margin: 0 0 12px; padding: 10px 12px; }
+.be-field legend { font-weight: 600; padding: 0 4px; }
+.be-lang-row { display: grid; grid-template-columns: 36px 1fr; gap: 8px; align-items: start; margin: 6px 0; }
+.be-lang { font-weight: 600; color: #5f625a; padding-top: 6px; font-size: 13px; }
+.be-lang-row input, .be-lang-row textarea, .be-restore select, .be-login input {
+  width: 100%; box-sizing: border-box; font: inherit; padding: 6px 8px;
+  border: 1px solid #c4c7bf; border-radius: 5px; background: #fff; color: #1d1d1b;
+}
+.be-lang-row textarea { resize: vertical; }
+.be-check { display: block; margin: 0 0 8px; font-size: 13px; }
+.be-photos { display: flex; flex-wrap: wrap; gap: 14px; }
+.be-photo { display: flex; flex-direction: column; gap: 6px; width: 220px; }
+.be-photo img, .be-photo-empty {
+  width: 220px; height: 140px; object-fit: cover; border-radius: 6px; background: #e7e9e3;
+  display: flex; align-items: center; justify-content: center; color: #7a7d75;
+}
+.be-photo-actions { display: flex; gap: 6px; }
+.be-card { border: 1px solid #d8dad4; border-radius: 8px; background: #fbfcf9; margin: 0 0 10px; }
+.be-card-head { display: flex; gap: 6px; align-items: center; padding: 6px 8px; }
+.be-card-title {
+  flex: 1; text-align: left; background: none; border: none; font: inherit; font-weight: 600;
+  padding: 6px; cursor: pointer !important; color: inherit;
+}
+.be-card-body { padding: 0 12px 6px; }
+.be-restore { display: flex; gap: 8px; }
+.be-restore select { max-width: 320px; }
+.be-login { max-width: 320px; margin: 15vh auto; display: flex; flex-direction: column; gap: 10px; }
+.be-login button { padding: 8px; font: inherit; border-radius: 6px; border: 1px solid #6ea600; background: #84c800; font-weight: 600; cursor: pointer !important; }

@@ -1,19 +1,29 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TABS, LABELS, TITLES, GENERAL_TEXT, TAB_PHOTOS, PHOTO_SOURCES, CONTENT, OVERVIEW_PHOTO, OVERVIEW_SOURCE } from './Texts';
 import { SLEEP_TIMEOUT_MS } from './config';
 import { tap } from './tap';
 import UpperPart from './components/UpperPart';
 import MiddlePart from './components/MiddlePart';
 import BottomPart from './components/BottomPart';
-
-// Preload all tab images into browser cache on module load
-Object.values(TAB_PHOTOS).forEach(src => { new Image().src = src; });
+import defaults from '../public/content.default.json';
+import { useContent, mediaUrl, isPreview } from '../../shared/backscreen/useContent';
+import { photoFor } from '../../shared/backscreen/schema';
 
 export default function App() {
-  const [screen, setScreen] = useState('sleep');
+  const content = useContent(defaults);
+  // The editor's preview opens straight into the content, not the sleep screen.
+  const [screen, setScreen] = useState(isPreview ? 'active' : 'sleep');
   const [language, setLanguage] = useState('cz');
-  const [activeTab, setActiveTab] = useState(null);
+  const [activeId, setActiveId] = useState(null);
   const timer = useRef(null);
+  // A card deleted in the editor while it is open falls back to the home view.
+  const card = content.cards.find((c) => c.id === activeId) || null;
+
+  useEffect(() => {
+    for (const p of [content.home.photo, ...content.cards.map((c) => c.photo)]) {
+      const src = photoFor(p, language);
+      if (src) new Image().src = mediaUrl(src);
+    }
+  }, [content, language]);
 
   const resetTimer = useCallback(() => {
     clearTimeout(timer.current);
@@ -27,7 +37,7 @@ export default function App() {
 
   const wake = useCallback(() => {
     setScreen('active');
-    setActiveTab(null);
+    setActiveId(null);
     resetTimer();
   }, [resetTimer]);
 
@@ -36,9 +46,9 @@ export default function App() {
     setLanguage(l);
   }, []);
 
-  const switchTab = useCallback((t) => (e) => {
+  const switchTab = useCallback((id) => (e) => {
     e.stopPropagation();
-    setActiveTab(t);
+    setActiveId(id);
     resetTimer();
   }, [resetTimer]);
 
@@ -47,13 +57,13 @@ export default function App() {
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); wake(); return; }
       if (screen !== 'active') return;
       const idx = parseInt(e.key) - 1;
-      if (idx >= 0 && idx < TABS.length) { setActiveTab(TABS[idx]); resetTimer(); }
+      if (idx >= 0 && idx < content.cards.length) { setActiveId(content.cards[idx].id); resetTimer(); }
       if (e.key === 'l' || e.key === 'L') { setLanguage(l => l === 'cz' ? 'en' : l === 'en' ? 'de' : 'cz'); }
       if (e.key === 'Escape') setScreen('sleep');
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [screen, wake, resetTimer]);
+  }, [screen, wake, resetTimer, content]);
 
   if (screen === 'sleep') {
     return (
@@ -63,30 +73,19 @@ export default function App() {
     );
   }
 
-  const content = activeTab ? CONTENT[language][activeTab] : null;
-
+  const view = card || content.home;
   return (
     <div className="screen active" {...tap(resetTimer)}>
-      <UpperPart
-        photo={activeTab ? TAB_PHOTOS[activeTab] : OVERVIEW_PHOTO}
-        source={activeTab ? PHOTO_SOURCES[language][activeTab] : OVERVIEW_SOURCE[language]}
-      />
+      <UpperPart photo={mediaUrl(photoFor(view.photo, language))} source={view.photoSource[language]} />
       <MiddlePart
         language={language}
         switchLang={switchLang}
-        headline={activeTab ? LABELS[language][activeTab] : TITLES[language]}
-        intro={activeTab ? content.intro : GENERAL_TEXT[language]}
-        body={activeTab ? content.body : ''}
-        goHome={activeTab ? switchTab(null) : null}
+        headline={card ? card.label[language] : content.home.title[language]}
+        intro={card ? card.intro[language] : content.home.text[language]}
+        body={card ? card.body[language] : ''}
+        goHome={card ? switchTab(null) : null}
       />
-      <BottomPart
-        tabs={TABS}
-        tabPhotos={TAB_PHOTOS}
-        labels={LABELS}
-        content={CONTENT}
-        language={language}
-        switchTab={switchTab}
-      />
+      <BottomPart cards={content.cards} language={language} switchTab={switchTab} />
     </div>
   );
 }
