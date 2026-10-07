@@ -7,7 +7,8 @@ import { createSoundManager } from './soundManager';
 const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
 const ACCUMULATED_ANGLE_TO_SWITCH = 90;
 const FUEL_SELECTION_MIN_DELTA_DEGREES = 0.1;
-const INACTIVITY_MS = 30000;
+const INACTIVITY_MS = 45000;
+const STOPPED_MSG_MS = 8000;
 // Safety net: success waits for oled4 and screen_6 to finish and reset.
 const SUCCESS_MAX_MS = 5 * 60 * 1000;
 
@@ -33,7 +34,7 @@ const sendExhibitControl = (socket, target, action, value) => {
 
 const sm = createSoundManager({
   AUDIO_1: { src: '/a/AUDIO_1.mp3', loop: true,  channel: 'center', volume: 1.0 },
-  AUDIO_2: { src: '/a/AUDIO_2.mp3', loop: false, channel: 'center', volume: 1.0 },
+  AUDIO_2: { src: '/a/AUDIO_2.mp3', loop: true,  channel: 'center', volume: 1.0 },
   AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'center', volume: 1.0 },
 }, 'screen_oled2');
 const FLAME_VOL = { 3: 1.0, 4: 1.0, 5: 1.0, 6: 1.0, 7: 1.0, 8: 1.0 };
@@ -165,10 +166,12 @@ export default function App() {
     prevScreen.current = screen;
   }, [screen]);
 
+  // The alarm runs from the warning until the exhibit sleeps; it only stops early if the player recovers.
   useEffect(() => {
     if (overloadActive && !prevOverload.current) sm.play('AUDIO_2');
+    else if (!overloadActive && prevOverload.current && !stoppedMsg) sm.stop('AUDIO_2', { fadeMs: 300 });
     prevOverload.current = overloadActive;
-  }, [overloadActive]);
+  }, [overloadActive, stoppedMsg]);
 
   // ── SCREENSAVER BOUNCE (direct DOM, no React re-renders) ──
   useEffect(() => {
@@ -266,7 +269,7 @@ export default function App() {
           stopDecay();
           setStoppedMsg(true);
           setGauges([0, 0, 0]);
-          overloadTimer.current = setTimeout(publishReset, 3000);
+          overloadTimer.current = setTimeout(publishReset, STOPPED_MSG_MS);
         } else if (elapsed >= 5000) {
           setOverloadActive(true);
         }
@@ -456,6 +459,8 @@ export default function App() {
       }
       if (screenRef.current === 'sleep') {
         prevAngles.current[idx] = angle;
+        // Only the left (fuel) wheel wakes the exhibit, as the graphic guide shows.
+        if (idx !== 0) return;
         lastActivity.current = Date.now();
         screenRef.current = 'home';
         sendExhibitControl(ws.current, 'lightbox_1', 'set_intensity', { intensity: 60 });
@@ -683,7 +688,7 @@ export default function App() {
                   <div className={`gauge-check${screen === 'success' ? ' is-locked' : ''}`}>✓</div>
                 )}
               </div>
-              <div className="gauge-label">{lang.params[i]}</div>
+              <div className={`gauge-label${screen === 'success' ? ' is-locked' : ''}`}>{lang.params[i]}</div>
             </div>
           ))}
         </div>

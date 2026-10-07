@@ -218,6 +218,8 @@ body {
   padding: 1.5rem 2rem;
   border-radius: 12px;
   max-width: 80%;
+  /* ~10 cm below centre: the page's 100vh spans the 960 mm opening. */
+  transform: translateY(10.4vh);
 }
 
 .wheel-row-game {
@@ -334,6 +336,11 @@ body {
   outline-width: 2px; 
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  transition: box-shadow 0.25s ease;
+}
+
+.gauge-label.is-locked {
+  box-shadow: inset 0 0 0 3px #84C800;
 }
 
 /* ── SUCCESS text (above wheels in same container) ── */
