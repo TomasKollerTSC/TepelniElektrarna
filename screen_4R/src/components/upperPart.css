@@ -12,7 +12,8 @@
   width: 100%;
   height: calc(100% - calc(10 * var(--vh, 1vh)));
   overflow: hidden;
-  border-radius: 4px;
+  /* Top corners follow the window's 80 mm arc, which would otherwise cut them off. */
+  border-radius: 137px 137px 4px 4px;
 }
 
 .photo-main {
