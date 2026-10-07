@@ -1,0 +1,23 @@
+[Unit]
+Description=Techmania lighting watch: re-initialize lighting 120 s and 300 s after the S-Play (re)appears
+Wants=control-app.service
+After=control-app.service
+
+[Service]
+Type=simple
+User=techmania
+Group=techmania
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+EnvironmentFile=/etc/techmania/backend.env
+StateDirectory=techmania/lighting-watch
+ExecStart=/usr/bin/python3 /usr/local/lib/techmania-extra/lighting_watch.py --exhibit ${EXHIBIT_ID}
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
