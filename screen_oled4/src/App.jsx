@@ -6,7 +6,7 @@ import { createSoundManager } from './soundManager';
 
 const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
 const MAX_STEPS = 15;
-const INACTIVITY_MS = 20000;
+const INACTIVITY_MS = 35000;
 // Safety net once the valve is open: screen_6 normally resets well before this.
 const DONE_MAX_MS = 3 * 60 * 1000;
 

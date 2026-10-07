@@ -199,10 +199,11 @@ body {
 .scale-bar {
   flex: 1;
   height: clamp(28px, calc(4 * var(--vh, 1vh)), 44px);
+  /* Green only on the last fifth, where the valve is fully open. */
   background: linear-gradient(to right,
-    #1A9EE8 0%, #1A9EE8 15%,
-    #1eb8c8 30%,
-    #84C800 55%, #84C800 100%
+    #1A9EE8 0%, #1A9EE8 45%,
+    #1eb8c8 65%,
+    #84C800 80%, #84C800 100%
   );
   border-radius: 4px;
   position: relative;
