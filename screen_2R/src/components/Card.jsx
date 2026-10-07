@@ -1,9 +1,8 @@
 import './card.css'
-import { tap } from '../tap'
 
 const Card = ({ image, data, language, onTap }) => {
     return (
-        <div className="card" {...tap(onTap)}>
+        <div className="card" onClick={onTap}>
             <div className="card-image">
                 <img src={image} alt={data.subtitle[language]} />
             </div>

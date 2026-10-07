@@ -60,8 +60,11 @@
   transition: opacity 0.15s, border-color 0.15s;
 }
 
-.flag-btn:hover {
-  opacity: 0.75;
+/* Touch leaves :hover stuck on the last flag, so only a real mouse gets it. */
+@media (hover: hover) {
+  .flag-btn:hover {
+    opacity: 0.75;
+  }
 }
 
 .flag-btn.flag-active {
