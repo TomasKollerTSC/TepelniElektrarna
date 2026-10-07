@@ -5,6 +5,7 @@ import { createSoundManager } from './soundManager';
 
 const WS_URL = import.meta.env.VITE_EXHIBIT_RELAY_WS_URL || 'ws://localhost:8765';
 const DEFAULT_ENERGY_SEND_RESET_DELAY_MS = 6000;
+const ENERGY_SEND_WINDOW_MS = 45000;
 const configuredResetDelayRaw = import.meta.env.VITE_ENERGY_SEND_RESET_DELAY_MS;
 const configuredResetDelay = Number(configuredResetDelayRaw);
 const hasValidConfiguredResetDelay = Number.isInteger(configuredResetDelay) && configuredResetDelay > 0;
@@ -62,19 +63,22 @@ const T = {
   cz: {
     title: 'Chladící okruh',
     body: 'Pára, která prošla parní turbínou je ochlazena v kondenzátoru na kapalnou vodu. Chladící okruh doplňuje chladící věž. Voda z okruhu je v kotli opět ohřátá a přeměněná na páru.',
+    successMsg: 'Energie úspěšně odeslána!',
   },
   en: {
     title: 'Cooling circuit',
     body: 'The steam that has passed through the steam turbine is cooled into liquid water in a condenser. A cooling tower completes the cooling circuit. The water from the circuit is reheated and converted to steam in the boiler.',
+    successMsg: 'Energy successfully transmitted!',
   },
   de: {
     title: 'Kühlkreislauf',
     body: 'Der Dampf, der die Turbine durchströmt hat, wird im Kondensator wieder zu Wasser abgekühlt. Der Kühlkreislauf wird durch den Kühlturm unterstützt. Das Wasser wird im Kessel erneut erhitzt und wieder in Dampf umgewandelt.',
+    successMsg: 'Energie erfolgreich übertragen!',
   },
 };
 
 export default function App() {
-  const [screen, setScreen] = useState('sleep'); // sleep | active
+  const [screen, setScreen] = useState('sleep'); // sleep | active | success
   const [language, setLanguage] = useState('cz');
   const ws = useRef(null);
   const wsTimer = useRef(null);
@@ -93,7 +97,7 @@ export default function App() {
   useEffect(() => {
     if (screen !== 'active') return;
     const id = setInterval(() => {
-      if (energySendSequence.current === 'idle' && Date.now() - lastActivity.current >= 30000) {
+      if (energySendSequence.current === 'idle' && Date.now() - lastActivity.current >= ENERGY_SEND_WINDOW_MS) {
         lighting.current.cancel();
         energyReady.current = false;
         energySendSequence.current = 'published';
@@ -139,6 +143,7 @@ export default function App() {
         energyReady.current = false;
         sm.unlock();
         sm.play('AUDIO_7');
+        setScreen('success');
         sendExhibitControl(ws.current, 'high_voltage_wires', 'trigger', 'play');
         const finish = () => {
           if (energySendSequence.current !== 'pending') return;
@@ -161,10 +166,15 @@ export default function App() {
       setScreen('active');
       // The send button opens once the charge ends, even if a lighting step failed.
       const run = ++chargeRun.current;
-      lighting.current.run(sequence => chargeEnergy(sequence, () => { energyReady.current = true; })).then(ok => {
+      // The 3/3 completion sound goes with the send button lighting up.
+      const ready = () => {
+        energyReady.current = true;
+        sm.play('AUDIO_3');
+      };
+      lighting.current.run(sequence => chargeEnergy(sequence, ready)).then(ok => {
         if (ok || run !== chargeRun.current || screenRef.current !== 'active' || energySendSequence.current !== 'idle') return;
         sendExhibitControl(ws.current, 'energy_send_button_lamp', 'set_state', true);
-        energyReady.current = true;
+        ready();
       });
     }
 
@@ -265,10 +275,16 @@ export default function App() {
           muted
           playsInline
         />
-        <div className="info-card">
-          <h1 className="info-title">{lang.title}</h1>
-          <p className="info-body">{lang.body}</p>
-        </div>
+        {screen === 'success' ? (
+          <div className="info-card is-success">
+            <h1 className="info-title">{lang.successMsg}</h1>
+          </div>
+        ) : (
+          <div className="info-card">
+            <h1 className="info-title">{lang.title}</h1>
+            <p className="info-body">{lang.body}</p>
+          </div>
+        )}
       </div>
     </div>
   );
