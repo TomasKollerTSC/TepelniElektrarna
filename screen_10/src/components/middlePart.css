@@ -8,15 +8,12 @@
   flex-direction: column;
 }
 
-/* ── Top bar: home button only, pinned level with the image top ── */
-.top-bar {
-  position: absolute;
-  z-index: 2; /* above the photo, which comes later in the DOM */
-  top: 84px;
-  right: 110px;
+/* ── Flags and home button share the first row of the text column, level with the image top ── */
+.text-top {
   display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: calc(1 * var(--vh, 1vh));
 }
 
 /* ── Language flags ── */
@@ -24,7 +21,6 @@
 .lang-flags {
   display: flex;
   gap: 0.6rem;
-  margin-bottom: calc(1 * var(--vh, 1vh));
 }
 
 .home-btn {
