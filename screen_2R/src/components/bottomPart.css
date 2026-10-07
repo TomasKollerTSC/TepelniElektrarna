@@ -2,7 +2,8 @@
   flex: 1 1 auto;
   border-top: 1px solid #1a1a1a;
   background: #0a0a0a;
-  padding: 0 50px;
+  /* Side inset keeps the outer cards' bottom corners clear of the window's 80 mm arc. */
+  padding: 0 56px 24px;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -10,7 +11,7 @@
 
 .card-slider {
   display: flex;
-  gap: calc(2 * var(--vw, 1vw));
+  gap: 24px;
   overflow-x: auto;
   overflow-y: hidden;
   width: 100%;
@@ -25,11 +26,19 @@
 .card-slider::-webkit-scrollbar-thumb:hover { background: #888; }
 .card-slider { scrollbar-width: thin; scrollbar-color: #555 transparent; }
 
-/* Scale Card component to fit the bottom section */
+/* All four cards share the width, so none is cut off at the window edge. */
 .card-slider .card {
-  height: calc(25vh - 4vh);
-  aspect-ratio: 2 / 3;
+  height: calc(25vh - 6vh);
+  flex: 1 1 0;
+  min-width: 0;
+  aspect-ratio: auto;
   margin-top: 0;
   margin-bottom: 0;
+  padding-bottom: 14px;
+}
+
+/* Shorter photo so a two-line title still leaves room for four text lines. */
+.card-slider .card-image {
+  height: 150px;
   flex-shrink: 0;
 }
