@@ -48,6 +48,7 @@ body {
 
 /* ── SLEEP ── */
 .sleep {
+  position: relative;
   background: #000;
   align-items: center;
   justify-content: center;

@@ -6,6 +6,7 @@ import BottomPart from './components/BottomPart';
 import defaults from '../public/content.default.json';
 import { useContent, mediaUrl, isPreview } from '../../shared/backscreen/useContent';
 import { photoFor } from '../../shared/backscreen/schema';
+import TouchHint from '../../shared/backscreen/TouchHint';
 
 export default function App() {
   const content = useContent(defaults);
@@ -67,7 +68,7 @@ export default function App() {
   if (screen === 'sleep') {
     return (
       <div className="screen sleep" onClick={wake}>
-        <div className="touch-hint"><img src="./g/touch-hint.png" alt="Touch hint" /></div>
+        <TouchHint topShare={1 / 3} />
       </div>
     );
   }
