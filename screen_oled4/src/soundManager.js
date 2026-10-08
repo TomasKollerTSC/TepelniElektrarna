@@ -28,6 +28,8 @@ class Cue {
   }
 
   play() {
+    // A play during a fade-out cancels it; otherwise the fade's end would silence this play.
+    if (this.fadeTimer) this._cancelFade();
     if (this.playing && this.loop) return;
     this._wire();
     this.audio.currentTime = 0;
@@ -54,15 +56,24 @@ class Cue {
       this.gain.gain.cancelScheduledValues(now);
       this.gain.gain.setValueAtTime(this.gain.gain.value, now);
       this.gain.gain.linearRampToValueAtTime(0, now + fadeMs / 1000);
-      setTimeout(finish, fadeMs);
+      clearTimeout(this.fadeTimer);
+      this.fadeTimer = setTimeout(() => { this.fadeTimer = null; finish(); }, fadeMs);
     } else {
       finish();
     }
   }
 
+  _cancelFade() {
+    clearTimeout(this.fadeTimer);
+    this.fadeTimer = null;
+    const now = ctx.currentTime;
+    this.gain.gain.cancelScheduledValues(now);
+    this.gain.gain.setValueAtTime(this.baseVol, now);
+  }
+
   setVolume(v) {
     this.baseVol = v;
-    if (this.gain) this.gain.gain.value = v;
+    if (this.gain && !this.fadeTimer) this.gain.gain.value = v;
   }
 }
 

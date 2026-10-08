@@ -38,6 +38,8 @@ const sm = createSoundManager({
   AUDIO_3: { src: '/a/AUDIO_3.mp3', loop: false, channel: 'center', volume: 1.0 },
 }, 'screen_oled2');
 const FLAME_VOL = { 3: 1.0, 4: 1.0, 5: 1.0, 6: 1.0, 7: 1.0, 8: 1.0 };
+// Flames are ducked under the alarm, as on JE, so the alarm is heard over them.
+const FLAME_DUCKED_VOL = 0.3;
 
 const FUELS = ['coal', 'gas', 'biomass'];
 const FUEL_IMAGES = ['/g/uhlí.png', '/g/plyn.png', '/g/biomasa.png'];
@@ -157,6 +159,7 @@ export default function App() {
   useEffect(() => {
     if (screen === 'game' || screen === 'success') {
       sm.unlock();
+      if (screen === 'game' && prevScreen.current !== 'game') sm.volume('AUDIO_1', 1.0);
       sm.play('AUDIO_1');
       if (screen === 'success') sm.volume('AUDIO_1', 1.0);
       if (screen === 'success' && prevScreen.current !== 'success') sm.play('AUDIO_3');
@@ -168,8 +171,13 @@ export default function App() {
 
   // The alarm runs from the warning until the exhibit sleeps; it only stops early if the player recovers.
   useEffect(() => {
-    if (overloadActive && !prevOverload.current) sm.play('AUDIO_2');
-    else if (!overloadActive && prevOverload.current && !stoppedMsg) sm.stop('AUDIO_2', { fadeMs: 300 });
+    if (overloadActive && !prevOverload.current) {
+      sm.volume('AUDIO_1', FLAME_DUCKED_VOL);
+      sm.play('AUDIO_2');
+    } else if (!overloadActive && prevOverload.current && !stoppedMsg) {
+      sm.stop('AUDIO_2', { fadeMs: 300 });
+      sm.volume('AUDIO_1', FLAME_VOL[currentVideoState.current] ?? 1.0);
+    }
     prevOverload.current = overloadActive;
   }, [overloadActive, stoppedMsg]);
 
@@ -343,7 +351,7 @@ export default function App() {
       if (!videoCache.current[newState]) return;
 
       currentVideoState.current = newState;
-      if (screen === 'game' && FLAME_VOL[newState] != null) sm.volume('AUDIO_1', FLAME_VOL[newState]);
+      if (screen === 'game' && !prevOverload.current && FLAME_VOL[newState] != null) sm.volume('AUDIO_1', FLAME_VOL[newState]);
       const isA = activeSlot.current === 'A';
       const next = isA ? videoBRef.current : videoARef.current;
       const curr = isA ? videoARef.current : videoBRef.current;
