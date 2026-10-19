@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
-import { MAX_CARDS, localized } from '../schema.js';
+import { useEffect, useRef, useState } from 'react';
+import { MAX_CARDS, localized, mediaRefs, normalizeContent } from '../schema.js';
 import { api } from './api.js';
 import { LocalizedField, PhotoField } from './fields.jsx';
 
 const BODY_HINT = 'Prázdný řádek začíná nový odstavec. Krátký první řádek odstavce bez tečky na konci se zobrazí jako mezititulek.';
+
+const slug = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
 
 const newCard = () => ({
   id: `karta-${Date.now().toString(36)}`,
@@ -48,6 +50,7 @@ export default function EditorForm({ title, onLogout }) {
   const [status, setStatus] = useState('');
   const [open, setOpen] = useState(null);
   const [restoreFile, setRestoreFile] = useState('');
+  const fileRef = useRef(null);
 
   const reload = async () => {
     const data = await api.load();
@@ -98,6 +101,39 @@ export default function EditorForm({ title, onLogout }) {
     setDirty(true);
     setStatus('Záloha načtena do konceptu. Zkontrolujte ji a zveřejněte.');
   });
+
+  const exportJson = () => {
+    const blob = new Blob([JSON.stringify(content, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
+    a.href = url;
+    a.download = `zaloha-${slug(title || 'obrazovka')}-${stamp}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  const importJson = async (file) => {
+    if (fileRef.current) fileRef.current.value = '';
+    if (!file) return;
+    let raw;
+    try {
+      raw = JSON.parse(await file.text());
+    } catch {
+      setStatus('Soubor se nepodařilo přečíst (není to JSON).');
+      return;
+    }
+    // normalizeContent turns any object into empty content, so require the real shape first.
+    const next = raw && raw.home && Array.isArray(raw.cards) ? normalizeContent(raw) : null;
+    if (!next) {
+      setStatus('Soubor neobsahuje obsah zadní obrazovky.');
+      return;
+    }
+    update(next);
+    const refs = mediaRefs(next);
+    const found = await Promise.all(refs.map((u) => fetch(u, { method: 'HEAD' }).then((r) => r.ok, () => false)));
+    const missing = refs.filter((_, i) => !found[i]).length;
+    setStatus(`Záloha načtena do formuláře. Zkontrolujte ji, uložte a zveřejněte.${missing ? ` Na tomto zařízení chybí nahrané fotky (${missing}) – nahrajte je znovu.` : ''}`);
+  };
 
   const cards = content.cards;
   const moveCard = (i, d) => {
@@ -150,10 +186,16 @@ export default function EditorForm({ title, onLogout }) {
         + Přidat kartu
       </button>
 
+      <h2>Zálohy</h2>
+      <p className="be-hint">Stažená záloha je soubor JSON s textem a odkazy na fotky. Načtení ji vloží do formuláře; na obrazovce se projeví až po zveřejnění.</p>
+      <div className="be-restore">
+        <button type="button" className="be-button" onClick={exportJson}>Stáhnout zálohu (.json)</button>
+        <button type="button" className="be-button" onClick={() => fileRef.current?.click()}>Načíst zálohu ze souboru</button>
+        <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => importJson(e.target.files?.[0])} />
+      </div>
       {backups.length > 0 && (
         <>
-          <h2>Zálohy</h2>
-          <p className="be-hint">Každé zveřejnění uloží předchozí verzi. Obnovení ji načte do konceptu.</p>
+          <p className="be-hint">Každé zveřejnění uloží předchozí verzi na tomto zařízení. Obnovení ji načte do konceptu.</p>
           <div className="be-restore">
             <select value={restoreFile} onChange={(e) => setRestoreFile(e.target.value)}>
               <option value="">Vyberte zálohu…</option>

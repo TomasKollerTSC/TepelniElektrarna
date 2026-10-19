@@ -7,6 +7,8 @@ html:has(.be-root), html:has(.be-root) body {
   overflow: auto !important;
   background: #f4f5f2 !important;
   touch-action: auto;
+  /* The kiosk's overscroll-behavior: none on html/body stops wheel scrolling once a form field is under the pointer. */
+  overscroll-behavior: auto !important;
 }
 html:has(.be-root) #root {
   position: static !important;
@@ -65,7 +67,7 @@ html:has(.be-root) #root {
   padding: 6px; cursor: pointer !important; color: inherit;
 }
 .be-card-body { padding: 0 12px 6px; }
-.be-restore { display: flex; gap: 8px; }
+.be-restore { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
 .be-restore select { max-width: 320px; }
 .be-login { max-width: 320px; margin: 15vh auto; display: flex; flex-direction: column; gap: 10px; }
 .be-login button { padding: 8px; font: inherit; border-radius: 6px; border: 1px solid #6ea600; background: #84c800; font-weight: 600; cursor: pointer !important; }
