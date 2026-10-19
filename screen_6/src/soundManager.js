@@ -32,6 +32,7 @@ class Cue {
     if (this.fadeTimer) this._cancelFade();
     if (this.playing && this.loop) return;
     this._wire();
+    this._setGain(this.baseVol);
     this.audio.currentTime = 0;
     const p = this.audio.play();
     if (p && p.catch) {
@@ -48,7 +49,7 @@ class Cue {
     const finish = () => {
       this.audio.pause();
       this.audio.currentTime = 0;
-      if (this.gain) this.gain.gain.value = this.baseVol;
+      if (this.gain) this._setGain(this.baseVol);
       this.playing = false;
     };
     if (fadeMs > 0 && this.gain) {
@@ -66,14 +67,19 @@ class Cue {
   _cancelFade() {
     clearTimeout(this.fadeTimer);
     this.fadeTimer = null;
+    this._setGain(this.baseVol);
+  }
+
+  // Plain gain.value = v lands inside a fade ramp still pending on the audio clock, which then ends at 0.
+  _setGain(v) {
     const now = ctx.currentTime;
     this.gain.gain.cancelScheduledValues(now);
-    this.gain.gain.setValueAtTime(this.baseVol, now);
+    this.gain.gain.setValueAtTime(v, now);
   }
 
   setVolume(v) {
     this.baseVol = v;
-    if (this.gain && !this.fadeTimer) this.gain.gain.value = v;
+    if (this.gain && !this.fadeTimer) this._setGain(v);
   }
 }
 
