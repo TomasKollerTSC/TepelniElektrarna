@@ -18,40 +18,10 @@ function parseBody(text) {
 
 const MiddlePart = ({ language, switchLang, headline, intro, body, photo, photoSource, goHome }) => {
   const scrollRef = useRef(null);
-  const innerRef = useRef(null);
 
+  // Each card and language opens at the top of its text.
   useLayoutEffect(() => {
-    const scroll = scrollRef.current;
-    const inner = innerRef.current;
-    if (!scroll || !inner) return;
-
-    const availableHeight = scroll.clientHeight;
-    if (availableHeight === 0) return;
-
-    const visibleWidth = scroll.clientWidth;
-    const gapPx = visibleWidth * 0.02;
-    const colWidthPx = (visibleWidth - 1 * gapPx) / 2;
-
-    // Measure content height in a single column
-    Object.assign(inner.style, {
-      columnCount: 'auto',
-      columnWidth: 'auto',
-      width: `${colWidthPx}px`,
-      height: 'auto',
-    });
-
-    const totalHeight = inner.scrollHeight;
-    const numCols = Math.max(2, Math.ceil(totalHeight / availableHeight));
-    const totalWidth = numCols * colWidthPx + (numCols - 1) * gapPx;
-
-    Object.assign(inner.style, {
-      width: `${totalWidth}px`,
-      height: '100%',
-      columnCount: String(numCols),
-      columnWidth: `${colWidthPx}px`,
-      columnGap: `${gapPx}px`,
-      columnFill: 'auto',
-    });
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   }, [body, intro]);
 
   const sections = body.includes('\n\n') ? parseBody(body) : null;
@@ -84,7 +54,7 @@ const MiddlePart = ({ language, switchLang, headline, intro, body, photo, photoS
           </div>
           <h1 className="headline">{headline}</h1>
           <div className="helper-text" ref={scrollRef}>
-            <div className="helper-text-inner" ref={innerRef}>
+            <div className="helper-text-inner">
               <p className="main-text">{intro}</p>
               {sections
                 ? sections.map((s, i) => (
