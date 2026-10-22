@@ -115,13 +115,13 @@ Run sequence regression tests with `node --test tests/lighting-sequence.test.mjs
 
 Infostěna (central LED info-wall, `192.168.140.16`) listens to this relay as a
 passive client at `ws://192.168.140.29:8765/` — it sends nothing and needs no
-registration. It plays a video 8 s after this frame from Screen 6:
+registration. It plays its story 8 s after the energy-sent signal, which every
+Energetika exhibit sends the same way on its own relay:
 
 ```json
-{ "type": "request", "name": "EXHIBIT_CONTROL", "sender": "screen_6",
-  "target": "energy_progress", "action": "trigger", "value": "send" }
+{ "type": "trigger", "name": "ENERGY_SENT", "id": "tepelni", "data": { "source": "screen_6" } }
 ```
 
-It matches `type`, `name`, `sender`, `target` and `value`; the raw
-`BUTTON ENERGY_SEND` press is deliberately ignored. If this frame changes,
-update the filter in Infostěna (`/edit` → Exponáty).
+Screen 6 sends it once per game, when it accepts the `BUTTON ENERGY_SEND` press.
+Infostěna matches `type`, `name` and `id`; lighting commands and game states no
+longer start it. Exhibit ids: `tepelni`, `jaderna`, `jaderna-fuze`, `gravitacni` (that one adds `data.platform`: 1 or 2).

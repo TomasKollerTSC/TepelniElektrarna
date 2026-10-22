@@ -19,6 +19,15 @@ if (configuredResetDelayRaw !== undefined && !hasValidConfiguredResetDelay) {
   );
 }
 
+// The one cross-exhibit "energy sent" signal; the Infostěna starts its story on it.
+const sendEnergySent = (socket) => {
+  if (socket?.readyState !== WebSocket.OPEN) {
+    console.error('[screen_6] ENERGY_SENT not sent: relay unavailable');
+    return;
+  }
+  socket.send(JSON.stringify({ type: 'trigger', name: 'ENERGY_SENT', id: 'tepelni', data: { source: 'screen_6' } }));
+};
+
 const sendExhibitControl = (socket, target, action, value) => {
   if (socket?.readyState !== WebSocket.OPEN) {
     console.error(`[screen_6] EXHIBIT_CONTROL not sent: relay unavailable (${target}/${action})`);
@@ -141,6 +150,7 @@ export default function App() {
           resetDelayMs: ENERGY_SEND_RESET_DELAY_MS,
         });
         energyReady.current = false;
+        sendEnergySent(ws.current);
         sm.unlock();
         sm.play('AUDIO_7');
         setScreen('success');
