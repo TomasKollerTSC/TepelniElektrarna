@@ -235,7 +235,7 @@ export default function App() {
 
       if (allGreen) {
         if (!greenStart.current) greenStart.current = now;
-        else if (now - greenStart.current >= 5000) {
+        else if (now - greenStart.current >= 4000) {
           stopDecay();
           const fuel = FUELS[fuelIdxRef.current];
           phaseComplete.current = true;
